@@ -1,0 +1,39 @@
+.container {
+    width: 960px;
+    margin:auto;
+}
+  
+#graphic {
+    padding-top: auto 0;
+}
+
+#sections {
+    position: relative;
+    display: inline-block;
+    width: 250px;
+    top: 60px;
+    z-index: 90;
+    padding-bottom: 200px;
+}
+  
+.step {
+    margin-bottom: 200px;
+    font-family: "TiemposTextWeb-Regular","Georgia";
+    font-size: 16px;
+    line-height: 23px;
+    color: #767678;
+    height: 500px;
+}
+
+#vis {
+    display: inline-block;
+    position: fixed;
+    top: 60px;
+    z-index: 1;
+    margin-left: 0;
+
+    height: 600px;
+    width: 600px;
+    background-color: green;
+}
+

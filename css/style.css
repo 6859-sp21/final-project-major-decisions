@@ -31,9 +31,8 @@
     top: 60px;
     z-index: 1;
     margin-left: 0;
-
+    width: 1200px;
     height: 600px;
-    width: 600px;
     background-color: green;
 }
 

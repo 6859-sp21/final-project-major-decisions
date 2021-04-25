@@ -1,3 +1,4 @@
+
 /**
  * scroller - handles the details
  * of figuring out which section
@@ -5,7 +6,8 @@
  * to.
  *
  */
- function scroller() {
+function scroller() {
+  console.log("call scroller")
   var container = d3.select('body');
   // event dispatcher
   var dispatch = d3.dispatch('active', 'progress');
@@ -79,7 +81,7 @@
       }
       sectionPositions.push(top - startPos);
     });
-    containerStart = container.node().getBoundingClientRect().top + window.pageYOffset;
+    containerStart = d3.select('#wholeBody').node().getBoundingClientRect().top + window.pageYOffset;
   }
 
   /**

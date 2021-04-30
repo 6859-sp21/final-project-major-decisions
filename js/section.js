@@ -1,4 +1,4 @@
- var scrollVis = function () {
+ var scrollVis = function (data) {
     // size of te 
     var width = 600;
     var height = 600;
@@ -41,7 +41,7 @@
         // create svg and give it a width and height
         svg = d3.select(this).selectAll('svg').data(rawData);
   
-        setupVis();
+        setupVis(data);
   
         setupSections();
       });
@@ -49,11 +49,13 @@
   
   
     // initial elements for allsections of the visualization. Hide everything first.
-    var setupVis = function () {
+    var setupVis = function (data) {
         console.log("Calling setupVis")
      
         const vis = d3.select("#vis").append("svg").attr('width', width).attr('height', height)
+        
         // step 1
+        create_airline_rank_bar(data);
         vis.append("g")
         .append("text").text("lets go on a adventure")
         .attr('class', 'one-project-title')
@@ -199,10 +201,9 @@
    * @param data - loaded tsv data
    */
   function display(data) {
-      console.log("Is display called");
     // create a new plot and
     // display it
-    var plot = scrollVis();
+    var plot = scrollVis(data);
     d3.select('#vis')
       .datum(data)
       .call(plot);

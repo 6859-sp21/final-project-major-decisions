@@ -7,7 +7,13 @@
 <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
 
 <!-- Create an element where the map will take place -->
-<div id="my_dataviz"></div>
+<div class="contentContainer">
+  <!-- <div class="buttonContainer">
+    <button onClick="choose('arr_flights')">arr_flights</button>
+    <button onClick="choose('arr_del15')">arr_del15</button>
+  </div> -->
+  <div id="my_dataviz"></div>
+</div>
 
 <style>
 .circle:hover{
@@ -19,24 +25,33 @@
 <script>
 
 // Size ?
-var width = 960
-var height = 650
+const width = 960
+const height = 650
 
 // The svg
-var svg = d3.select("#my_dataviz")
+const svg = d3.select("#my_dataviz")
   .append("svg")
   .attr("width", width)
   .attr("height", height)
 
 // Map and projection
-var projection = d3.geoMercator()
+const projection = d3.geoMercator()
     .center([-100, 50])                // GPS of location to zoom on
     .scale(400)                       // This is like the zoom
     .translate([ width/2, height/2 ])
 
+const selectedAttribute=["arr_flights", "arr_del15", "carrier_ct", " weather_ct", "nas_ct", "security_ct", "late_aircraft_ct", "arr_cancelled", "arr_diverted"]
+
+// var selectedAttribute = "arr_flights";
+
+// function choose(choice){
+//     selectedAttribute = choice;
+//     console.log(selectedAttribute)
+// }
+ 
+
 // Create data for circles:
 const airports = d3.csv("https://raw.githubusercontent.com/6859-sp21/final-project-major-decisions/main/data/airlines_agg.csv", function(data_airports) {
-console.log(airports)
 // Load external data and boot
 d3.json("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson", function(data){
 
@@ -90,7 +105,7 @@ d3.json("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/w
         .attr("cx", function(d){ return projection([d.long, d.lat])[0] })
         .attr("cy", function(d){ return projection([d.long, d.lat])[1] })
         // .attr("r", function(d){ return Math.pow(d.arr_flights, 1/5)})
-        .attr("r", function(d){ return d.arr_flights/50000})
+        .attr("r", function(d){ return d[selectedAttribute[0]]/25000})
         .attr("class", "circle")
         .style("fill", "#69b3a2")
         .attr("stroke", "#69b3a2")

@@ -1,3 +1,4 @@
+
 <html>
   <head>
     <!-- Load d3.js -->
@@ -12,20 +13,32 @@
         This is step 1
       </section>
       <section class="step">
-        This is step 2
+        This is total_map
       </section>
       <section class="step">
-        This is step 3
+        This is map
+        <div class="buttonContainer">
+          <button type="button" id="arr_del15_selector" onclick="choose('arr_del15')">arr_del15</button>
+          <button type="button" id="carrier_ct_selector" onclick="choose('carrier_ct')">carrier_ct</button>
+          <button type="button" id="weather_ct_selector" onclick="choose(' weather_ct')">weather_ct</button>
+          <button type="button" id="nas_ct_selector" onclick="choose('nas_ct')">nas_ct</button>
+          <button type="button" id="security_ct_selector" onclick="choose('security_ct')">security_ct</button>
+          <button type="button" id="late_aircraft_ct_selector" onclick="choose('late_aircraft_ct')">late_aircraft_ct</button>
+          <button type="button" id="arr_cancelled_selector" onclick="choose('arr_cancelled')">arr_cancelled</button>
+          <button type="button" id="arr_diverted_selector" onclick="choose('arr_diverted')">arr_diverted</button>
+        </div>
       </section>
     </div>
     <div id='vis'>
     </div>
   </div>
   <script src="lib/d3.js"></script>
-  <!-- <script src="js/test.js"></script> -->
-
-  <script src="js/airline_rank_controller.js"></script>
   <script src="js/scroller.js"></script>
   <script src="js/section.js"></script>
+  <script src="js/airline_rank_controller.js"></script>
+  <!-- <script src="https://d3js.org/d3.v4.js"></script> -->
+  <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
+  <script src="js/total_map.js"></script>
+  <script src="js/map.js"></script>
   </body>
 </html>

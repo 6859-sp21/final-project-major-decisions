@@ -5,18 +5,16 @@
     <link rel="stylesheet" type="text/css" href="css/style.css" />
   </head>
   <body id="wholeBody">
-    <div class="container">test</div>
+    <select id="selectButton"></select>
     <div id="zoomChart">
       <script>
-        d3.csv("data/airlines_processed.csv", function (d) {
+        d3.csv("data/airlines_time_agg.csv", function (d) {
           return {
             year: +d.year,
             month: +d.month,
             date: new Date(+d.year, +d.month),
             carrier: d.carrier,
             carrier_name: d.carrier_name,
-            airport: d.airport,
-            airport_name: d.airport_name,
             arr_flights: +d.arr_flights,
             arr_del15: +d.arr_del15,
             carrier_ct: +d.carrier_ct,
@@ -39,13 +37,25 @@
         });
 
         function generateTimeChart(data) {
-          let sortedData = data.sort((x, y) =>
-            d3.ascending(x.date, y.date)
-          );
+          let sortedData = data.sort((x, y) => d3.ascending(x.date, y.date));
 
-          let deltaBOS = sortedData.filter(
-            (d) => d.carrier === "DL" && d.airport === "BOS"
-          );
+          // need to set up
+          let aggData = sortedData.filter((d) => d.carrier === "AS");
+
+          let airlineCarriers = new Set(data.map((d) => d.carrier_name));
+
+          // add the options to the button
+          d3.select("#selectButton")
+            .selectAll("myOptions")
+            .data(airlineCarriers)
+            .enter()
+            .append("option")
+            .text(function (d) {
+              return d;
+            })
+            .attr("value", function (d) {
+              return d;
+            });
 
           // set the dimensions and margins of the graph
           let margin = { top: 10, right: 30, bottom: 30, left: 60 },
@@ -53,7 +63,7 @@
             height = 500 - margin.top - margin.bottom;
 
           // append the svg object to the body of the page
-          let vis = d3
+          let svg = d3
             .select("#zoomChart")
             .append("svg")
             .attr("width", width + margin.left + margin.right)
@@ -64,88 +74,135 @@
               "translate(" + margin.left + "," + margin.top + ")"
             );
 
-          let x = d3.scaleTime()
-            .domain(d3.extent(deltaBOS, (d) => d.date))
-            .nice()
-            .range([0, width]);
+          let x = d3
+            .scaleTime()
+            .domain(d3.extent(sortedData, (d) => d.date))
+            .range([0, width])
+            .nice();
 
           let xAxis = d3.axisBottom(x);
-          let xAxisGroup = vis
+          let xAxisGroup = svg
             .append("g")
             .call(xAxis)
             .attr("transform", "translate(0," + height + ")");
 
-          let y = d3.scaleLinear()
-            .domain([0, d3.max(deltaBOS, (d) => d.arr_flights)])
-            .range([height, 0]);
+          let y = d3
+            .scaleLinear()
+            .domain([
+              0,
+              d3.max(sortedData, function (d) {
+                return Math.max(
+                  d.carrier_ct,
+                  d.weather_ct,
+                  d.nas_ct,
+                  d.security_ct,
+                  d.late_aircraft_ct
+                );
+              }),
+            ])
+            .range([height, 0])
+            .nice();
 
           let yAxis = d3.axisLeft(y);
-          let yAxisGroup = vis.append("g").call(yAxis);
+          let yAxisGroup = svg.append("g").call(yAxis);
 
-          let clip = vis
-            .append("defs")
-            .append("clipPath")
-              .attr("id", "clip")
-              .append("rect")
-                .attr("width", width)
-                .attr("height", height)
-                .attr("x", 0)
-                .attr("y", 0);
+          let delayTypes = [
+            "carrier_ct",
+            "weather_ct",
+            "nas_ct",
+            "security_ct",
+            "late_aircraft_ct",
+          ];
 
-          let clipped = vis
-            .append("g")
-            .attr("clip-path", "url(#clip)");
+          let color = d3.scaleOrdinal().domain(delayTypes).range(d3.schemeSet2);
 
-          clipped
-            .append("g")
-            .attr("class", "x axis")
-            .attr("transform", "translate(0," + height + ")")
-            .call(xAxis);
+          let stackGen = d3.stack().keys(delayTypes);
+          let stackedData = stackGen(aggData);
 
-          let area = d3.area()
-            .curve(d3.curveLinear)
-            .x((d) => x(d.date))
-            .y0(y(0))
-            .y1((d) => y(d.arr_flights));
+          let area = d3
+            .area()
+            .x((d) => x(d.data.date))
+            .y0((d) => y(d[0]))
+            .y1((d) => y(d[1]));
 
-          let path = clipped
-            .append("g")
-            .datum(deltaBOS)
-            .append("path")
-            .attr("class", "areaData")
-            .attr("fill", "steelblue")
-            .attr("d", area);
+          let layers = svg
+            .selectAll("layers")
+            .data(stackedData)
+            .join("path")
+            .attr("d", area)
+            .attr("class", function (d) {
+              return "delayLayers " + d.key;
+            })
+            .attr("fill", (d) => color(d.key));
 
-          let zoom = d3
-              .zoom()
-              .scaleExtent([1, 4])
-              .extent([[0, 0], [width - margin.right, height]])
-              .translateExtent([[0, 0], [width, width - margin.right]])
-              .on("zoom", function (event, d) {
-                let newX = event.transform.rescaleX(x);
-                xAxisGroup.call(
-                  xAxis.scale(event.transform.rescaleX(newX))
-                );
+          function updateChart(selectedCarrier, svg) {
+            let filteredData = sortedData.filter(
+              (d) => d.carrier_name === selectedCarrier
+            );
+            let filteredStack = stackGen(filteredData);
+            console.log(filteredStack);
+            svg.selectAll(".delayLayers").remove();
 
-                path.attr(
-                  "transform",
-                  "translate(" +
-                    event.transform["x"] + ",0)scale(" + event.transform["k"] + ",1)"
-                );
-              });
+            svg
+              .selectAll("layers")
+              .data(filteredStack)
+              .join("path")
+              .attr("class", function (d) {
+                return "delayLayers " + d.key;
+              })
+              .attr("fill", (d) => color(d.key))
+              .attr("d",d3.area()
+                .x((d) => x(d.data.date))
+                .y0((d) => y(d[0]))
+                .y1((d) => y(d[1]))
+              );
+          }
 
-          // get pointer events throughout chart
-          var rect = vis
+          d3.select("#selectButton").on("change", function (d) {
+            selectedCarrier = this.value;
+            updateChart(selectedCarrier, svg);
+          });
+
+          let highlight = function (event, d) {
+            d3.selectAll(".delayLayers").style("opacity", 0.2); // lower opacity if not selected
+            d3.select("path.delayLayers." + d).style("opacity", 1); // selected should have full opacity
+          };
+
+          let noHighlight = function (d) {
+            d3.selectAll("path.delayLayers").style("opacity", 1);
+          };
+
+          let legendSize = 20;
+          svg
+            .selectAll("legend")
+            .data(delayTypes)
+            .enter()
             .append("rect")
-            .attr("width", width)
-            .attr("height", height)
-            .style("fill", "none")
-            .style("pointer-events", "all")
-            .attr(
-              "transform",
-              "translate(" + margin.left + "," + margin.top + ")"
-            )
-            .call(zoom);
+            .attr("x", width*3/4)
+            .attr("y", function (d, i) {
+              return 10 + i * (legendSize + 5);
+            })
+            .attr("width", legendSize)
+            .attr("height", legendSize)
+            .style("fill", d => color(d))
+            .on("mouseover", highlight)
+            .on("mouseleave", noHighlight)
+
+          svg
+            .selectAll("labels")
+            .data(delayTypes)
+            .enter()
+            .append("text")
+            .attr("x", width*3/4 + legendSize * 1.2)
+            .attr("y", function (d, i) {
+              return 10 + i * (legendSize + 5) + legendSize / 2;
+            })
+            .style("fill", d => color(d))
+            .text(d => d)
+            .attr("text-anchor", "left")
+            .style("alignment-baseline", "middle")
+            .on("mouseover", highlight)
+            .on("mouseleave", noHighlight)
         }
       </script>
     </div>

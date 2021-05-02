@@ -1,7 +1,7 @@
  var scrollVis = function (data) {
     // size of te 
-    var width = 600;
-    var height = 600;
+    var width = 960;
+    var height = 650;
     var margin = { top: 0, left: 20, bottom: 40, right: 10 };
   
     // Keep track of which visualization
@@ -66,8 +66,9 @@
         .attr('opacity', 0);
 
         // step 2
+        generateMapTotal()
         vis.append("g")
-        .append("text").text("step 2")
+        .append("text").text("total_map")
         .attr('class', 'two-step')
         .attr('x', width / 2)
         .attr('y', height / 3)
@@ -75,8 +76,9 @@
         .attr('opacity', 0);
 
         // step 3
+        choose('arr_del15')
         vis.append("g")
-        .append("text").text("step 3")
+        .append("text").text("map")
         .attr('class', 'three-step')
         .attr('x', width / 2)
         .attr('y', height / 3)

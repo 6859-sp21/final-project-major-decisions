@@ -1,0 +1,192 @@
+<html>
+  <head>
+    <!-- Load d3.js -->
+    <script src="lib/d3.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/style.css" />
+  </head>
+  <body id="wholeBody">
+    <select id="selectButton"></select>
+    <div id="zoomChart">
+      <script>
+        d3.csv("data/airlines.csv", function (d) {
+          return {
+            year: +d.year,
+            month: +d.month,
+            date: new Date(+d.year, +d.month),
+            carrier: d.carrier,
+            carrier_name: d.carrier_name,
+            airport: d.airport,
+            airport_name: d.airport_name,
+            arr_flights: +d.arr_flights,
+            arr_del15: +d.arr_del15,
+            carrier_ct: +d.carrier_ct,
+            weather_ct: +d.weather_ct,
+            nas_ct: +d.nas_ct,
+            security_ct: +d.security_ct,
+            late_aircraft_ct: +d.late_aircraft_ct,
+            arr_cancelled: +d.arr_cancelled,
+            arr_diverted: +d.arr_diverted,
+            arr_delay: +d.arr_delay,
+            carrier_delay: +d.carrier_delay,
+            weather_delay: +d.weather_delay,
+            nas_delay: +d.nas_delay,
+            security_delay: +d.security_delay,
+            late_aircraft_delay: +d.late_aircraft_delay,
+          };
+        }).then(function (data) {
+          let airData = data;
+          generateTimeChart(data);
+        });
+
+        function generateTimeChart(data) {
+          let sortedData = data.sort((x, y) => d3.ascending(x.date, y.date));
+
+          let deltaBOS = sortedData.filter(
+            (d) => d.carrier === "DL" && d.airport === "BOS"
+          );
+
+          let airlineCarriers = new Set(data.map((d) => d.carrier_name));
+
+          // add the options to the button
+          d3.select("#selectButton")
+            .selectAll("myOptions")
+            .data(airlineCarriers)
+            .enter()
+            // .datum(airlineCarriers)
+            .append("option")
+            .text(function (d) {
+              return d;
+            }) // text showed in the menu
+            .attr("value", function (d) {
+              return d;
+            }); // corresponding value returned by the button
+
+          // set the dimensions and margins of the graph
+          let margin = { top: 10, right: 30, bottom: 30, left: 60 },
+            width = 560 - margin.left - margin.right,
+            height = 500 - margin.top - margin.bottom;
+
+          // append the svg object to the body of the page
+          let vis = d3
+            .select("#zoomChart")
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr(
+              "transform",
+              "translate(" + margin.left + "," + margin.top + ")"
+            );
+
+          let x = d3
+            .scaleTime()
+            .domain(d3.extent(deltaBOS, (d) => d.date))
+            .nice()
+            .range([0, width]);
+
+          let xAxis = d3.axisBottom(x);
+          let xAxisGroup = vis
+            .append("g")
+            .call(xAxis)
+            .attr("transform", "translate(0," + height + ")");
+
+          let y = d3
+            .scaleLinear()
+            .domain([0, d3.max(deltaBOS, (d) => d.arr_flights)])
+            .range([height, 0]);
+
+          let yAxis = d3.axisLeft(y);
+          let yAxisGroup = vis.append("g").call(yAxis);
+
+          let clip = vis
+            .append("defs")
+            .append("clipPath")
+            .attr("id", "clip")
+            .append("rect")
+            .attr("width", width)
+            .attr("height", height)
+            .attr("x", 0)
+            .attr("y", 0);
+
+          let clipped = vis.append("g").attr("clip-path", "url(#clip)");
+
+          clipped
+            .append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis);
+
+          let area = d3
+            .area()
+            .curve(d3.curveLinear)
+            .x((d) => x(d.date))
+            .y0(y(0))
+            .y1((d) => y(d.arr_flights));
+
+          let path = clipped
+            .append("g")
+            .datum(deltaBOS)
+            .append("path")
+            .attr("class", "areaData")
+            .attr("fill", "steelblue")
+            .attr("d", area);
+
+          let zoom = d3
+            .zoom()
+            .scaleExtent([1, 4])
+            .extent([
+              [0, 0],
+              [width - margin.right, height],
+            ])
+            .translateExtent([
+              [0, 0],
+              [width, width - margin.right],
+            ])
+            .on("zoom", function (event, d) {
+              let newX = event.transform.rescaleX(x);
+              xAxisGroup.call(xAxis.scale(event.transform.rescaleX(newX)));
+
+              path.attr(
+                "transform",
+                "translate(" +
+                  event.transform["x"] +
+                  ",0)scale(" +
+                  event.transform["k"] +
+                  ",1)"
+              );
+            });
+
+          // get pointer events throughout chart
+          var rect = vis
+            .append("rect")
+            .attr("width", width)
+            .attr("height", height)
+            .style("fill", "none")
+            .style("pointer-events", "all")
+            .attr(
+              "transform",
+              "translate(" + margin.left + "," + margin.top + ")"
+            )
+            .call(zoom);
+
+          function updateChart(selectedCarrier) {
+            // wrong !!! need to change location or agg over all locs for carrier
+            let filteredData = data.filter(
+              (d) => d.carrier_name === selectedCarrier && d.airport === "BOS"
+            );
+            // update y axis, but shouldn't mislead ppl 
+            // y.domain([0, d3.max(filteredData, d => d.arr_flights)]);
+            // yAxisGroup.transition().duration(750).call(yAxis);
+
+            path.datum(filteredData).transition().duration(750).attr("d", area);
+          }
+
+          d3.select("#selectButton").on("change", function (d) {
+            selectedCarrier = this.value;
+            updateChart(selectedCarrier);
+          });
+        }
+      </script>
+    </div>
+  </body>
+</html>

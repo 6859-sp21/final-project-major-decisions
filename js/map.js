@@ -1,22 +1,26 @@
 function choose(choice){
+    d3.select("#delay_map").remove();
+    d3.select("#delay_tooltip").remove();
     generateMap(choice)
 }
 
-function generateMap(selectedAttribute){
-    // Create data for circles:
-    d3.select("#delay_map").remove();
-    d3.select("#delay_tooltip").remove();
-  
+function generateMap(selectedAttribute){  
     // Size ?
     const width = 960
     const height = 650
+    d3.select("#delay_map").remove();
+    d3.select("#delay_tooltip").remove();
+    
   
     // The svg
     const svg = d3.select("#vis")
       .append("svg")
       .attr("width", width)
       .attr("height", height)
-      .attr("id", "delay_map");
+      .attr("id", "delay_map")
+      .attr('class', 'three-step');
+
+    
   
     // Map and projection
     const projection = d3.geoMercator()
@@ -43,18 +47,15 @@ function generateMap(selectedAttribute){
               )
             .style("stroke", "black")
             .style("opacity", .3)
+
   
         // create a tooltip
         var Tooltip = d3.select("#vis")
           .append("div")
           .attr("class", "tooltip")
           .attr("id", "delay_tooltip")
-          .style("opacity", 1)
-          .style("background-color", "white")
-          .style("border", "solid")
-          .style("border-width", "2px")
-          .style("border-radius", "5px")
-          .style("padding", "5px")
+          .style("opacity", 0)
+
   
         // Three function that change the tooltip when user hover / move / leave a cell
         var mouseover = function(d) {

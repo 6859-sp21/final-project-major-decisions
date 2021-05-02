@@ -52,33 +52,13 @@
     var setupVis = function (data) {
         console.log("Calling setupVis")
      
-        const vis = d3.select("#vis").append("svg").attr('width', width).attr('height', height)
+        const vis = d3.select("#vis").append("svg").attr('width', 10).attr('height', 10)
         
         // step 1
         create_airline_rank_bar(data);
         vis.append("g")
         .append("text").text("lets go on a adventure")
         .attr('class', 'one-project-title')
-        .attr('x', width / 2)
-        .attr('y', height / 3)
-        .attr('fill', 'black')
-        .attr('opacity', 0);
-
-        // step 2
-        generateMapTotal()
-        vis.append("g")
-        .append("text").text("total_map")
-        .attr('class', 'two-step')
-        .attr('x', width / 2)
-        .attr('y', height / 3)
-        .attr('fill', 'black')
-        .attr('opacity', 0);
-
-        // step 3
-        choose('arr_del15')
-        vis.append("g")
-        .append("text").text("map")
-        .attr('class', 'three-step')
         .attr('x', width / 2)
         .attr('y', height / 3)
         .attr('fill', 'black')
@@ -118,6 +98,11 @@
     // STEP 1
     function showTitle() {
       console.log("Step 1: Calling show title");
+      d3.select("#total_map").remove();
+      d3.select("#total_tooltip").remove();
+      d3.select("#delay_map").remove();
+      d3.select("#delay_tooltip").remove();
+
       d3.select('.one-project-title')
         .transition()
         .duration(transitionTime)
@@ -132,6 +117,11 @@
     // STEP 2
     function showStepTwo() {
       console.log("Step 2: calling show filler title");
+
+      d3.select("#delay_map").remove();
+      d3.select("#delay_tooltip").remove();
+      generateMapTotal()
+
       d3.select('.one-project-title')
       .transition()
       .duration(0)
@@ -151,6 +141,11 @@
     // STEP 3
     function showStepThree() {
       console.log("Step 3: calling step 3");
+      generateMap('arr_del15')
+
+      d3.select("#total_map").remove();
+      d3.select("#total_tooltip").remove();
+
       d3.select('.two-step')
       .transition()
       .duration(0)

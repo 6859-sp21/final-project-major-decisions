@@ -2,12 +2,16 @@ function generateMapTotal(){
     // Size ?
     const width = 960
     const height = 650
-  
+
     // The svg
     const svg = d3.select("#vis")
       .append("svg")
       .attr("width", width)
       .attr("height", height)
+      .attr("id", "total_map")
+      .attr('class', 'two-step');
+
+    
   
     // Map and projection
     const projection = d3.geoMercator()
@@ -34,17 +38,13 @@ function generateMapTotal(){
               )
             .style("stroke", "black")
             .style("opacity", .3)
-  
+
         // create a tooltip
         var Tooltip = d3.select("#vis")
           .append("div")
-          .attr("class", "tooltip")
-          .style("opacity", 1)
-          .style("background-color", "white")
-          .style("border", "solid")
-          .style("border-width", "2px")
-          .style("border-radius", "5px")
-          .style("padding", "5px")
+          .attr('class', 'tooltip')
+          .attr("id", "total_tooltip")
+          .style("opacity", 0)
   
         // Three function that change the tooltip when user hover / move / leave a cell
         var mouseover = function(d) {
@@ -78,6 +78,8 @@ function generateMapTotal(){
           .on("mousemove", mousemove)
           .on("mouseleave", mouseleave)
         });
+
+
     })
   }
   

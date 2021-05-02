@@ -196,7 +196,6 @@
           function idled() {
             idleTimeout = null;
           }
-          // svg.selectAll("layers").append("g").attr("class", "brush").call(brush);
           svg.append("g").attr("class", "brush").call(brush);
 
           function brushed(event) {
@@ -205,8 +204,6 @@
               if (!idleTimeout) return (idleTimeout = setTimeout(idled, 350));
               x.domain([0, 0]);
             } else {
-              // x.domain([s[0][0], s[1][0]].map(x.invert, x));
-              console.log(x.invert(s[0]), x.invert(s[1]));
               x.domain([x.invert(s[0]), x.invert(s[1])]);
               svg.select(".brush").call(brush.move, null);
             }

@@ -71,7 +71,7 @@ async function create_airline_rank_bar(data) {
     console.log(rank(name => getValue(name))) // rank test
 
     const keyframes = [];
-    const k = 10;
+    const k = 1;
     const fillerValue = 0; // the value we fill NaN with
     let ka, a, kb, b;
     for ([[ka, a], [kb, b]] of d3.pairs(datevalues)) {
@@ -88,8 +88,10 @@ async function create_airline_rank_bar(data) {
     console.log(keyframes)
   
     const nameframes = d3.groups(keyframes.flatMap(([, data]) => data), d => d.name)
+    console.log("nameframes");
     console.log(nameframes);
-    const prev = new Map(nameframes.flatMap(([, data]) => d3.pairs(data, (a, b) => [b, a])))
+    const prev = new Map(nameframes.flatMap(([, data]) => d3.pairs(data, (a, b) => [b, a])));
+    console.log("prev");
     console.log(prev)
     const next = new Map(nameframes.flatMap(([, data]) => d3.pairs(data)));
     // ============================== drawing functions ========================
@@ -142,11 +144,11 @@ async function create_airline_rank_bar(data) {
             update => update,
             exit => exit.transition(transition).remove()
               .attr("transform", d => `translate(${x((next.get(d) || d).value)},${y((next.get(d) || d).rank)})`)
-              //.call(g => g.select("tspan").tween("text", d => textTween(d.value, (next.get(d) || d).value)))
+              .call(g => g.select("tspan").tween("text", d => textTween(d.value, (next.get(d) || d).value)))
           )
           .call(bar => bar.transition(transition)
             .attr("transform", d => `translate(${x(d.value)},${y(d.rank)})`)
-            //.call(g => g.select("tspan").tween("text", d => transition.textTween((prev.get(d) || d).value, d.value)))
+            .call(g => g.select("tspan").tween("text", d => textTween((prev.get(d) || d).value, d.value)))
             )
     }
 
@@ -155,7 +157,7 @@ async function create_airline_rank_bar(data) {
             .attr("transform", `translate(0,${margin.top})`);
 
         const axis = d3.axisTop(x)
-            .ticks(width / 160, tickFormat)
+            .ticks(width / 160)
             .tickSizeOuter(0)
             .tickSizeInner(-barSize * (n + y.padding()));
 
@@ -182,12 +184,12 @@ async function create_airline_rank_bar(data) {
     // ================== final step drawing the graphs ====================
     let margin = ({top: 16, right: 6, bottom: 6, left: 0});
     let barSize = 48;
-    let duration = 250;
+    let duration = 2000;
     const height = margin.top + barSize * n + margin.bottom;
     const width = 1200;
 
     let x = d3.scaleLinear([0, xAxisMax], [margin.left, width - margin.right])
-    console.log(x(50));
+    console.log(x(0));
     let y = d3.scaleBand()
     .domain(d3.range(n + 1))
     .rangeRound([margin.top, margin.top + barSize * (n + 1 + 0.1)])
@@ -198,22 +200,21 @@ async function create_airline_rank_bar(data) {
 
     document.getElementById("vis").appendChild(svg.node());
 
-
-
-
     const updateBars = bars(svg);
     const updateLabels = labels(svg);
+    const updateAxis = axis(svg);
 
     for (const keyframe of keyframes) {
         const transition = svg.transition()
             .duration(duration)
             .ease(d3.easeLinear);
     
-        // Extract the top bar’s value.
-        x.domain([0, keyframe[1][0].value]);
+        // // Extract the top bar’s value.
       
         updateBars(keyframe, transition);
         updateLabels(keyframe, transition);
+        updateAxis(keyframe, transition);
+
 
         await transition.end();
       }
@@ -221,21 +222,18 @@ async function create_airline_rank_bar(data) {
     console.log("End of creation");
 }
 
-// function dateMapper([date, data]){
-//     const result= [new Date().setFullYear(parseInt(date)), data];
-//     return result;
-// }
-
 function dateMapper([date, data]){
     const result= [parseInt(date), data];
     return result;
 }
 
-function calculatedPercentageDelay(d) {
-    return result = (parseInt(d.arr_del15)/parseInt(d.arr_flights)*100);
-    if (result) {
+function textTween(a, b) {
+    formatNumber = d3.format(",d");
 
-    }
+    const i = d3.interpolateNumber(a, b);
+    return function(t) {
+        this.textContent = formatNumber(i(t));
+    };
 }
 
 

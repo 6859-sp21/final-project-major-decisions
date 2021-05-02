@@ -1,7 +1,7 @@
  var scrollVis = function (data) {
     // size of te 
-    var width = 960;
-    var height = 650;
+    const width = 960;
+    const height = 650;
     var margin = { top: 0, left: 20, bottom: 40, right: 10 };
   
     // Keep track of which visualization
@@ -51,14 +51,18 @@
     // initial elements for allsections of the visualization. Hide everything first.
     var setupVis = function (data) {
         console.log("Calling setupVis")
+        const width = 960;
+        const height = 650;
      
         const vis = d3.select("#vis").append("svg").attr('width', 10).attr('height', 10)
         
         // step 1
-        create_airline_rank_bar(data);
-        vis.append("g")
+        // create_airline_rank_bar(data);
+        vis.append("svg").attr('class', 'one-project-title').attr('width', width).attr('height', height)
+        .attr('display', 'none')
+        .attr('opacity', 0)
+        .append('g')
         .append("text").text("lets go on a adventure")
-        .attr('class', 'one-project-title')
         .attr('x', width / 2)
         .attr('y', height / 3)
         .attr('fill', 'black')
@@ -78,6 +82,7 @@
       activateFunctions[0] = showTitle;
       activateFunctions[1] = showStepTwo;
       activateFunctions[2] = showStepThree;
+      activateFunctions[3] = showStepFour;
 
       
       // updateFunctions are called while
@@ -106,57 +111,89 @@
       d3.select('.one-project-title')
         .transition()
         .duration(transitionTime)
-        .attr('opacity', 1);
+        .attr('opacity', 1)
+        .attr('display', 'inherit');
   
         d3.select('.two-step')
         .transition() // this need to be left in as a hack for fast scrolling
         .duration(0)
-        .attr('opacity', 0);
+        .attr('opacity', 0)
+        .attr('display', 'none');
     }
   
-    // STEP 2
+       // STEP 2
     function showStepTwo() {
       console.log("Step 2: calling show filler title");
+
+      d3.select('.one-project-title')
+      .transition()
+      .duration(0)
+      .attr('opacity', 0)
+      .attr('display', 'none');
+
+      create_airline_rank_bar(data);
+      console.log('version', d3.version)
+      d3.select('.two-step')
+      // .transition()
+      // .duration(transitionTime)
+      .attr('opacity', 1)
+      .attr('display', 'block');
+
+      d3.select('.three-step')
+      .transition()
+      .duration(0)
+      .attr('opacity', 0)
+      .attr('display', 'none');
+    }
+
+       // STEP 3
+    function showStepThree() {
+      console.log("Step 3: calling show filler title");
 
       d3.select("#delay_map").remove();
       d3.select("#delay_tooltip").remove();
       generateMapTotal()
 
-      d3.select('.one-project-title')
-      .transition()
-      .duration(0)
-      .attr('opacity', 0);
-
       d3.select('.two-step')
       .transition()
-      .duration(transitionTime)
-      .attr('opacity', 1);
+      .duration(0)
+      .attr('opacity', 0)
+      .attr('display', 'none');
 
       d3.select('.three-step')
+      // .transition()
+      // .duration(transitionTime)
+      .attr('opacity', 1)
+      .attr('display', 'block');
+
+      d3.select('.four-step')
       .transition()
       .duration(0)
-      .attr('opacity', 0);
+      .attr('opacity', 0)
+      .attr('display', 'none');
     }
 
-    // STEP 3
-    function showStepThree() {
-      console.log("Step 3: calling step 3");
+    // STEP 4
+    function showStepFour() {
+      console.log("Step 4: calling step 4");
       generateMap('arr_del15')
 
       d3.select("#total_map").remove();
       d3.select("#total_tooltip").remove();
 
-      d3.select('.two-step')
+      d3.select('.three-step')
       .transition()
       .duration(0)
       .attr('opacity', 0);
 
-      d3.select('.three-step')
+      d3.select('.four-step')
       .transition()
       .duration(transitionTime)
       .attr('opacity', 1);
 
     }
+
+    
   
     /**
      * activate 

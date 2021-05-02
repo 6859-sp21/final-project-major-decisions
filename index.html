@@ -13,6 +13,9 @@
         This is step 1
       </section>
       <section class="step">
+        This is step 2
+      </section>
+      <section class="step">
         This is total_map
       </section>
       <section class="step">
@@ -32,14 +35,20 @@
     <div id='vis'>
     </div>
   </div>
+  <script src="https://d3js.org/d3.v4.js"></script>
+  <script>
+    d3v4 = d3
+    window.d3 = null
+  </script>
   <script src="lib/d3.js"></script>
+  <script>
+    d3 = d3
+  </script>
   <script src="js/scroller.js"></script>
   <script src="js/section.js"></script>
-  <script src="js/airline_rank_controller.js"></script>
-  <script src="https://d3js.org/d3.v4.js"></script>
+  <script src="js/bar_controller_integration.js"></script>
   <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
   <script src="js/total_map.js"></script>
   <script src="js/map.js"></script>
-
   </body>
 </html>

@@ -33,7 +33,7 @@
           };
         }).then(function (data) {
           let airData = data;
-          generateTimeChart(data);
+          generateTimeChart(airData);
         });
 
         function generateTimeChart(data) {
@@ -58,12 +58,12 @@
             });
 
           // set the dimensions and margins of the graph
-          let margin = { top: 10, right: 30, bottom: 30, left: 60 },
+          let margin = { top: 30, right: 30, bottom: 60, left: 60 },
             width = 560 - margin.left - margin.right,
             height = 500 - margin.top - margin.bottom;
 
           // append the svg object to the body of the page
-          let svg = d3
+          const svg = d3
             .select("#zoomChart")
             .append("svg")
             .attr("width", width + margin.left + margin.right)
@@ -71,7 +71,7 @@
             .append("g")
             .attr(
               "transform",
-              "translate(" + margin.left + "," + margin.top + ")"
+              `translate(${margin.left},${margin.bottom})`
             );
 
           let x = d3
@@ -84,7 +84,13 @@
           let xAxisGroup = svg
             .append("g")
             .call(xAxis)
-            .attr("transform", "translate(0," + height + ")");
+            .attr("transform", `translate(0,${height})`);
+
+          let xAxisLabel = svg.append("text")
+            .attr("text-anchor", "end")
+            .attr("x", width)
+            .attr("y", height + 0.5*margin.bottom)
+            .text("Date")
 
           let y = d3
             .scaleLinear()
@@ -104,7 +110,16 @@
             .nice();
 
           let yAxis = d3.axisLeft(y);
-          let yAxisGroup = svg.append("g").call(yAxis);
+          let yAxisGroup = svg
+            .append("g")
+            .call(yAxis);
+
+          let yAxisLabel = svg.append("text")
+            .attr("x", -height*3/4)
+            .attr("y", -40)
+            .text("No. of Delays per 10,000 Arriving Flights")
+            .attr("transform", "rotate(-90)")
+            .attr("text-anchor", "start")
 
           let delayTypes = [
             "carrier_ct",

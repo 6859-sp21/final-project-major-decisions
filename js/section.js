@@ -52,10 +52,11 @@
     var setupVis = function (data) {
         console.log("Calling setupVis")
      
-        const vis = d3.select("#vis").append("svg").attr('width', width).attr('height', height)
+        const vis = d3.select("#vis").append("svg")
+        .attr('class', 'container-svg').attr('width', width).attr('height', height)
         
         // step 1
-        create_airline_rank_bar(data);
+        // create_airline_rank_bar(data);
         vis.append("g")
         .append("text").text("lets go on a adventure")
         .attr('class', 'one-project-title')

@@ -6,6 +6,9 @@ function generateMapTotal(){
     // The svg
     const svg = d3.select("#vis")
       .append("svg")
+      .attr('class', 'two-step')
+      .attr('display', 'none')
+      .attr('opacity', 0)
       .attr("width", width)
       .attr("height", height)
   
@@ -18,10 +21,11 @@ function generateMapTotal(){
     const airports = d3.csv("https://raw.githubusercontent.com/6859-sp21/final-project-major-decisions/main/data/airlines_agg.csv", function(data_airports) {
     // Load external data and boot
     d3.json("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson", function(data){
-  
+        console.log("INSIDE!");
         // Filter data
         data.features = data.features.filter( function(d){return d.properties.name=="USA"} )
   
+        console.log("Calling inside map");
         // Draw the map
         svg.append("g")
             .selectAll("path")

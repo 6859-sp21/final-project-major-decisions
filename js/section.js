@@ -1,7 +1,7 @@
  var scrollVis = function (data) {
     // size of te 
-    var width = 960;
-    var height = 650;
+    const width = 960;
+    const height = 650;
     var margin = { top: 0, left: 20, bottom: 40, right: 10 };
   
     // Keep track of which visualization
@@ -51,33 +51,38 @@
     // initial elements for allsections of the visualization. Hide everything first.
     var setupVis = function (data) {
         console.log("Calling setupVis")
+        const width = 960;
+        const height = 650;
      
-        const vis = d3.select("#vis").append("svg")
-        .attr('class', 'container-svg').attr('width', width).attr('height', height)
+        const vis = d3.select("#vis")
+        // .attr('class', 'container-svg').attr('width', width).attr('height', height)
         
         // step 1
         // create_airline_rank_bar(data);
-        vis.append("g")
+        vis.append("svg").attr('class', 'one-project-title').attr('width', width).attr('height', height)
+        .attr('display', 'none')
+        .attr('opacity', 0)
+        .append('g')
         .append("text").text("lets go on a adventure")
-        .attr('class', 'one-project-title')
         .attr('x', width / 2)
         .attr('y', height / 3)
         .attr('fill', 'black')
-        .attr('opacity', 0);
 
         // step 2
-        generateMapTotal()
-        vis.append("g")
-        .append("text").text("total_map")
-        .attr('class', 'two-step')
-        .attr('x', width / 2)
-        .attr('y', height / 3)
-        .attr('fill', 'black')
-        .attr('opacity', 0);
+        // create_airline_rank_bar(data, vis);
+        // vis.append("svg").attr('class', 'two-step')
+        // .attr('display', 'none')
+        // .attr('opacity', 0)
+        // .attr('width', width).attr('height', height).append('g')
+        // .append("text").text("total_map")
+        // .attr('x', width / 2)
+        // .attr('y', height / 3)
+        // .attr('fill', 'black');
+
 
         // step 3
-        choose('arr_del15')
-        vis.append("g")
+        // choose('arr_del15')
+        vis.append("svg").append('g')
         .append("text").text("map")
         .attr('class', 'three-step')
         .attr('x', width / 2)
@@ -122,31 +127,37 @@
       d3.select('.one-project-title')
         .transition()
         .duration(transitionTime)
-        .attr('opacity', 1);
+        .attr('opacity', 1)
+        .attr('display', 'inherit');
   
         d3.select('.two-step')
         .transition() // this need to be left in as a hack for fast scrolling
         .duration(0)
-        .attr('opacity', 0);
+        .attr('opacity', 0)
+        .attr('display', 'none');
     }
   
     // STEP 2
     function showStepTwo() {
-      console.log("Step 2: calling show filler title");
+      console.log("Step 2: calling step 2 function");
       d3.select('.one-project-title')
       .transition()
       .duration(0)
-      .attr('opacity', 0);
+      .attr('opacity', 0)
+      .attr('display', 'none');
 
+      create_airline_rank_bar(data);
       d3.select('.two-step')
-      .transition()
-      .duration(transitionTime)
-      .attr('opacity', 1);
+      // .transition()
+      // .duration(transitionTime)
+      .attr('opacity', 1)
+      .attr('display', 'block');
 
       d3.select('.three-step')
       .transition()
       .duration(0)
-      .attr('opacity', 0);
+      .attr('opacity', 0)
+      .attr('display', 'none');
     }
 
     // STEP 3

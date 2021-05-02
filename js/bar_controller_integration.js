@@ -1,9 +1,8 @@
 
-d3.csv('https://raw.githubusercontent.com/6859-sp21/final-project-major-decisions/main/data/airlines.csv').then((data)=>{create_airline_rank_bar(data)});
+//d3.csv('https://raw.githubusercontent.com/6859-sp21/final-project-major-decisions/main/data/airlines.csv').then((data)=>{create_airline_rank_bar(data)});
 
 function produceCarrierAnnualMap(data) {
     const carrierMap= generateMap(d3.groups(data, d=>d.carrier_name));
-    console.log(carrierMap);
     return carrierMap;
 
     // from an array of objects like this: 0: {year: "2017", month: "8", carrier: "B6", carrier_name: "JetBlue Airways", airport: "PSE", …}
@@ -36,9 +35,8 @@ async function create_airline_rank_bar(data) {
 
     // [[year, data entries]]
     const yearMap = d3.groups(data, d=>d.year).map(([year, data])=>[createDate(year), data]);
-    // console.log(yearMap);
     const datevalues = yearMap.map(([year, data]) => [year,produceCarrierAnnualMap(data)])
-    console.log(datevalues);
+    // console.log(datevalues);
 
     const carrier_map_2016 = datevalues[0][1] // 1 is always constant
     carrier_data_2016 =[]
@@ -84,15 +82,15 @@ async function create_airline_rank_bar(data) {
         }
     }
     keyframes.push([new Date(kb), rank(name => b.get(name) || 0)]);
-    console.log("keyframes");
-    console.log(keyframes)
+    // console.log("keyframes");
+    // console.log(keyframes)
   
     const nameframes = d3.groups(keyframes.flatMap(([, data]) => data), d => d.name)
-    console.log("nameframes");
-    console.log(nameframes);
+    // console.log("nameframes");
+    // console.log(nameframes);
     const prev = new Map(nameframes.flatMap(([, data]) => d3.pairs(data, (a, b) => [b, a])));
-    console.log("prev");
-    console.log(prev)
+    // console.log("prev");
+    // console.log(prev)
     const next = new Map(nameframes.flatMap(([, data]) => d3.pairs(data)));
     // ============================== drawing functions ========================
     function bars(svg) {
@@ -189,14 +187,16 @@ async function create_airline_rank_bar(data) {
     const width = 1200;
 
     let x = d3.scaleLinear([0, xAxisMax], [margin.left, width - margin.right])
-    console.log(x(0));
     let y = d3.scaleBand()
     .domain(d3.range(n + 1))
     .rangeRound([margin.top, margin.top + barSize * (n + 1 + 0.1)])
     .padding(0.1) 
 
     const svg = d3.create("svg")
-    .attr("viewBox", [0, 0, width, height]);
+    .attr("viewBox", [0, 0, width, height])
+    .attr("class", "two-step")
+    .attr('display', 'none')
+    .attr('opacity', 0);
     document.getElementById("vis").appendChild(svg.node());
 
     // ============ integration trick ============ 
@@ -223,8 +223,6 @@ async function create_airline_rank_bar(data) {
 
         await transition.end();
       }
-
-    console.log("End of creation");
 }
 
 function dateMapper([date, data]){

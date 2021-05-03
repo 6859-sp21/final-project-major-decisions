@@ -1,4 +1,11 @@
-src="https://d3v4js.org/d3v4.v4.js"
+const attributeMap = new Map(); // a map keeping track if a genre is selected 
+attributeMap.set('arr_del15', 'Total Delayed Flights: ');
+attributeMap.set('carrier_ct', 'Carrier Delayed Flights: ')
+attributeMap.set('weather_ct', 'Weather Delayed Flights: ');    
+attributeMap.set('nas_ct', 'National Air System Delayed Flights: ')
+attributeMap.set('security_ct', 'Security Delayed Flights: ')
+attributeMap.set('late_aircraft_ct', 'Late Aircraft Delayed Flights: ')    
+
 
 function choose(choice){
     d3.select("#delay_map").remove();
@@ -22,8 +29,7 @@ function generateMap(selectedAttribute){
       .attr("id", "delay_map")
       .attr('class', 'four-step');
 
-    
-  
+
     // Map and projection
     const projection = d3v4.geoMercator()
         .center([-100, 50])                // GPS of location to zoom on
@@ -65,7 +71,7 @@ function generateMap(selectedAttribute){
         }
         var mousemove = function(d) {
           Tooltip
-            .html(d.airport_name + "<br>" + selectedAttribute + ": " + d.arr_flights)
+            .html(d.airport_name + "<br>" + attributeMap.get(selectedAttribute) + d.arr_flights)
             .style("left", (d3v4.mouse(this)[0]+10) + "px")
             .style("top", (d3v4.mouse(this)[1]) + "px")
         }

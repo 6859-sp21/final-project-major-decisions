@@ -194,7 +194,7 @@ async function create_airline_rank_bar(data) {
 
     const svg = d3.create("svg")
     .attr("viewBox", [0, 0, width, height])
-    .attr("class", "two-step")
+    .attr("class", "dynamic-bar")
     .attr('display', 'none')
     .attr('opacity', 0);
     document.getElementById("vis").appendChild(svg.node());

@@ -87,6 +87,7 @@
       activateFunctions[2] = showDynamicBarChart;
       activateFunctions[3] = showMapOne;
       activateFunctions[4] = showMapTwo;
+      activateFunctions[5] = showTimeChart;
 
 
       
@@ -208,6 +209,8 @@
 
       d3.select("#total_map").remove();
       d3.select("#total_tooltip").remove();
+      d3.select("#time_vis").remove();
+      document.getElementById("selectButton").innerHTML = null;
 
       d3.select('.three-step')
       .transition()
@@ -218,9 +221,36 @@
       .transition()
       .duration(transitionTime)
       .attr('opacity', 1);
+
+      d3.select('.five-step')
+      .transition()
+      .duration(0)
+      .attr('opacity', 0);
     }
 
-    
+    // STEP 5 OR 6
+    function showTimeChart() {
+      console.log("Step 5: calling step 5");
+
+      d3.select("#delay_map").remove();
+      d3.select("#delay_tooltip").remove();
+      d3.select("#total_map").remove();
+      d3.select("#total_tooltip").remove();
+
+      createTimeChart();
+
+      d3.select('.five-step')
+      .transition()
+      .duration(transitionTime)
+      .attr('opacity', 1)
+      .attr('display', 'block');
+
+      d3.select('.four-step')
+      .transition()
+      .duration(0)
+      .attr('opacity', 0)
+      .attr('display', 'none');
+    }  
   
     /**
      * activate 
@@ -228,7 +258,7 @@
      * @param index - index of the activated section
      */
     chart.activate = function (index) {
-      console.log("Activate functions");
+      console.log("Activate functions", index);
       activeIndex = index;
       var sign = (activeIndex - lastIndex) < 0 ? -1 : 1;
       var scrolledSections = d3.range(lastIndex + sign, activeIndex + sign, sign);
@@ -293,4 +323,3 @@
   
   // load data and display, the entrance point to the whole flow
   d3.csv('https://raw.githubusercontent.com/6859-sp21/final-project-major-decisions/main/data/airlines.csv').then((data)=>{display(data)});
-  

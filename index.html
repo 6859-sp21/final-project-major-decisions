@@ -11,12 +11,12 @@
         <div class="title">
           <h3> Analyzing US airport and airline data </h3>
           We collected data regarding US airlines and airports on-time statistics and delay causes from United States Department of Transportation's
-          <a href="https://www.transtats.bts.gov/OT_Delay/OT_DelayCause1.asp?pn=1">Bureau of Transportation statistic website</a>          
+          <a href="https://www.transtats.bts.gov/OT_Delay/OT_DelayCause1.asp?pn=1">Bureau of Transportation Statistics website.</a>   
         </div>
       </section>
       <section class="step">
-        We collected data spanned from 2016 January to present. The data includes information on total number and delayed number of flights
-        per airline per airport per months.  And performed the following analysis
+        We collected data spanned from January 2016 to March 2021. The data includes information on total number and delayed number of flights
+        per airline per airport per months. We performed the following analysis.
       </div>
       </section>
       <section class="step">
@@ -38,6 +38,18 @@
           <button type="button" id="security_ct_selector" onclick="choose('security_ct')">Security Delayed</button>
           <button type="button" id="late_aircraft_ct_selector" onclick="choose('late_aircraft_ct')">Late Aircraft Delayed</button>
         </div>
+        <div id="delayDefinition">
+        </div>
+      </section>
+      <section class="step">
+        We examined each airline's monthly reported number of delayed flights between January 2016 and March 2021. To better compare the proportion of delayed flights across airlines, we normalized the delay counts by the total number of arriving flights per airline.
+        <br>
+        This visualization shows the number of delays per 10,000 arriving flights. To explore changes in delay counts and types over time, select an airline from the dropdown. You can also brush to zoom into a time period or double-click to reset the time scale. You can also hover over the legend to highlight a delay type.
+
+
+        <br>
+        <br>
+        <select id="selectButton"></select>
       </section>
     <div id='vis'>
     </div>
@@ -58,5 +70,6 @@
   <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
   <script src="js/total_map.js"></script>
   <script src="js/map.js"></script>
+  <script src="js/time_integration.js"></script>
   </body>
 </html>

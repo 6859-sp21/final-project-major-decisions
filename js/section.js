@@ -54,7 +54,9 @@
         const width = 960;
         const height = 650;
      
-        const vis = d3.select("#vis").append("svg").attr('width', 10).attr('height', 10)
+        // const vis = d3.select("#vis").append("svg").attr('width', 10).attr('height', 10)
+        const vis = d3.select("#vis")
+
         
         // step 1
         // create_airline_rank_bar(data);
@@ -67,6 +69,7 @@
         .attr('y', height / 3)
         .attr('fill', 'black')
         .attr('opacity', 0);
+
     };
   
     /**
@@ -80,9 +83,9 @@
       // activateFunctions are called each
       // time the active section changes
       activateFunctions[0] = showTitle;
-      activateFunctions[1] = showStepTwo;
-      activateFunctions[2] = showStepThree;
-      activateFunctions[3] = showStepFour;
+      activateFunctions[1] = showDataIntro;
+      activateFunctions[2] = showStepTwo;
+      activateFunctions[3] = showStepThree;
 
       
       // updateFunctions are called while
@@ -119,6 +122,11 @@
         .duration(0)
         .attr('opacity', 0)
         .attr('display', 'none');
+    }
+
+    function showDataIntro() {
+
+      
     }
   
        // STEP 2
@@ -190,7 +198,6 @@
       .transition()
       .duration(transitionTime)
       .attr('opacity', 1);
-
     }
 
     

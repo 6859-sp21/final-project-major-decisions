@@ -84,8 +84,10 @@
       // time the active section changes
       activateFunctions[0] = showTitle;
       activateFunctions[1] = showDataIntro;
-      activateFunctions[2] = showStepTwo;
-      activateFunctions[3] = showStepThree;
+      activateFunctions[2] = showDynamicBarChart;
+      activateFunctions[3] = showMapOne;
+      activateFunctions[4] = showMapTwo;
+
 
       
       // updateFunctions are called while
@@ -130,7 +132,7 @@
     }
   
        // STEP 2
-    function showStepTwo() {
+    function showDynamicBarChart() {
       console.log("Step 2: calling show filler title");
 
       d3.select('.one-project-title')
@@ -155,7 +157,7 @@
     }
 
        // STEP 3
-    function showStepThree() {
+    function showMapOne() {
       console.log("Step 3: calling show filler title");
 
       d3.select("#delay_map").remove();
@@ -182,7 +184,7 @@
     }
 
     // STEP 4
-    function showStepFour() {
+    function showMapTwo() {
       console.log("Step 4: calling step 4");
       generateMap('arr_del15')
 

@@ -53,19 +53,23 @@
         console.log("Calling setupVis")
         const vis = d3.select("#vis")
 
-        
-        // step 1
-        // create_airline_rank_bar(data);
-        // vis.append("svg").attr('class', 'one-project-title').attr('width', width).attr('height', height)
-        // .attr('display', 'none')
-        // .attr('opacity', 0)
-        // .append('g')
-        // .append("text").text("lets go on a adventure")
-        // .attr('x', width / 2)
-        // .attr('y', height / 3)
-        // .attr('fill', 'black')
-        // .attr('opacity', 0);
+        // step 1 Title image
+        vis.append("svg").attr('class', 'vis-title').attr('width', width).attr('height', height)
+        .attr('opacity', 0)
+        .append("svg:image")
+        .attr('x', -9)
+        .attr('y', -12)
+        .attr('width', width).attr('height', height)
+        .attr("xlink:href", "assets/bts.png");
 
+        // step 2 raw data image
+        vis.append("svg").attr('class', 'data-intro').attr('width', width).attr('height', height)
+        .attr('opacity', 0)
+        .append("svg:image")
+        .attr('x', -9)
+        .attr('y', -12)
+        .attr('width', width).attr('height', height)
+        .attr("xlink:href", "assets/raw_data.png");
     };
   
     /**
@@ -109,13 +113,11 @@
       d3.select("#delay_map").remove();
       d3.select("#delay_tooltip").remove();
 
-      const svg = d3.create("svg")
-      .attr("viewBox", [0, 0, 1200, 600])
-      .attr("class", "title")
-      .append('text').text("Title")
-      // .attr('display', 'none')
-      // .attr('opacity', 0);
-      document.getElementById("vis").appendChild(svg.node());
+      d3.select(".vis-title")
+      .transition()
+      .duration(transitionTime)
+      .attr('opacity', 1)
+      .attr('display', 'block');
 
 
       d3.select('.data-intro')
@@ -127,19 +129,18 @@
 
     function showDataIntro() {
 
-      d3.select('.title')
+      d3.select('.vis-title')
       .transition() // this need to be left in as a hack for fast scrolling
       .duration(0)
       .attr('opacity', 0)
       .attr('display', 'none');
 
-      const svg = d3.create("svg")
-      .attr("viewBox", [0, 0, 1200, 600])
-      .attr("class", "data-intro")
-      .append('text').text("dataintro")
-      // .attr('display', 'none')
-      // .attr('opacity', 0);
-      document.getElementById("vis").appendChild(svg.node());
+     
+      d3.select(".data-intro")
+      .transition()
+      .duration(transitionTime)
+      .attr('opacity', 1)
+      .attr('display', 'block');
 
       d3.select('.dynamic-bar')
       .transition() // this need to be left in as a hack for fast scrolling

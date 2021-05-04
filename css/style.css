@@ -54,3 +54,24 @@ div.tooltip {
     stroke: #51eec9;
     stroke-width: 4px;
 }
+
+.button {
+    background-color: #69b3a2; /* Green */
+    border: none;
+    color: white;
+    transition-duration: 0.4s;
+    padding: 5px 10px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    display: block;
+    border: 2px solid #69b3a2;
+    margin-bottom:5px;
+  }
+
+.button:hover {
+    background-color: white;
+    color: #69b3a2;
+    border: 2px solid #69b3a2;
+  }

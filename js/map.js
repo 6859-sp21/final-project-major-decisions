@@ -30,29 +30,25 @@ function generateMap(selectedAttribute){
       .attr('class', 'four-step');
 
 
-    // Map and projection
-    const projection = d3v4.geoMercator()
-        .center([-100, 50])                // GPS of location to zoom on
-        .scale(400)                       // This is like the zoom
-        .translate([ width/2, height/2 ])
+    const projection = d3.geoAlbersUsa()
+    .translate([width/2,height/2])
+    .scale(1000);
+
+    var path = d3.geoPath().projection(projection);
   
     const airports = d3v4.csv("https://raw.githubusercontent.com/6859-sp21/final-project-major-decisions/main/data/airlines_agg.csv", function(data_airports) {
     // Load external data and boot
-    d3v4.json("https://raw.githubusercontent.com/holtzy/d3-graph-gallery/master/DATA/world.geojson", function(data){
-  
-        // Filter data
-        data.features = data.features.filter( function(d){return d.properties.name=="USA"} )
+    d3v4.json("https://raw.githubusercontent.com/6859-sp21/final-project-major-decisions/main/data/us.json", function(data){
   
         // Draw the map
         svg.append("g")
+            .attr("class", "states")
             .selectAll("path")
-            .data(data.features)
+            .data(topojson.feature(data, data.objects.states).features)
             .enter()
             .append("path")
               .attr("fill", "#b8b8b8")
-              .attr("d", d3v4.geoPath()
-                  .projection(projection)
-              )
+              .attr("d", path)
             .style("stroke", "black")
             .style("opacity", .3)
 
@@ -85,8 +81,9 @@ function generateMap(selectedAttribute){
           .data(data_airports)
           .enter()
           .append("circle")
-            .attr("cx", function(d){ return projection([d.long, d.lat])[0] })
-            .attr("cy", function(d){ return projection([d.long, d.lat])[1] })
+            .attr("transform", function(d) {
+              return "translate("+projection([d.long, d.lat])+")";
+            })
             .attr("r", function(d){ return d[selectedAttribute]/5000})
             .attr("class", "circle")
             .style("fill", "#69b3a2")

@@ -49,3 +49,8 @@ div.tooltip {
     border-radius: 8px;			
     pointer-events: none;			
 }
+
+.circle:hover{
+    stroke: #51eec9;
+    stroke-width: 4px;
+}

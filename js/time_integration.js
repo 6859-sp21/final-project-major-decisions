@@ -55,6 +55,8 @@ function generateTimeChart(data) {
     width = 560 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
 
+  let focusHeight = 100;
+
   // append the svg object to the body of the page
   const svg = d3.select("#vis")
     .append("svg")
@@ -72,6 +74,7 @@ function generateTimeChart(data) {
   // document.getElementById("vis").appendChild(svg.node());
   // for some reason, using this doesn't actually add it to the DOM?
   // also, lining up axes and areas keeps going outside bounds without append("g") and translate
+
 
   // ----- AXES SCALES AND LABELS ----- //
   let x = d3
@@ -122,6 +125,20 @@ function generateTimeChart(data) {
     .attr("transform", "rotate(-90)")
     .attr("text-anchor", "start")
 
+  
+  // ----- CONTEXT VIEW AXES AND SCALES ----- //
+  // let xContext = d3
+  //   .scaleTime()
+  //   .domain(d3.extent(sortedData, (d) => d.date))
+  //   .range([0, width])
+  //   .nice();
+
+  // let xContextAxis = d3.axisBottom(x);
+  // let xContextAxisGroup = svg
+  //   .append("g")
+  //   .call(xContextAxis)
+  //   .attr("transform", `translate(0,${height})`);
+
 
   // ----- COLOR ENCODING ----- //
   let delayTypes = [
@@ -133,6 +150,70 @@ function generateTimeChart(data) {
   ];
 
   let color = d3.scaleOrdinal().domain(delayTypes).range(d3.schemeSet2);
+
+
+  // ----- DRAW VERTICAL LINE TO SHOW VALUE ON MOUSEOVER ----- //
+  let hoverLine = svg.append("line")
+    .attr("class", "hoverInfo")
+    .attr("class", "x")
+    .attr("y1", 0)
+    .attr("y2", height - margin.top)// - margin.bottom)
+    .style("stroke", "red")
+    .style("stroke-dasharray", "3,3")
+    .style("opacity", 0);
+
+  let hoverValue = svg.append('g')
+    .append('text')
+      .attr("class", "hoverInfo")
+      .attr("class", "hoverValue")
+      // .attr("text-anchor", "left")
+      // .attr("alignment-baseline", "middle")
+      .style("opacity", 0)
+
+  // let hoverDate = svg.append('g')
+  //   .append('text')
+  //     .attr("class", "hoverInfo")
+  //     .attr("class", "hoverDate")
+  //     .attr("text-anchor", "left")
+  //     .attr("alignment-baseline", "middle")
+  //     .style("opacity", 0)
+
+
+  // ----- BRUSH TO ZOOM ----- //
+  let brush = d3
+    .brushX()
+    .extent([
+      [0, 0],
+      [width - margin.right, height],
+    ])
+    .on("end", brushed);
+
+  var idleTimeout;
+  function idled() {
+    idleTimeout = null;
+  }
+
+
+  function brushed(event) {
+    let s = event.selection;
+    if (!s) {
+      if (!idleTimeout) return (idleTimeout = setTimeout(idled, 350));
+      x.domain([0, 0]);
+    } else {
+      x.domain([x.invert(s[0]), x.invert(s[1])]);
+      svg.select(".brush").call(brush.move, null);
+    }
+
+    xAxisGroup.call(xAxis.scale(x));
+    svg.selectAll(".delayLayers").transition().duration(1000).attr("d", area);
+  }
+
+  svg.on("dblclick", function () {
+    x.domain(d3.extent(data, (d) => d.date)).nice();
+    xAxisGroup.call(xAxis);
+    svg.selectAll(".delayLayers").transition().duration(1000).attr("d", area);
+  });
+
 
   // ----- DRAW AREAS ----- //
   let stackGen = d3.stack().keys(delayTypes);
@@ -150,6 +231,10 @@ function generateTimeChart(data) {
     .attr("y", 0);
 
   let clipped = svg.append("g").attr("clip-path", "url(#clip)");
+  let eventsRect = svg.append("g")
+    .attr("class","events")
+    .attr("class", "brush");
+  eventsRect.call(brush);
 
   let area = d3
     .area()
@@ -167,6 +252,40 @@ function generateTimeChart(data) {
     })
     .attr("fill", (d) => color(d.key));
 
+  let bisect = d3.bisector(d => d.date).right;
+
+  eventsRect
+    .on("mousemove", (event, d) => {
+      let x0 = x.invert(d3.pointer(event)[0]);
+      let i = bisect(sortedData, x0);
+      let d0 = sortedData[i];
+      let d1 = sortedData[i+1];
+      let datum = (x0 - d0.date > d1.date - x0) ? d1 : d0;
+      let total_ct = datum.carrier_ct + datum.weather_ct + datum.nas_ct + datum.security_ct + datum.late_aircraft_ct;
+
+      svg.select(".x")
+        .attr("transform",
+          `translate(${x(datum.date)}, 0)`)
+        .style("opacity",1)
+        .raise();
+      svg.select(".hoverValue")
+        .attr("transform",
+          `translate(${x(datum.date)}, ${y(total_ct)-100})`)
+        .text(total_ct.toFixed(2) + '\n' + new Intl.DateTimeFormat('en-US', {year: 'numeric', month: 'long'}).format(datum.date))
+        .style("opacity",1)
+        .raise();
+    })
+    .on("mouseout", (event, d) => {
+      svg.select(".x").style("opacity", 0);
+      svg.select(".hoverValue").style("opacity", 0);
+    })
+
+    
+  // ----- ADD CONTEXT COMPONENTS ----- //
+  // let context = svg.append("g")
+  //   .attr("class", "context")
+    // .attr("transform", "translate(" + margin_context.left + "," + margin_context.top + ")");
+
 
   // ----- ADD TITLE ----- //
   let chartTitle = svg
@@ -177,6 +296,7 @@ function generateTimeChart(data) {
     .attr("fill", "black")
     .attr("text-anchor", "middle")
     .text((d) => "Delayed " + selectedCarrier + " Flights")
+
 
   // ----- FILTER BY AIRLINE ----- // 
   function updateChart(selectedCarrier, svg) {
@@ -201,7 +321,32 @@ function generateTimeChart(data) {
           .x((d) => x(d.data.date))
           .y0((d) => y(d[0]))
           .y1((d) => y(d[1]))
-      );
+      )
+
+    eventsRect
+      .on("mousemove", (event, d) => {
+        let x0 = x.invert(d3.pointer(event)[0]);
+        let i = bisect(filteredData, x0);
+        let d0 = filteredData[i];
+        let d1 = filteredData[i+1];
+        let datum = (x0 - d0.date > d1.date - x0) ? d1 : d0;
+        let total_ct = datum.carrier_ct + datum.weather_ct + datum.nas_ct + datum.security_ct + datum.late_aircraft_ct;
+
+        svg.select(".x")
+          .attr("transform",
+            `translate(${x(datum.date)}, 0)`)
+          .style("opacity",1)
+          .raise();
+        svg.select(".hoverValue")
+          .attr("transform",
+            `translate(${x(datum.date)}, ${y(total_ct)-100})`)
+          .text(total_ct.toFixed(2) + '\n' + new Intl.DateTimeFormat('en-US', {year: 'numeric', month: 'long'}).format(datum.date))
+          .style("opacity",1)
+          .raise();
+      })
+      .on("mouseout", (event, d) => {
+        svg.select(".x").style("opacity", 0);
+      })
   }
 
   function updateTitle(selectedCarrier) {
@@ -212,43 +357,6 @@ function generateTimeChart(data) {
     selectedCarrier = this.value;
     updateChart(selectedCarrier, svg);
     updateTitle(selectedCarrier);
-  });
-
-
-  // ----- BRUSH TO ZOOM ----- //
-  let brush = d3
-    .brushX()
-    .extent([
-      [0, 0],
-      [width - margin.right, height],
-    ])
-    .on("end", brushed);
-
-  var idleTimeout;
-  function idled() {
-    idleTimeout = null;
-  }
-
-  svg.append("g").attr("class", "brush").call(brush);
-
-  function brushed(event) {
-    let s = event.selection;
-    if (!s) {
-      if (!idleTimeout) return (idleTimeout = setTimeout(idled, 350));
-      x.domain([0, 0]);
-    } else {
-      x.domain([x.invert(s[0]), x.invert(s[1])]);
-      svg.select(".brush").call(brush.move, null);
-    }
-
-    xAxisGroup.call(xAxis.scale(x));
-    svg.selectAll(".delayLayers").transition().duration(1000).attr("d", area);
-  }
-
-  svg.on("dblclick", function () {
-    x.domain(d3.extent(data, (d) => d.date)).nice();
-    xAxisGroup.call(xAxis);
-    svg.selectAll(".delayLayers").transition().duration(1000).attr("d", area);
   });
 
 

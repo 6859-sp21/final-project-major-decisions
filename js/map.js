@@ -6,6 +6,15 @@ attributeMap.set('nas_ct', 'National Air System Delayed Flights: ')
 attributeMap.set('security_ct', 'Security Delayed Flights: ')
 attributeMap.set('late_aircraft_ct', 'Late Aircraft Delayed Flights: ')    
 
+const territoryPos = new Map(); // a map keeping track if a genre is selected 
+territoryPos.set('BQN', 'translate(200 560)');
+territoryPos.set('GUM', 'translate(210 560)')
+territoryPos.set('PPG', 'translate(220 560)');    
+territoryPos.set('PSE', 'translate(230 560)')
+territoryPos.set('SJU', 'translate(240 560)')
+territoryPos.set('STT', 'translate(250 560)') 
+territoryPos.set('STX', 'translate(260 560)') 
+
 
 function choose(choice){
     d3.select("#delay_map").remove();
@@ -51,14 +60,21 @@ function generateMap(selectedAttribute){
               .attr("d", path)
             .style("stroke", "black")
             .style("opacity", .3)
-
   
         // create a tooltip
-        var Tooltip = d3v4.select("#vis")
+        var Tooltip = d3.select("#vis")
           .append("div")
           .attr("class", "tooltip")
           .attr("id", "delay_tooltip")
           .style("opacity", 0)
+
+        svg.append('rect')
+          .attr('x', 190)
+          .attr('y', 550)
+          .attr('width', 80)
+          .attr('height', 20)
+          .attr('fill', 'white')
+          .attr('stroke', 'DarkGrey');
   
         // Add circles:
         var circles= svg
@@ -67,7 +83,12 @@ function generateMap(selectedAttribute){
           .enter()
           .append("circle")
             .attr("transform", function(d) {
-              return "translate("+projection([d.long, d.lat])+")";
+              if (projection([d.long, d.lat])==null){
+                return territoryPos.get(d.airport);
+              }
+              else {
+                return "translate("+projection([d.long, d.lat])+")";
+              }
             })
             .attr("r", function(d){ return d[selectedAttribute]/5000})
             .attr("class", "circle")

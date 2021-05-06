@@ -3,6 +3,15 @@ function generateMapTotal(){
     const width = 960
     const height = 650
 
+    const territoryPos = new Map(); // a map keeping track if a genre is selected 
+    territoryPos.set('BQN', 'translate(200 560)');
+    territoryPos.set('GUM', 'translate(210 560)')
+    territoryPos.set('PPG', 'translate(220 560)');    
+    territoryPos.set('PSE', 'translate(230 560)')
+    territoryPos.set('SJU', 'translate(240 560)')
+    territoryPos.set('STT', 'translate(250 560)') 
+    territoryPos.set('STX', 'translate(260 560)') 
+
     // The svg
     const svg = d3.select("#vis")
       .append("svg")
@@ -41,6 +50,14 @@ function generateMapTotal(){
           .attr("id", "total_tooltip")
           .style("opacity", 0)
   
+        svg.append('rect')
+        .attr('x', 190)
+        .attr('y', 550)
+        .attr('width', 80)
+        .attr('height', 20)
+        .attr('fill', 'white')
+        .attr('stroke', 'DarkGrey');
+        
   
         // Add circles:
         var circles= svg
@@ -49,7 +66,12 @@ function generateMapTotal(){
           .enter()
           .append("circle")
             .attr("transform", function(d) {
+              if (projection([d.long, d.lat])==null){
+                return territoryPos.get(d.airport);
+              }
+              else {
                 return "translate("+projection([d.long, d.lat])+")";
+              }
             })
             .attr("r", function(d){ return d['arr_flights']/25000})
             .attr("class", "circle")

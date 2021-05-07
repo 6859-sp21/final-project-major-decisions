@@ -51,9 +51,12 @@ function generateTimeChart(data) {
     });
 
   // set the dimensions and margins of the graph
-  let margin = { top: 20, right: 30, bottom: 30, left: 60 },
-    width = 560 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
+    let fullWidth = 560,
+        fullHeight = 500;
+
+    let margin  = {top: 20, right: 30, bottom: 30, left: 60},
+      width = fullWidth - margin.left - margin.right,
+      height  = fullHeight- margin.top - margin.bottom;
 
   let focusHeight = 100;
 
@@ -170,14 +173,8 @@ function generateTimeChart(data) {
       // .attr("alignment-baseline", "middle")
       .style("opacity", 0)
 
-  // let hoverDate = svg.append('g')
-  //   .append('text')
-  //     .attr("class", "hoverInfo")
-  //     .attr("class", "hoverDate")
-  //     .attr("text-anchor", "left")
-  //     .attr("alignment-baseline", "middle")
-  //     .style("opacity", 0)
-
+  // https://stackoverflow.com/questions/38670322/d3-brushing-and-mouse-move-coexist 
+  
 
   // ----- BRUSH TO ZOOM ----- //
   let brush = d3

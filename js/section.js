@@ -50,7 +50,6 @@
   
     // initial elements for allsections of the visualization. Hide everything first.
     var setupVis = function (data) {
-        console.log("Calling setupVis")
         const vis = d3.select("#vis")
 
         // step 1 Title image
@@ -108,11 +107,10 @@
     const transitionTime = 600;
     // STEP 1
     function showTitle() {
-      console.log("Step 1: Calling show title");
       d3.select("#total_map").remove();
       d3.select("#total_tooltip").remove();
-      d3.select("#delay_map").remove();
-      d3.select("#delay_tooltip").remove();
+      // d3.select("#delay_map").remove();
+      // d3.select("#delay_tooltip").remove();
 
       d3.select(".vis-title")
       .transition()
@@ -129,6 +127,7 @@
     }
 
     function showDataIntro() {
+      d3.select('.dynamic-bar').remove();
 
       d3.select('.vis-title')
       .transition() // this need to be left in as a hack for fast scrolling
@@ -150,18 +149,16 @@
       .attr('display', 'none');
     }
   
-
-    function showDynamicBarChart() {
-      console.log("Step 2: calling show filler title");
-
+    async function showDynamicBarChart() {
       d3.select('.data-intro')
       .transition() // this need to be left in as a hack for fast scrolling
       .duration(0)
       .attr('opacity', 0)
       .attr('display', 'none');
 
-      create_airline_rank_bar(data);
-      console.log('version', d3.version)
+      d3.select(".three-step").remove();
+      await createCarrierRankBarPercentDelayed(data)
+
       d3.select('.dynamic-bar')
       .transition()
       .duration(transitionTime)
@@ -173,14 +170,14 @@
       .duration(0)
       .attr('opacity', 0)
       .attr('display', 'none');
+     
     }
 
        // STEP 3
     function showMapOne() {
-      console.log("Step 3: calling show filler title");
-
       d3.select("#delay_map").remove();
       d3.select("#delay_tooltip").remove();
+      d3.select('.dynamic-bar').remove();
       generateMapTotal()
 
       d3.select('.dynamic-bar')
@@ -190,8 +187,6 @@
       .attr('display', 'none');
 
       d3.select('.three-step')
-      // .transition()
-      // .duration(transitionTime)
       .attr('opacity', 1)
       .attr('display', 'block');
 
@@ -204,7 +199,6 @@
 
     // STEP 4
     function showMapTwo() {
-      console.log("Step 4: calling step 4");
       generateMap('arr_del15')
 
       d3.select("#total_map").remove();
@@ -230,8 +224,6 @@
 
     // STEP 5 OR 6
     function showTimeChart() {
-      console.log("Step 5: calling step 5");
-
       d3.select("#delay_map").remove();
       d3.select("#delay_tooltip").remove();
       d3.select("#total_map").remove();
@@ -258,7 +250,6 @@
      * @param index - index of the activated section
      */
     chart.activate = function (index) {
-      console.log("Activate functions", index);
       activeIndex = index;
       var sign = (activeIndex - lastIndex) < 0 ? -1 : 1;
       var scrolledSections = d3.range(lastIndex + sign, activeIndex + sign, sign);

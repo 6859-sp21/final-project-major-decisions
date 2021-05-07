@@ -1,20 +1,21 @@
 
 //d3.csv('https://raw.githubusercontent.com/6859-sp21/final-project-major-decisions/main/data/airlines.csv').then((data)=>{create_airline_rank_bar(data)});
 
-function produceCarrierAnnualMap(data) {
+function produceCarrierAnnualMap(year, data) {
     const carrierMap= generateMap(d3.groups(data, d=>d.carrier_name));
     return carrierMap;
-
     // from an array of objects like this: 0: {year: "2017", month: "8", carrier: "B6", carrier_name: "JetBlue Airways", airport: "PSE", …}
     // To [delay_flights, total_flights]
     function sumFlightsFromArrayOfObject(entryList) {
         let delay_flights = 0;
         let total_flights = 0;
         for (const entry of entryList) {
-            delay_flights = delay_flights + parseInt(entry.arr_del15);
-            total_flights = total_flights + parseInt(entry.arr_flights);
+            
+            delay_flights = delay_flights + nonNaNParseFloat(entry.arr_del15);
+            total_flights = total_flights + nonNaNParseFloat(entry.arr_flights);
         }
-        return (delay_flights/total_flights)*100;
+        const result = (delay_flights/total_flights)*100;
+        return result;
     }
 
     function generateMap(carrierList) {
@@ -26,31 +27,16 @@ function produceCarrierAnnualMap(data) {
     }
 }
 
-async function create_airline_rank_bar(data) {
-
+async function createCarrierRankBarPercentDelayed(data) {
     // ========================== data processing ================================
-    // const datevalues = Array.from(d3.rollup(data, ([d]) => calculatedPercentageDelay(d), d => createDate(d.year, d.month), d => d.carrier_name))
-    // .sort(([a], [b]) => d3.ascending(a, b));
-    // console.log(datevalues);
-
-    // [[year, data entries]]
     const yearMap = d3.groups(data, d=>d.year).map(([year, data])=>[createDate(year), data]);
-    const datevalues = yearMap.map(([year, data]) => [year,produceCarrierAnnualMap(data)])
-    // console.log(datevalues);
-
-    const carrier_map_2016 = datevalues[0][1] // 1 is always constant
-    carrier_data_2016 =[]
-    for (const [key, value] of carrier_map_2016){
-        carrier_data_2016.push({"carrier_name": key, "delay_pct": value})
-    }
-    carrier_data_2016 =carrier_data_2016.sort(
-        (a,b) =>d3.ascending(a.delay_pct, b.delay_pct)
-    );
-
+    const datevalues = yearMap.map(([year, data]) =>
+     [year,produceCarrierAnnualMap(year, data)]).sort(
+         (a,b) => {return a[0].getFullYear()-b[0].getFullYear()});
     // ======================== keyframes ==================================
     const names = new Set(data.map(data => data.carrier_name)) // 20 names in total, some has nun 
     const n = 5;
-    const xAxisMax = 50;
+    const xAxisMax = 30;
     function rank(value) {
         const data = Array.from(names, name => ({name, value: value(name)}));
         data.sort((a, b) => d3.descending(a.value, b.value));
@@ -66,8 +52,6 @@ async function create_airline_rank_bar(data) {
         }
         return temp;
     }
-    console.log(rank(name => getValue(name))) // rank test
-
     const keyframes = [];
     const k = 1;
     const fillerValue = 0; // the value we fill NaN with
@@ -82,32 +66,41 @@ async function create_airline_rank_bar(data) {
         }
     }
     keyframes.push([new Date(kb), rank(name => b.get(name) || 0)]);
-    // console.log("keyframes");
-    // console.log(keyframes)
-  
     const nameframes = d3.groups(keyframes.flatMap(([, data]) => data), d => d.name)
-    // console.log("nameframes");
-    // console.log(nameframes);
     const prev = new Map(nameframes.flatMap(([, data]) => d3.pairs(data, (a, b) => [b, a])));
-    // console.log("prev");
-    // console.log(prev)
     const next = new Map(nameframes.flatMap(([, data]) => d3.pairs(data)));
     // ============================== drawing functions ========================
     function bars(svg) {
+        svg.append("defs")
+            .append("pattern")
+            .attr("id", "bg")
+            .attr('width', 50)
+            .attr('height', barSize)
+            .append("image")
+            .attr("xlink:href", "assets/spirit.png")
+            .attr('width', 50)
+            .attr('height', barSize);
+
+        svg.append("rect")
+        .attr("fill", "url(#bg)");
+
         let bar = svg.append("g")
-            .attr("fill-opacity", 0.6)
+            .attr("fill-opacity", 0.8)
             .selectAll("rect");
+
+        const colorScale = d3.scaleOrdinal(d3v4.schemeCategory20)
+        .domain(names);
 
         return ([date, data], transition) => bar = bar
             .data(data.slice(0, n), d => d.name)
             .join(
             enter => enter.append("rect")
-                //.attr("fill", d=>color(d))
-                .attr("fill", 'red')
+                .attr("fill", d => colorScale(d.name))
                 .attr("height", y.bandwidth())
                 .attr("x", x(0))
                 .attr("y", d => y((prev.get(d) || d).rank))
                 .attr("width", d => x((prev.get(d) || d).value) - x(0)),
+             
             update => update,
             exit => exit.transition(transition).remove()
                 .attr("y", d => y((next.get(d) || d).rank))
@@ -167,7 +160,23 @@ async function create_airline_rank_bar(data) {
         };
     }
 
-
+    function ticker(svg) {
+        formatDate = d3.utcFormat("%Y")
+        const now = svg.append("text")
+            .attr('class', 'ticker-text')
+            .style("font", `bold ${barSize}px var(--sans-serif)`)
+            .style("font-variant-numeric", "tabular-nums")
+            .attr("text-anchor", "end")
+            .style('font-size', "30px")
+            .attr("x", width - 80)
+            .attr("y", margin.top + barSize * (n - 0.45))
+            // .attr("dy", "0.32em")
+            .text(formatDate(keyframes[0][0]));
+      
+        return ([date], transition) => {
+          transition.end().then(() => now.text(formatDate(date)));
+        };
+      }
     // =============================== settings functions =========================
     let color = function() {
         const scale = d3.scaleOrdinal(d3.schemeTableau10);
@@ -180,11 +189,11 @@ async function create_airline_rank_bar(data) {
     }
 
     // ================== final step drawing the graphs ====================
-    let margin = ({top: 16, right: 6, bottom: 6, left: 0});
+    let margin = ({top: 50, right: 6, bottom: 6, left: 0});
     let barSize = 48;
-    let duration = 2000;
+    let duration = 1000;
     const height = margin.top + barSize * n + margin.bottom;
-    const width = 1200;
+    const width = 900;
 
     let x = d3.scaleLinear([0, xAxisMax], [margin.left, width - margin.right])
     let y = d3.scaleBand()
@@ -195,8 +204,17 @@ async function create_airline_rank_bar(data) {
     const svg = d3.create("svg")
     .attr("viewBox", [0, 0, width, height])
     .attr("class", "dynamic-bar")
-    .attr('display', 'none')
-    .attr('opacity', 0);
+    .attr('display', 'block')
+    .attr('opacity', 1);
+
+      // creating title 
+    svg.append('g').attr('class','dynamic-bar').append('text')
+    .attr("y", 25)
+    .attr("x", width/2)
+    .attr("text-anchor", "middle")
+    .text('Top 5 Carriers with highest percentage of delayed flights from 2016 - present')
+    .attr("text-anchor", "middle")
+
     document.getElementById("vis").appendChild(svg.node());
 
     // ============ integration trick ============ 
@@ -209,6 +227,8 @@ async function create_airline_rank_bar(data) {
     const updateBars = bars(svg);
     const updateLabels = labels(svg);
     const updateAxis = axis(svg);
+    const updateTicker = ticker(svg);
+
 
     for (const keyframe of keyframes) {
         const transition = svg.transition()
@@ -220,8 +240,10 @@ async function create_airline_rank_bar(data) {
         updateBars(keyframe, transition);
         updateLabels(keyframe, transition);
         updateAxis(keyframe, transition);
+        updateTicker(keyframe, transition);
 
         await transition.end();
+        await sleep(2000);
       }
 }
 
@@ -235,13 +257,10 @@ function textTween(a, b) {
 
     const i = d3.interpolateNumber(a, b);
     return function(t) {
-        this.textContent = formatNumber(i(t));
+        this.textContent = formatNumber(i(t))+"%";
     };
 }
 
-
-//  takes a value accessor function
-// Seara: is this righ? 
 function rank(value) {
     const data = Array.from(names, name => ({name, value: value(name)}));
     data.sort((a, b) => d3.descending(a.value, b.value));
@@ -249,17 +268,20 @@ function rank(value) {
     return data;
 }
 
-function fillInZero(){
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
 
-}
 function createDate(year, month) {   
     const newDate = new Date(parseInt(year),1, 1);
     return newDate;
 }
 
-// accepth t
-function createToCarrierMap(brandData){
-    const newDate = new Date(parseInt(year),parseInt(month), 1);
-    return newDate;
+function nonNaNParseFloat(numberString){
+    let result = parseFloat(numberString);
+    if (isNaN(result)){
+        return 0;
+    } else {
+        return result;
+    }
 }
-

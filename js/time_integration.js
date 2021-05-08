@@ -56,9 +56,9 @@ function generateTimeChart(data) {
 
     let margin  = {top: 20, right: 30, bottom: 30, left: 60},
       width = fullWidth - margin.left - margin.right,
-      height  = fullHeight- margin.top - margin.bottom;
+      height  = fullHeight - margin.top - margin.bottom;
 
-  let focusHeight = 100;
+  let previewHeight = 150;
 
   // append the svg object to the body of the page
   const svg = d3.select("#vis")
@@ -66,8 +66,9 @@ function generateTimeChart(data) {
     .attr("class", "five-step")
     .attr("id", "time_vis")
     // .attr("width", width + margin.left + margin.right)
-    .attr("width", width + 4*margin.left)
-    .attr("height", height + margin.top + margin.bottom)
+    .attr("width", width + 5*margin.left) // 800
+    .attr("height", height + 2*previewHeight) //margin.top + margin.bottom) // 500
+    .attr("style","outline: thin solid red;") // use this to see full size of svg
     .append("g")
       .attr(
         "transform",
@@ -128,20 +129,6 @@ function generateTimeChart(data) {
     .attr("transform", "rotate(-90)")
     .attr("text-anchor", "start")
 
-  
-  // ----- CONTEXT VIEW AXES AND SCALES ----- //
-  // let xContext = d3
-  //   .scaleTime()
-  //   .domain(d3.extent(sortedData, (d) => d.date))
-  //   .range([0, width])
-  //   .nice();
-
-  // let xContextAxis = d3.axisBottom(x);
-  // let xContextAxisGroup = svg
-  //   .append("g")
-  //   .call(xContextAxis)
-  //   .attr("transform", `translate(0,${height})`);
-
 
   // ----- COLOR ENCODING ----- //
   let delayTypes = [
@@ -169,8 +156,6 @@ function generateTimeChart(data) {
     .append('text')
       .attr("class", "hoverInfo")
       .attr("class", "hoverValue")
-      // .attr("text-anchor", "left")
-      // .attr("alignment-baseline", "middle")
       .style("opacity", 0)
 
   // https://stackoverflow.com/questions/38670322/d3-brushing-and-mouse-move-coexist 
@@ -249,6 +234,61 @@ function generateTimeChart(data) {
     })
     .attr("fill", (d) => color(d.key));
 
+  
+  // ----- CONTEXT VIEW AXES AND SCALES ----- //
+  let xContext = d3
+    .scaleTime()
+    .domain(d3.extent(sortedData, (d) => d.date))
+    .range([0, width])
+    .nice();
+
+  let xContextAxis = d3.axisBottom(x);
+  let xContextAxisGroup = svg
+    .append("g")
+    .call(xContextAxis)
+    .attr("transform", `translate(0,${height + previewHeight + margin.bottom})`);
+
+  let yContext = d3
+    .scaleLinear()
+    .range([previewHeight, 0])
+    .domain(y.domain())
+
+
+  // ----- ADD CONTEXT COMPONENTS ----- //
+  let context = svg.append("g")
+    .attr("class", "context")
+    .attr("transform", `translate(0,${height + margin.bottom})`);
+
+  let areaContext = d3
+    .area()
+    .x((d) => x(d.data.date))
+    .y0((d) => yContext(d[0]))
+    .y1((d) => yContext(d[1]));
+    // .area()
+    // .x((d) => xContext(d.date))
+    // .y0((previewHeight))
+    // .y1(d => previewHeight + y(d.carrier_ct + d.weather_ct + d.nas_ct + d.security_ct + d.late_aircraft_ct))
+
+  let contextView = context
+    .selectAll("contextLayers")
+    .data(stackedData)
+    .join("path")
+    .attr("d", areaContext)
+    .attr("fill", "#B2C8EE")
+
+  let extentView = context
+    .selectAll(".extent")
+    .attr("y", -6)
+    .attr("height", previewHeight + 8)
+    .attr("opacity", 0.5)
+
+  // let brushPreview = svg.append("g")
+  //   .attr("viewBox", [0, 0, width, previewHeight])
+  //   .attr("style","outline: thin solid red;") // use this to see full size of svg
+
+
+  // ----- ADD HOVER LINE ----- //
+
   let bisect = d3.bisector(d => d.date).right;
 
   eventsRect
@@ -276,12 +316,6 @@ function generateTimeChart(data) {
       svg.select(".x").style("opacity", 0);
       svg.select(".hoverValue").style("opacity", 0);
     })
-
-    
-  // ----- ADD CONTEXT COMPONENTS ----- //
-  // let context = svg.append("g")
-  //   .attr("class", "context")
-    // .attr("transform", "translate(" + margin_context.left + "," + margin_context.top + ")");
 
 
   // ----- ADD TITLE ----- //

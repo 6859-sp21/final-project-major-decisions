@@ -75,8 +75,8 @@ function generateMapTotal(){
             })
             .attr("r", function(d){ return d['arr_flights']/25000})
             .attr("class", "circle")
-            .style("fill", "#69b3a2")
-            .attr("stroke", "#69b3a2")
+            .style("fill", "#e5c494")
+            .attr("stroke", "#e5c494")
             .attr("stroke-width", 3)
             .attr("fill-opacity", .4)
           .on("mouseover", (event, d) => {

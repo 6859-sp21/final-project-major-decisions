@@ -1,7 +1,7 @@
 const attributeMap = new Map(); // a map keeping track if a genre is selected 
 attributeMap.set('arr_del15', 'Total Delayed Flights: ');
 attributeMap.set('carrier_ct', 'Carrier Delayed Flights: ')
-attributeMap.set('weather_ct', 'Weather Delayed Flights: ');    
+attributeMap.set(' weather_ct', 'Weather Delayed Flights: ');    
 attributeMap.set('nas_ct', 'National Air System Delayed Flights: ')
 attributeMap.set('security_ct', 'Security Delayed Flights: ')
 attributeMap.set('late_aircraft_ct', 'Late Aircraft Delayed Flights: ')    
@@ -14,6 +14,14 @@ territoryPos.set('PSE', 'translate(230 560)')
 territoryPos.set('SJU', 'translate(240 560)')
 territoryPos.set('STT', 'translate(250 560)') 
 territoryPos.set('STX', 'translate(260 560)') 
+
+const colors = new Map(); // a map keeping track if a genre is selected 
+colors.set('arr_del15', '#ffd92f');
+colors.set('carrier_ct', '#66c2a5')
+colors.set(' weather_ct', '#fc8d62');    
+colors.set('nas_ct', '#8da0cb')
+colors.set('security_ct', '#e78ac3')
+colors.set('late_aircraft_ct', '#a6d854')    
 
 
 function choose(choice){
@@ -92,8 +100,8 @@ function generateMap(selectedAttribute){
             })
             .attr("r", function(d){ return d[selectedAttribute]/5000})
             .attr("class", "circle")
-            .style("fill", "#69b3a2")
-            .attr("stroke", "#69b3a2")
+            .style("fill", colors.get(selectedAttribute))
+            .attr("stroke", colors.get(selectedAttribute))
             .attr("stroke-width", 3)
             .attr("fill-opacity", .4)
           .on("mouseover", (event, d) => {

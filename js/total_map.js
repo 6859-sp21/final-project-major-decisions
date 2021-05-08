@@ -20,6 +20,15 @@ function generateMapTotal(){
       .attr("id", "total_map")
       .attr('class', 'three-step');
 
+    var size = d3.scaleSqrt()
+      .domain([1, 2000000])  // What's in the data, let's say it is percentage
+      .range([1, 50])  // Size in pixel
+
+    var valuesToShow = [10000, 100000, 1000000]
+    var xCircle = 550
+    var xLabel = 640
+    var yCircle = 580
+
     const projection = d3.geoAlbersUsa()
     .translate([width/2,height/2])
     .scale(1000);
@@ -73,11 +82,11 @@ function generateMapTotal(){
                 return "translate("+projection([d.long, d.lat])+")";
               }
             })
-            .attr("r", function(d){ return d['arr_flights']/25000})
+            .attr("r", function(d){ return size(d['arr_flights'])})
             .attr("class", "circle")
             .style("fill", "#e5c494")
             .attr("stroke", "#e5c494")
-            .attr("stroke-width", 3)
+            .attr("stroke-width", 2)
             .attr("fill-opacity", .4)
           .on("mouseover", (event, d) => {
             Tooltip.style("opacity", 1)
@@ -92,6 +101,39 @@ function generateMapTotal(){
             Tooltip.style("opacity", 0)
           })
         });
+
+        svg
+          .selectAll("legend")
+          .data(valuesToShow)
+          .enter()
+          .append("circle")
+            .attr("cx", xCircle)
+            .attr("cy", function(d){ return yCircle - size(d) } )
+            .attr("r", function(d){ return size(d) })
+            .style("fill", "none")
+            .attr("stroke", "black")
+        svg
+          .selectAll("legend")
+          .data(valuesToShow)
+          .enter()
+          .append("line")
+            .attr('x1', function(d){ return xCircle + size(d) } )
+            .attr('x2', xLabel)
+            .attr('y1', function(d){ return yCircle - size(d) } )
+            .attr('y2', function(d){ return yCircle - size(d) } )
+            .attr('stroke', 'black')
+            .style('stroke-dasharray', ('2,2'))
+
+        svg
+          .selectAll("legend")
+          .data(valuesToShow)
+          .enter()
+          .append("text")
+            .attr('x', xLabel)
+            .attr('y', function(d){ return yCircle - size(d) } )
+            .text( function(d){ return d } )
+            .style("font-size", 10)
+            .attr('alignment-baseline', 'middle')
 
 
     })

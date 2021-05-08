@@ -46,6 +46,15 @@ function generateMap(selectedAttribute){
       .attr("id", "delay_map")
       .attr('class', 'four-step');
 
+    var size = d3.scaleSqrt()
+      .domain([1, 260000])  // What's in the data, let's say it is percentage
+      .range([1, 50])  // Size in pixel
+
+    var valuesToShow = [1000, 10000, 100000]
+    var xCircle = 550
+    var xLabel = 640
+    var yCircle = 580
+
 
     const projection = d3.geoAlbersUsa()
     .translate([width/2,height/2])
@@ -98,18 +107,18 @@ function generateMap(selectedAttribute){
                 return "translate("+projection([d.long, d.lat])+")";
               }
             })
-            .attr("r", function(d){ return d[selectedAttribute]/5000})
+            .attr("r", function(d){ return size(d[selectedAttribute])})
             .attr("class", "circle")
             .style("fill", colors.get(selectedAttribute))
             .attr("stroke", colors.get(selectedAttribute))
-            .attr("stroke-width", 3)
+            .attr("stroke-width", 2)
             .attr("fill-opacity", .4)
           .on("mouseover", (event, d) => {
             Tooltip.style("opacity", 1)
           })
           .on("mousemove", (event, d) => {
             Tooltip
-            .html(d.airport_name + "<br>" + attributeMap.get(selectedAttribute) + d.arr_flights)
+            .html(d.airport_name + "<br>" + attributeMap.get(selectedAttribute) + Math.round(d[selectedAttribute]))
               .style("left", (d3.pointer(event, g.node())[0]+10) + "px")
               .style("top", (d3.pointer(event, g.node())[1]) + "px")
           })
@@ -117,5 +126,38 @@ function generateMap(selectedAttribute){
             Tooltip.style("opacity", 0)
           })
         });
+
+        svg
+          .selectAll("legend")
+          .data(valuesToShow)
+          .enter()
+          .append("circle")
+            .attr("cx", xCircle)
+            .attr("cy", function(d){ return yCircle - size(d) } )
+            .attr("r", function(d){ return size(d) })
+            .style("fill", "none")
+            .attr("stroke", "black")
+        svg
+          .selectAll("legend")
+          .data(valuesToShow)
+          .enter()
+          .append("line")
+            .attr('x1', function(d){ return xCircle + size(d) } )
+            .attr('x2', xLabel)
+            .attr('y1', function(d){ return yCircle - size(d) } )
+            .attr('y2', function(d){ return yCircle - size(d) } )
+            .attr('stroke', 'black')
+            .style('stroke-dasharray', ('2,2'))
+
+        svg
+          .selectAll("legend")
+          .data(valuesToShow)
+          .enter()
+          .append("text")
+            .attr('x', xLabel)
+            .attr('y', function(d){ return yCircle - size(d) } )
+            .text( function(d){ return d } )
+            .style("font-size", 10)
+            .attr('alignment-baseline', 'middle')
     })
   }

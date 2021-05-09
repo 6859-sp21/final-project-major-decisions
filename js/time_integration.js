@@ -199,6 +199,9 @@ function generateTimeChart(data) {
     .selectAll("contextLayers")
     .data(stackedData)
     .join("path")
+    .attr("class", function (d) {
+        return "contextLayers " + d.key;
+    })
     .attr("d", areaContext)
     .attr("fill", "#B2C8EE")
 
@@ -360,6 +363,20 @@ function generateTimeChart(data) {
           .y0((d) => y(d[0]))
           .y1((d) => y(d[1]))
       )
+
+    svg.selectAll(".contextLayers").remove();
+    context
+      .selectAll("contextLayers")
+      .data(filteredStack)
+      .join("path")
+      .attr("class", function(d) {return "contextLayers " + d.key;})
+      .attr("d", 
+        d3.area()
+        .x((d) => x(d.data.date))
+        .y0((d) => yContext(d[0]))
+        .y1((d) => yContext(d[1])))
+      .attr("fill", "#B2C8EE")
+
 
     // change data for hover line with tooltip
     eventsRect

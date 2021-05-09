@@ -64,6 +64,9 @@ function generateMap(selectedAttribute){
   
     const airports = d3v4.csv("https://raw.githubusercontent.com/6859-sp21/final-project-major-decisions/main/data/airlines_agg.csv", function(data_airports) {
     // Load external data and boot
+    const sortedData = data_airports.sort(function(x, y){
+      return d3.descending(+x[selectedAttribute], +y[selectedAttribute]);
+    })
     d3v4.json("https://raw.githubusercontent.com/6859-sp21/final-project-major-decisions/main/data/us.json", function(data){
   
         // Draw the map
@@ -96,7 +99,7 @@ function generateMap(selectedAttribute){
         // Add circles:
         var circles= svg
           .selectAll("myCircles")
-          .data(data_airports)
+          .data(sortedData)
           .enter()
           .append("circle")
             .attr("transform", function(d) {

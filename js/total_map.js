@@ -36,6 +36,10 @@ function generateMapTotal(){
     var path = d3.geoPath().projection(projection);
 
     const airports = d3v4.csv("https://raw.githubusercontent.com/6859-sp21/final-project-major-decisions/main/data/airlines_agg.csv", function(data_airports) {
+    const sortedData = data_airports.sort(function(x, y){
+      return d3.descending(+x.arr_flights, +y.arr_flights);
+    })
+    
     // Load external data and boot
     d3v4.json("https://raw.githubusercontent.com/6859-sp21/final-project-major-decisions/main/data/us.json", function(data){
   
@@ -71,7 +75,7 @@ function generateMapTotal(){
         // Add circles:
         var circles= svg
           .selectAll("myCircles")
-          .data(data_airports)
+          .data(sortedData)
           .enter()
           .append("circle")
             .attr("transform", function(d) {

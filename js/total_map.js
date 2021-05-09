@@ -3,14 +3,14 @@ function generateMapTotal(){
     const width = 960
     const height = 650
 
-    const territoryPos = new Map(); // a map keeping track if a genre is selected 
-    territoryPos.set('BQN', 'translate(200 560)');
-    territoryPos.set('GUM', 'translate(210 560)')
-    territoryPos.set('PPG', 'translate(220 560)');    
-    territoryPos.set('PSE', 'translate(230 560)')
-    territoryPos.set('SJU', 'translate(240 560)')
-    territoryPos.set('STT', 'translate(250 560)') 
-    territoryPos.set('STX', 'translate(260 560)') 
+    const territoryPos = new Map(); // a map keeping track if a territory is selected 
+    territoryPos.set('BQN', 200);
+    territoryPos.set('GUM', 210)
+    territoryPos.set('PPG', 220);    
+    territoryPos.set('PSE', 230)
+    territoryPos.set('SJU', 240)
+    territoryPos.set('STT', 250) 
+    territoryPos.set('STX', 260) 
 
     // The svg
     const svg = d3.select("#vis")
@@ -78,12 +78,20 @@ function generateMapTotal(){
           .data(sortedData)
           .enter()
           .append("circle")
-            .attr("transform", function(d) {
+            .attr("cx", function(d) {
               if (projection([d.long, d.lat])==null){
                 return territoryPos.get(d.airport);
               }
               else {
-                return "translate("+projection([d.long, d.lat])+")";
+                return projection([d.long, d.lat])[0];
+              }
+            })
+            .attr("cy", function(d) {
+              if (projection([d.long, d.lat])==null){
+                return 560;
+              }
+              else {
+                return projection([d.long, d.lat])[1];
               }
             })
             .attr("r", function(d){ return size(d['arr_flights'])})
@@ -105,7 +113,7 @@ function generateMapTotal(){
             Tooltip.style("opacity", 0)
           })
         });
-
+      
         svg
           .selectAll("legend")
           .data(valuesToShow)
@@ -138,6 +146,25 @@ function generateMapTotal(){
             .text( function(d){ return d+" flights" } )
             .style("font-size", 10)
             .attr('alignment-baseline', 'middle')
+
+        var zoom = d3.zoom()
+        .scaleExtent([1, 8])
+        .on('zoom', function(event) {
+            svg.selectAll('path')
+            .attr('transform', event.transform);
+            svg.selectAll('circle')
+            .attr('transform', event.transform);
+            svg.selectAll('line')
+            .attr('transform', event.transform);
+            svg.selectAll('text')
+            .attr('transform', event.transform);
+            svg.selectAll('rect')
+            .attr('transform', event.transform);
+            svg.selectAll('div')
+            .attr('transform', event.transform);
+        });
+
+        svg.call(zoom);
 
 
     })

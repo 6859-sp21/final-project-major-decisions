@@ -16,7 +16,7 @@ territoryPos.set('STT', 'translate(250 560)')
 territoryPos.set('STX', 'translate(260 560)') 
 
 const colors = new Map(); // a map keeping track if a genre is selected 
-colors.set('arr_del15', '#ffd92f');
+colors.set('arr_del15', '#ebc334');
 colors.set('carrier_ct', '#66c2a5')
 colors.set(' weather_ct', '#fc8d62');    
 colors.set('nas_ct', '#8da0cb')
@@ -52,7 +52,7 @@ function generateMap(selectedAttribute){
 
     var valuesToShow = [1000, 10000, 100000]
     var xCircle = 550
-    var xLabel = 640
+    var xLabel = 600
     var yCircle = 580
 
 
@@ -142,10 +142,10 @@ function generateMap(selectedAttribute){
           .data(valuesToShow)
           .enter()
           .append("line")
-            .attr('x1', function(d){ return xCircle + size(d) } )
+            .attr('x1', function(d){ return xCircle } )
             .attr('x2', xLabel)
-            .attr('y1', function(d){ return yCircle - size(d) } )
-            .attr('y2', function(d){ return yCircle - size(d) } )
+            .attr('y1', function(d){ return yCircle - 2*size(d) } )
+            .attr('y2', function(d){ return yCircle - 2*size(d) } )
             .attr('stroke', 'black')
             .style('stroke-dasharray', ('2,2'))
 
@@ -155,8 +155,8 @@ function generateMap(selectedAttribute){
           .enter()
           .append("text")
             .attr('x', xLabel)
-            .attr('y', function(d){ return yCircle - size(d) } )
-            .text( function(d){ return d } )
+            .attr('y', function(d){ return yCircle - 2*size(d) } )
+            .text( function(d){ return d+" flights" } )
             .style("font-size", 10)
             .attr('alignment-baseline', 'middle')
     })

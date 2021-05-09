@@ -26,7 +26,7 @@ function generateMapTotal(){
 
     var valuesToShow = [10000, 100000, 1000000]
     var xCircle = 550
-    var xLabel = 640
+    var xLabel = 600
     var yCircle = 580
 
     const projection = d3.geoAlbersUsa()
@@ -117,10 +117,10 @@ function generateMapTotal(){
           .data(valuesToShow)
           .enter()
           .append("line")
-            .attr('x1', function(d){ return xCircle + size(d) } )
+            .attr('x1', function(d){ return xCircle } )
             .attr('x2', xLabel)
-            .attr('y1', function(d){ return yCircle - size(d) } )
-            .attr('y2', function(d){ return yCircle - size(d) } )
+            .attr('y1', function(d){ return yCircle - 2*size(d) } )
+            .attr('y2', function(d){ return yCircle - 2*size(d) } )
             .attr('stroke', 'black')
             .style('stroke-dasharray', ('2,2'))
 
@@ -130,8 +130,8 @@ function generateMapTotal(){
           .enter()
           .append("text")
             .attr('x', xLabel)
-            .attr('y', function(d){ return yCircle - size(d) } )
-            .text( function(d){ return d } )
+            .attr('y', function(d){ return yCircle - 2*size(d) } )
+            .text( function(d){ return d+" flights" } )
             .style("font-size", 10)
             .attr('alignment-baseline', 'middle')
 

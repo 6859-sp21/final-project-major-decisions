@@ -56,7 +56,7 @@ div.tooltip {
 }
 
 .button {
-    background-color: #ffd92f; /* Green */
+    background-color: #ebc334; /* Green */
     border: none;
     color: white;
     transition-duration: 0.4s;
@@ -66,14 +66,14 @@ div.tooltip {
     display: inline-block;
     font-size: 14px;
     display: block;
-    border: 2px solid #ffd92f;
+    border: 2px solid #ebc334;
     margin-bottom:5px;
   }
 
 .button:hover {
     background-color: white;
-    color: #ffd92f;
-    border: 2px solid #ffd92f;
+    color: #ebc334;
+    border: 2px solid #ebc334;
   }
 
 

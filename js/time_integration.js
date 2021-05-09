@@ -234,15 +234,19 @@ function generateTimeChart(data) {
       if (!idleTimeout) return (idleTimeout = setTimeout(idled, 350));
       x.domain([0, 0]);
     } else {
-      x.domain([x.invert(s[0]), x.invert(s[1])]);
-      svg.select(".brush").call(brush.move, null);
-    }
+      let newX0 = xContext(x.invert(s[0])),
+          newX1 = xContext(x.invert(s[1]));
 
-    xAxisGroup.call(xAxis.scale(x));
-    svg.selectAll(".delayLayers").transition().duration(1000).attr("d", area);
-    svg.selectAll(".contextRect").transition().duration(1000)
-      .attr("x", s[0])
-      .attr("width", s[1] - s[0]);
+      x.domain([x.invert(s[0]), x.invert(s[1])]);
+
+      svg.select(".brush").call(brush.move, null);
+
+      xAxisGroup.call(xAxis.scale(x));
+      svg.selectAll(".delayLayers").transition().duration(1000).attr("d", area);
+      svg.selectAll(".contextRect").transition().duration(1000)
+        .attr("x", newX0)
+        .attr("width", newX1 - newX0);
+    }
   }
 
   svg.on("dblclick", function () {

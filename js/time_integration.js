@@ -347,6 +347,9 @@ function generateTimeChart(data) {
     let filteredStack = stackGen(filteredData);
     svg.selectAll(".delayLayers").remove();
 
+    x.domain(d3.extent(data, (d) => d.date)).nice();
+    xAxisGroup.call(xAxis);
+
     clipped
       .selectAll("layers")
       .data(filteredStack)
@@ -377,6 +380,10 @@ function generateTimeChart(data) {
         .y1((d) => yContext(d[1])))
       .attr("fill", "#B2C8EE")
 
+    svg.select(".contextRect")
+      .attr("x", 0)
+      .attr("width", width)
+      .raise();
 
     // change data for hover line with tooltip
     eventsRect

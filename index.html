@@ -38,16 +38,19 @@
         Where are airports around the United States and how many arrivals has each had since 2016?
       </section>
       <section class="step">
-        What about delays? And what's causing them around the country? Click on a cause to explore!
+        What's slowing down flights around the country? 
+      </section>
+      <section class="step">
+        And how are these delays distributed around different airports? Click on a cause to explore!
         <br>
         <br>
         <div class="buttonContainer">
           <button class="button" type="button" id="arr_del15_selector" onclick="choose('arr_del15')">Total Delayed</button>
-          <button class="button" type="button" id="carrier_ct_selector" onclick="choose('carrier_ct')">Air Carrier</button>
-          <button class="button" type="button" id="weather_ct_selector" onclick="choose(' weather_ct')">Extreme Weather</button>
-          <button class="button" type="button" id="nas_ct_selector" onclick="choose('nas_ct')">National Aviation System (NAS)</button>
-          <button class="button" type="button" id="security_ct_selector" onclick="choose('security_ct')">Security</button>
-          <button class="button" type="button" id="late_aircraft_ct_selector" onclick="choose('late_aircraft_ct')">Late-arriving aircraft</button>
+          <button class="button1" type="button" id="carrier_ct_selector" onclick="choose('carrier_ct')">Air Carrier</button>
+          <button class="button2" type="button" id="weather_ct_selector" onclick="choose(' weather_ct')">Extreme Weather</button>
+          <button class="button3" type="button" id="nas_ct_selector" onclick="choose('nas_ct')">National Aviation System (NAS)</button>
+          <button class="button4" type="button" id="security_ct_selector" onclick="choose('security_ct')">Security</button>
+          <button class="button5" type="button" id="late_aircraft_ct_selector" onclick="choose('late_aircraft_ct')">Late-arriving aircraft</button>
         </div>
         <div id="delayDefinition">
         </div>
@@ -82,6 +85,7 @@
   <script src="https://d3js.org/topojson.v2.min.js"></script>
   <script src="js/total_map.js"></script>
   <script src="js/map.js"></script>
+  <script src="js/delay_donut.js"></script>
   <script src="js/time_integration.js"></script>
   </body>
 </html>

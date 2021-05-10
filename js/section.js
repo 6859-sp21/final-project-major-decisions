@@ -85,8 +85,9 @@
       activateFunctions[1] = showDataIntro;
       activateFunctions[2] = showDynamicBarChart;
       activateFunctions[3] = showMapOne;
-      activateFunctions[4] = showMapTwo;
-      activateFunctions[5] = showTimeChart;
+      activateFunctions[4] = showDonut;
+      activateFunctions[5] = showMapTwo;
+      activateFunctions[6] = showTimeChart;
 
 
       
@@ -177,8 +178,7 @@
 
        // STEP 3
     function showMapOne() {
-      d3.select("#delay_map").remove();
-      d3.select("#delay_tooltip").remove();
+      d3.select("#donut-map").remove();
       d3.select('.dynamic-bar').remove();
       generateMapTotal()
 
@@ -192,23 +192,48 @@
       .attr('opacity', 1)
       .attr('display', 'block');
 
-      d3.select('.four-step')
+      d3.select('.donut-step')
       .transition()
       .duration(0)
       .attr('opacity', 0)
       .attr('display', 'none');
     }
 
+    // STEP 3.5
+    function showDonut() {
+
+      d3.select("#total_map").remove();
+      d3.select("#total_tooltip").remove();
+      d3.select("#delay_map").remove();
+      d3.select("#delay_tooltip").remove();
+
+      generateDonut()
+
+      d3.select('.three-step')
+      .transition()
+      .duration(0)
+      .attr('opacity', 0);
+
+      d3.select('.donut-step')
+      .transition()
+      .duration(transitionTime)
+      .attr('opacity', 1);
+
+      d3.select('.four-step')
+      .transition()
+      .duration(0)
+      .attr('opacity', 0);
+    }
+
     // STEP 4
     function showMapTwo() {
       generateMap('arr_del15')
 
-      d3.select("#total_map").remove();
-      d3.select("#total_tooltip").remove();
+      d3.select("#donut-map").remove();
       d3.select("#time_vis").remove();
       document.getElementById("selectButton").innerHTML = null;
 
-      d3.select('.three-step')
+      d3.select('.donut-step')
       .transition()
       .duration(0)
       .attr('opacity', 0);

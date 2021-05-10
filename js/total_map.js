@@ -3,14 +3,14 @@ function generateMapTotal(){
     const width = 960
     const height = 650
 
-    const territoryPos = new Map(); // a map keeping track if a genre is selected 
-    territoryPos.set('BQN', 'translate(200 560)');
-    territoryPos.set('GUM', 'translate(210 560)')
-    territoryPos.set('PPG', 'translate(220 560)');    
-    territoryPos.set('PSE', 'translate(230 560)')
-    territoryPos.set('SJU', 'translate(240 560)')
-    territoryPos.set('STT', 'translate(250 560)') 
-    territoryPos.set('STX', 'translate(260 560)') 
+    const territoryPos = new Map(); // a map keeping track if a territory is selected 
+    territoryPos.set('BQN', 200);
+    territoryPos.set('GUM', 210)
+    territoryPos.set('PPG', 220);    
+    territoryPos.set('PSE', 230)
+    territoryPos.set('SJU', 240)
+    territoryPos.set('STT', 250) 
+    territoryPos.set('STX', 260) 
 
     // The svg
     const svg = d3.select("#vis")
@@ -20,6 +20,15 @@ function generateMapTotal(){
       .attr("id", "total_map")
       .attr('class', 'three-step');
 
+    var size = d3.scaleSqrt()
+      .domain([1, 2000000])  // What's in the data, let's say it is percentage
+      .range([1, 50])  // Size in pixel
+
+    var valuesToShow = [10000, 100000, 1000000]
+    var xCircle = 550
+    var xLabel = 600
+    var yCircle = 580
+
     const projection = d3.geoAlbersUsa()
     .translate([width/2,height/2])
     .scale(1000);
@@ -27,6 +36,10 @@ function generateMapTotal(){
     var path = d3.geoPath().projection(projection);
 
     const airports = d3v4.csv("https://raw.githubusercontent.com/6859-sp21/final-project-major-decisions/main/data/airlines_agg.csv", function(data_airports) {
+    const sortedData = data_airports.sort(function(x, y){
+      return d3.descending(+x.arr_flights, +y.arr_flights);
+    })
+    
     // Load external data and boot
     d3v4.json("https://raw.githubusercontent.com/6859-sp21/final-project-major-decisions/main/data/us.json", function(data){
   
@@ -62,22 +75,30 @@ function generateMapTotal(){
         // Add circles:
         var circles= svg
           .selectAll("myCircles")
-          .data(data_airports)
+          .data(sortedData)
           .enter()
           .append("circle")
-            .attr("transform", function(d) {
+            .attr("cx", function(d) {
               if (projection([d.long, d.lat])==null){
                 return territoryPos.get(d.airport);
               }
               else {
-                return "translate("+projection([d.long, d.lat])+")";
+                return projection([d.long, d.lat])[0];
               }
             })
-            .attr("r", function(d){ return d['arr_flights']/25000})
+            .attr("cy", function(d) {
+              if (projection([d.long, d.lat])==null){
+                return 560;
+              }
+              else {
+                return projection([d.long, d.lat])[1];
+              }
+            })
+            .attr("r", function(d){ return size(d['arr_flights'])})
             .attr("class", "circle")
-            .style("fill", "#69b3a2")
-            .attr("stroke", "#69b3a2")
-            .attr("stroke-width", 3)
+            .style("fill", "#e5c494")
+            .attr("stroke", "#e5c494")
+            .attr("stroke-width", 2)
             .attr("fill-opacity", .4)
           .on("mouseover", (event, d) => {
             Tooltip.style("opacity", 1)
@@ -92,6 +113,58 @@ function generateMapTotal(){
             Tooltip.style("opacity", 0)
           })
         });
+      
+        svg
+          .selectAll("legend")
+          .data(valuesToShow)
+          .enter()
+          .append("circle")
+            .attr("cx", xCircle)
+            .attr("cy", function(d){ return yCircle - size(d) } )
+            .attr("r", function(d){ return size(d) })
+            .style("fill", "none")
+            .attr("stroke", "black")
+        svg
+          .selectAll("legend")
+          .data(valuesToShow)
+          .enter()
+          .append("line")
+            .attr('x1', function(d){ return xCircle } )
+            .attr('x2', xLabel)
+            .attr('y1', function(d){ return yCircle - 2*size(d) } )
+            .attr('y2', function(d){ return yCircle - 2*size(d) } )
+            .attr('stroke', 'black')
+            .style('stroke-dasharray', ('2,2'))
+
+        svg
+          .selectAll("legend")
+          .data(valuesToShow)
+          .enter()
+          .append("text")
+            .attr('x', xLabel)
+            .attr('y', function(d){ return yCircle - 2*size(d) } )
+            .text( function(d){ return d+" flights" } )
+            .style("font-size", 10)
+            .attr('alignment-baseline', 'middle')
+
+        var zoom = d3.zoom()
+        .scaleExtent([1, 8])
+        .on('zoom', function(event) {
+            svg.selectAll('path')
+            .attr('transform', event.transform);
+            svg.selectAll('circle')
+            .attr('transform', event.transform);
+            svg.selectAll('line')
+            .attr('transform', event.transform);
+            svg.selectAll('text')
+            .attr('transform', event.transform);
+            svg.selectAll('rect')
+            .attr('transform', event.transform);
+            svg.selectAll('div')
+            .attr('transform', event.transform);
+        });
+
+        svg.call(zoom);
 
 
     })

@@ -56,9 +56,9 @@ function generateTimeChart(data) {
 
     let margin  = {top: 20, right: 30, bottom: 30, left: 60},
       width = fullWidth - margin.left - margin.right,
-      height  = fullHeight- margin.top - margin.bottom;
+      height  = fullHeight - margin.top - margin.bottom;
 
-  let focusHeight = 100;
+  let previewHeight = 150;
 
   // append the svg object to the body of the page
   const svg = d3.select("#vis")
@@ -66,8 +66,9 @@ function generateTimeChart(data) {
     .attr("class", "five-step")
     .attr("id", "time_vis")
     // .attr("width", width + margin.left + margin.right)
-    .attr("width", width + 4*margin.left)
-    .attr("height", height + margin.top + margin.bottom)
+    .attr("width", width + 5*margin.left) // 800
+    .attr("height", height + 2*previewHeight) //margin.top + margin.bottom) // 500
+    .attr("style","outline: thin solid red;") // use this to see full size of svg
     .append("g")
       .attr(
         "transform",
@@ -77,6 +78,18 @@ function generateTimeChart(data) {
   // document.getElementById("vis").appendChild(svg.node());
   // for some reason, using this doesn't actually add it to the DOM?
   // also, lining up axes and areas keeps going outside bounds without append("g") and translate
+
+  // ----- DEFINE STACKED DATA ----- //
+  let delayTypes = [
+    "carrier_ct",
+    "weather_ct",
+    "nas_ct",
+    "security_ct",
+    "late_aircraft_ct",
+  ];
+
+  let stackGen = d3.stack().keys(delayTypes);
+  let stackedData = stackGen(aggData);
 
 
   // ----- AXES SCALES AND LABELS ----- //
@@ -128,30 +141,8 @@ function generateTimeChart(data) {
     .attr("transform", "rotate(-90)")
     .attr("text-anchor", "start")
 
-  
-  // ----- CONTEXT VIEW AXES AND SCALES ----- //
-  // let xContext = d3
-  //   .scaleTime()
-  //   .domain(d3.extent(sortedData, (d) => d.date))
-  //   .range([0, width])
-  //   .nice();
-
-  // let xContextAxis = d3.axisBottom(x);
-  // let xContextAxisGroup = svg
-  //   .append("g")
-  //   .call(xContextAxis)
-  //   .attr("transform", `translate(0,${height})`);
-
 
   // ----- COLOR ENCODING ----- //
-  let delayTypes = [
-    "carrier_ct",
-    "weather_ct",
-    "nas_ct",
-    "security_ct",
-    "late_aircraft_ct",
-  ];
-
   let color = d3.scaleOrdinal().domain(delayTypes).range(d3.schemeSet2);
 
 
@@ -169,12 +160,61 @@ function generateTimeChart(data) {
     .append('text')
       .attr("class", "hoverInfo")
       .attr("class", "hoverValue")
-      // .attr("text-anchor", "left")
-      // .attr("alignment-baseline", "middle")
       .style("opacity", 0)
 
   // https://stackoverflow.com/questions/38670322/d3-brushing-and-mouse-move-coexist 
   
+  
+  // ----- CONTEXT VIEW AXES AND SCALES ----- //
+  let xContext = d3
+    .scaleTime()
+    .domain(d3.extent(sortedData, (d) => d.date))
+    .range([0, width])
+    .nice();
+
+  let xContextAxis = d3.axisBottom(x);
+  let xContextAxisGroup = svg
+    .append("g")
+    .call(xContextAxis)
+    .attr("transform", `translate(0,${height + previewHeight + margin.bottom})`);
+
+  let yContext = d3
+    .scaleLinear()
+    .range([previewHeight, 0])
+    .domain(y.domain())
+
+
+  // ----- ADD CONTEXT COMPONENTS ----- //
+  let context = svg.append("g")
+    .attr("class", "context")
+    .attr("transform", `translate(0,${height + margin.bottom})`)
+
+  let areaContext = d3
+    .area()
+    .x((d) => x(d.data.date))
+    .y0((d) => yContext(d[0]))
+    .y1((d) => yContext(d[1]));
+
+  let contextView = context
+    .selectAll("contextLayers")
+    .data(stackedData)
+    .join("path")
+    .attr("class", function (d) {
+        return "contextLayers " + d.key;
+    })
+    .attr("d", areaContext)
+    .attr("fill", "#B2C8EE")
+
+  let contextRect = context.append('rect')
+    .attr("class", "contextRect")
+    .attr("x", 0)
+    .attr("y", 0)
+    .attr("width", width)
+    .attr("height", previewHeight)
+    .attr("stroke", "black")
+    .attr("fill", "#d3d3d3")
+    .attr("opacity", 0.5)
+
 
   // ----- BRUSH TO ZOOM ----- //
   let brush = d3
@@ -197,25 +237,32 @@ function generateTimeChart(data) {
       if (!idleTimeout) return (idleTimeout = setTimeout(idled, 350));
       x.domain([0, 0]);
     } else {
-      x.domain([x.invert(s[0]), x.invert(s[1])]);
-      svg.select(".brush").call(brush.move, null);
-    }
+      let newX0 = xContext(x.invert(s[0])),
+          newX1 = xContext(x.invert(s[1]));
 
-    xAxisGroup.call(xAxis.scale(x));
-    svg.selectAll(".delayLayers").transition().duration(1000).attr("d", area);
+      x.domain([x.invert(s[0]), x.invert(s[1])]);
+
+      svg.select(".brush").call(brush.move, null);
+
+      xAxisGroup.call(xAxis.scale(x));
+      svg.selectAll(".delayLayers").transition().duration(1000).attr("d", area);
+      svg.selectAll(".contextRect").transition().duration(1000)
+        .attr("x", newX0)
+        .attr("width", newX1 - newX0);
+    }
   }
 
   svg.on("dblclick", function () {
     x.domain(d3.extent(data, (d) => d.date)).nice();
     xAxisGroup.call(xAxis);
     svg.selectAll(".delayLayers").transition().duration(1000).attr("d", area);
+    svg.selectAll(".contextRect").transition().duration(1000)
+      .attr("x", 0)
+      .attr("width", width);
   });
 
 
   // ----- DRAW AREAS ----- //
-  let stackGen = d3.stack().keys(delayTypes);
-  let stackedData = stackGen(aggData);
-
   // set up clip area so visualization doesn't go past axes
   let clip = svg
     .append("defs")
@@ -249,6 +296,9 @@ function generateTimeChart(data) {
     })
     .attr("fill", (d) => color(d.key));
 
+
+  // ----- ADD HOVER LINE ----- //
+
   let bisect = d3.bisector(d => d.date).right;
 
   eventsRect
@@ -277,12 +327,6 @@ function generateTimeChart(data) {
       svg.select(".hoverValue").style("opacity", 0);
     })
 
-    
-  // ----- ADD CONTEXT COMPONENTS ----- //
-  // let context = svg.append("g")
-  //   .attr("class", "context")
-    // .attr("transform", "translate(" + margin_context.left + "," + margin_context.top + ")");
-
 
   // ----- ADD TITLE ----- //
   let chartTitle = svg
@@ -303,6 +347,9 @@ function generateTimeChart(data) {
     let filteredStack = stackGen(filteredData);
     svg.selectAll(".delayLayers").remove();
 
+    x.domain(d3.extent(data, (d) => d.date)).nice();
+    xAxisGroup.call(xAxis);
+
     clipped
       .selectAll("layers")
       .data(filteredStack)
@@ -320,6 +367,25 @@ function generateTimeChart(data) {
           .y1((d) => y(d[1]))
       )
 
+    svg.selectAll(".contextLayers").remove();
+    context
+      .selectAll("contextLayers")
+      .data(filteredStack)
+      .join("path")
+      .attr("class", function(d) {return "contextLayers " + d.key;})
+      .attr("d", 
+        d3.area()
+        .x((d) => x(d.data.date))
+        .y0((d) => yContext(d[0]))
+        .y1((d) => yContext(d[1])))
+      .attr("fill", "#B2C8EE")
+
+    svg.select(".contextRect")
+      .attr("x", 0)
+      .attr("width", width)
+      .raise();
+
+    // change data for hover line with tooltip
     eventsRect
       .on("mousemove", (event, d) => {
         let x0 = x.invert(d3.pointer(event)[0]);

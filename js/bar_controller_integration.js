@@ -1,32 +1,4 @@
 
-//d3.csv('https://raw.githubusercontent.com/6859-sp21/final-project-major-decisions/main/data/airlines.csv').then((data)=>{create_airline_rank_bar(data)});
-
-function produceCarrierAnnualMapPercentDelayed(data) {
-    const carrierMap= generateMap(d3.groups(data, d=>d.carrier_name));
-    return carrierMap;
-    // from an array of objects like this: 0: {year: "2017", month: "8", carrier: "B6", carrier_name: "JetBlue Airways", airport: "PSE", …}
-    // To [delay_flights, total_flights]
-    function sumFlightsFromArrayOfObject(entryList) {
-        let delay_flights = 0;
-        let total_flights = 0;
-        for (const entry of entryList) {
-            
-            delay_flights = delay_flights + nonNaNParseFloat(entry.arr_del15);
-            total_flights = total_flights + nonNaNParseFloat(entry.arr_flights);
-        }
-        const result = (delay_flights/total_flights)*100;
-        return result;
-    }
-
-    function generateMap(carrierList) {
-        let generateMap = new Map();
-        for (const [carrier, carrier_data] of carrierList) {
-            generateMap.set(carrier, sumFlightsFromArrayOfObject(carrier_data));
-        }
-        return generateMap;
-    }
-}
-
 function produceCarrierAnnualMapAveMin(data) {
     const carrierMap= generateMap(d3.groups(data, d=>d.carrier_name));
     return carrierMap;
@@ -52,7 +24,7 @@ function produceCarrierAnnualMapAveMin(data) {
     }
 }
 
-async function createCarrierRankBarAveMin(data) {
+async function createCarrierRankBarAveMin(data, isAutoPlay = -1) {
     // ========================== data processing ================================
     const yearMap = d3.groups(data, d=>d.year).map(([year, data])=>[createDate(year), data]);
     const datevalues = yearMap.map(([year, data]) =>
@@ -84,11 +56,10 @@ async function createCarrierRankBarAveMin(data) {
         }
     }
 
-    keyframes.push([new Date(kb), rank(name => b.get(name) || 0)]);
+    keyframes.push([new Date(kb), rank(name => b.get(name) || 0)]); // one frame per year
     const nameframes = d3.groups(keyframes.flatMap(([, data]) => data), d => d.name)
     const prev = new Map(nameframes.flatMap(([, data]) => d3.pairs(data, (a, b) => [b, a])));
     const next = new Map(nameframes.flatMap(([, data]) => d3.pairs(data)));
-    console.log(nameframes);
     // ============================== drawing functions ========================
     function bars(svg) {
         let bar = svg.append("g")
@@ -199,7 +170,7 @@ async function createCarrierRankBarAveMin(data) {
     .padding(0.1) 
 
     const svg = d3.create("svg")
-    .attr("viewBox", [0, 0, width, height])
+    .attr("viewBox", [0, 0, width, height + 200]) // changes here 
     .attr("class", "dynamic-bar")
     .attr('display', 'block')
     .attr('opacity', 1);
@@ -219,44 +190,82 @@ async function createCarrierRankBarAveMin(data) {
     const updateAxis = axis(svg);
     const updateTicker = ticker(svg);
 
+    if (isAutoPlay == -1) {
+        for (const keyframe of keyframes) {
+            const transition = svg.transition()
+                .duration(duration)
+                .ease(d3.easeLinear);
+        
+            // // Extract the top bar’s value.
+        
+            updateBars(keyframe, transition);
+            updateLabels(keyframe, transition);
+            updateAxis(keyframe, transition);
+            updateTicker(keyframe, transition);
 
-    for (const keyframe of keyframes) {
+            await transition.end();
+            await sleep(2000);
+        }
+    } else {
+        const keyframe = keyframes[isAutoPlay - 2016]
         const transition = svg.transition()
-            .duration(duration)
-            .ease(d3.easeLinear);
-    
-        // // Extract the top bar’s value.
-      
+                .duration(0);            
         updateBars(keyframe, transition);
         updateLabels(keyframe, transition);
         updateAxis(keyframe, transition);
         updateTicker(keyframe, transition);
-
-        await transition.end();
-        await sleep(2000);
-      }
+    }
 }
 
 // arrays of [time, datamap]
 // data map is carrier = > desired data
-function datedDataMapPercentDelayed(data){
+function datedDataMapPercentDelayed(data, isCustomizable, selectedCarriers){
     const yearMap = d3.groups(data, d=>d.year).map(([year, data])=>[createDate(year), data]);
     const datevalues = yearMap.map(([year, data]) =>
-     [year,produceCarrierAnnualMapPercentDelayed(data)]).sort(
+     [year,produceCarrierAnnualMapPercentDelayed(data, isCustomizable, selectedCarriers)]).sort(
          (a,b) => {return a[0].getFullYear()-b[0].getFullYear()});
     return datevalues
+
+    function produceCarrierAnnualMapPercentDelayed(data, isCustomizable, selectedCarriers) {
+        const carrierMap= generateMap(d3.groups(data, d=>d.carrier_name));
+        return carrierMap;
+        // from an array of objects like this: 0: {year: "2017", month: "8", carrier: "B6", carrier_name: "JetBlue Airways", airport: "PSE", …}
+        // To [delay_flights, total_flights]
+        function sumFlightsFromArrayOfObject(entryList) {
+            let delay_flights = 0;
+            let total_flights = 0;
+            for (const entry of entryList) {
+                
+                delay_flights = delay_flights + nonNaNParseFloat(entry.arr_del15);
+                total_flights = total_flights + nonNaNParseFloat(entry.arr_flights);
+            }
+            const result = (delay_flights/total_flights)*100;
+            return result;
+        }
+    
+        function generateMap(carrierList) {
+            let generateMap = new Map();
+            for (const [carrier, carrier_data] of carrierList) {
+                // only add if it is included in filter or is the default map which should includes everything
+                if (selectedCarriers.includes(carrier) || !isCustomizable){
+                    generateMap.set(carrier, sumFlightsFromArrayOfObject(carrier_data));
+                }
+            }
+            return generateMap;
+        }
+    }
 }
 
-async function createCarrierRankBarPercentDelayed(data) {
-    const datevalues = datedDataMapPercentDelayed(data);
+// add when is something that is unavailable
+async function createCarrierRankBarPercentDelayed(data, isCustomizable=false, selectedCarriers=[], isAutoPlay = true) {
+    const datevalues = datedDataMapPercentDelayed(data, isCustomizable,selectedCarriers);
+    // selectedCarriers = ["JetBlue Airways", "United Air Lines Inc.", "Delta Air Lines Inc.", "Hawaiian Airlines Inc.",
+    // "Spirit Air Lines", "Mesa Airlines Inc."]
+    // isCustomizable = true;
+    // const datevalues = datedDataMapPercentDelayed(data, isCustomizable, selectedCarriers);
     console.log(datevalues);
-    const n = 5;
+    const n = isCustomizable? selectedCarriers.length: 5;// 5 is default value
 
-    // // ===================== Seara's experiment ==============================
-    // const selectedCarriers = ["JetBlue Airways", "United Air Lines Inc.", "Spirit Air Lines"]
-    // const n = selectedCarriers.length;
-
-    // // ===================================================
     const names = new Set(data.map(data => data.carrier_name)) // 20 names in total, some has nun 
     const xAxisMax = 30;
     function rank(value) {
@@ -283,6 +292,7 @@ async function createCarrierRankBarPercentDelayed(data) {
     const nameframes = d3.groups(keyframes.flatMap(([, data]) => data), d => d.name)
     const prev = new Map(nameframes.flatMap(([, data]) => d3.pairs(data, (a, b) => [b, a])));
     const next = new Map(nameframes.flatMap(([, data]) => d3.pairs(data)));
+    console.log(keyframes)
     // ============================== drawing functions ========================
     function bars(svg) {
         let bar = svg.append("g")
@@ -403,7 +413,7 @@ async function createCarrierRankBarPercentDelayed(data) {
     .attr("y", 25)
     .attr("x", width/2)
     .attr("text-anchor", "middle")
-    .text('Top 5 Carriers with highest percentage of delayed flights from 2016 - present')
+    .text('Top '+n+' Carriers with highest percentage of delayed flights from 2016 - present')
     .attr("text-anchor", "middle")
 
     document.getElementById("vis").appendChild(svg.node());
@@ -428,14 +438,6 @@ async function createCarrierRankBarPercentDelayed(data) {
         await sleep(2000);
       }
 }
-
-// async function createAnimatedBarsWithSelectedCarriers(data, selectedCarriers) {
-//     const datevalues = datedDataMapPercentDelayed(data);
-//     const n = selectedCarriers.length 
-//     const xAxis = 30 // needs a way to dynamically select that 5 + the maximum value? 
-
-
-// }
 
 function dateMapper([date, data]){
     const result= [parseInt(date), data];
@@ -483,4 +485,46 @@ function nonNaNParseFloat(numberString){
     } else {
         return result;
     }
+}
+
+function createFinalGraph(data){
+
+}
+
+// This should be 
+function createSlider(){
+    console.log("Calling create ")
+    const dataTime = d3.range(0, 5).map(function(d) {
+        return new Date(2016 + d, 10, 3);
+        });
+    
+    const sliderTime = d3
+        .sliderBottom()
+        .min(d3.min(dataTime))
+        .max(d3.max(dataTime))
+        .step(1000 * 60 * 60 * 24 * 365)
+        .width(400)
+        .tickFormat(d3.timeFormat('%Y'))
+        .tickValues(dataTime)
+        .default(new Date(1998, 10, 3))
+        .on('onchange', val => {
+            console.log("Detected on change!");
+            d3.select('.dynamic-bar').remove();
+        });
+
+    const containerVis = document.getElementById("vis");
+
+    let gTime = containerVis.append('svg')
+        .attr('width', 900).atrr('height', '200')
+        .append('g')
+        .attr('width', 500)
+        .attr('height', 100)
+        .append('g')
+        .attr('transform', 'translate(10,320)');
+
+    gTime.call(sliderTime);
+}
+
+function createStaticBarAveMin(dateData, selectedYear){
+
 }

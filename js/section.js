@@ -157,8 +157,8 @@
       .attr('display', 'none');
 
       d3.select(".three-step").remove();
-      try {await createCarrierRankBarPercentDelayed(data);}
-      //try {await createCarrierRankBarAveMin(data);}
+      //try {await createCarrierRankBarPercentDelayed(data);}
+      try {await createCarrierRankBarAveMin(data);}
       catch(e) {/* we don't plan to do additional promise chaining, swallow the error for now*/}
 
       d3.select('.dynamic-bar')

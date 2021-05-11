@@ -128,7 +128,7 @@
     }
 
     function showDataIntro() {
-      d3.select('.dynamic-bar').remove();
+      d3.selectAll('.dynamic-bar').remove();
 
       d3.select('.vis-title')
       .transition() // this need to be left in as a hack for fast scrolling
@@ -143,7 +143,7 @@
       .attr('opacity', 1)
       .attr('display', 'block');
 
-      d3.select('.dynamic-bar')
+      d3.selectAll('.dynamic-bar')
       .transition() // this need to be left in as a hack for fast scrolling
       .duration(0)
       .attr('opacity', 0)
@@ -152,16 +152,18 @@
   
     async function showDynamicBarChart() {
       d3.select('.data-intro')
-      .transition() // this need to be left in as a hack for fast scrolling
+      .transition() // this need to bcreateCarrierRankBarAveMine left in as a hack for fast scrolling
       .duration(0)
       .attr('opacity', 0)
       .attr('display', 'none');
 
       d3.select(".three-step").remove();
       //try {await createCarrierRankBarPercentDelayed(data);}
-      try {await createCarrierRankBarAveMin(data);}
+      try { await createCarrierRankBarAveMin(data);}
       catch(e) {/* we don't plan to do additional promise chaining, swallow the error for now*/}
 
+      //createFinalGraph(data);
+      // catch (e){}
       d3.select('.dynamic-bar')
       .transition()
       .duration(transitionTime)
@@ -179,7 +181,7 @@
        // STEP 3
     function showMapOne() {
       d3.select("#donut-map").remove();
-      d3.select('.dynamic-bar').remove();
+      d3.selectAll('.dynamic-bar').remove();
       generateMapTotal()
 
       d3.select('.dynamic-bar')

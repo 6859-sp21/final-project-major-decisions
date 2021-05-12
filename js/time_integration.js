@@ -411,11 +411,6 @@ function generateTimeChart(data) {
         .raise();
 
       let datumDelays = new Map();
-      // datumDelays.set("carrier_ct", datum.carrier_ct);
-      // datumDelays.set("weather_ct", datum.weather_ct);
-      // datumDelays.set("nas_ct", datum.nas_ct);
-      // datumDelays.set("security_ct", datum.security_ct);
-      // datumDelays.set("late_aircraft_ct", datum.late_aircraft_ct);
 
       y1 = datum.late_aircraft_ct + datum.security_ct + datum.nas_ct + datum.weather_ct + datum.carrier_ct;
       y2 = datum.security_ct + datum.nas_ct + datum.weather_ct + datum.carrier_ct;
@@ -528,17 +523,17 @@ function generateTimeChart(data) {
 
         let datumDelays = new Map();
 
-        y1 = datum.carrier_ct + datum.weather_ct + datum.nas_ct + datum.security_ct + datum.late_aircraft_ct;
-        y2 = datum.weather_ct + datum.nas_ct + datum.security_ct + datum.late_aircraft_ct;
-        y3 = datum.nas_ct + datum.security_ct + datum.late_aircraft_ct;
-        y4 = datum.security_ct + datum.late_aircraft_ct;
-        y5 = datum.late_aircraft_ct;
-
-        datumDelays.set("carrier_ct", y5);
-        datumDelays.set("weather_ct", y4);
-        datumDelays.set("nas_ct", y3);
-        datumDelays.set("security_ct", y2);
+        y1 = datum.late_aircraft_ct + datum.security_ct + datum.nas_ct + datum.weather_ct + datum.carrier_ct;
+        y2 = datum.security_ct + datum.nas_ct + datum.weather_ct + datum.carrier_ct;
+        y3 = datum.nas_ct + datum.weather_ct + datum.carrier_ct;
+        y4 = datum.weather_ct + datum.carrier_ct;
+        y5 = datum.carrier_ct;
+        
         datumDelays.set("late_aircraft_ct", y1);
+        datumDelays.set("security_ct", y2);
+        datumDelays.set("nas_ct", y3);
+        datumDelays.set("weather_ct", y4);
+        datumDelays.set("carrier_ct", y5);
 
 
         svg.select(".x")

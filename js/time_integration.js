@@ -538,7 +538,6 @@ function generateTimeChart(data) {
             .attr("transform",
               `translate(${x(datum.date)}, ${y(datumDelays.get(delayType))})`)
             .style("opacity",1)
-          console.log(delayType, svg.select(".hoverCircle."+delayType));
         }
     })
     .on("mouseout", (event, d) => {

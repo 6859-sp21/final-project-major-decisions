@@ -58,7 +58,7 @@ function generateTimeChart(data) {
       width = fullWidth - margin.left - margin.right,
       height  = fullHeight - margin.top - margin.bottom;
 
-  let previewHeight = 150;
+  let previewHeight = 125;
 
   // append the svg object to the body of the page
   const svg = d3.select("#vis")
@@ -95,20 +95,27 @@ function generateTimeChart(data) {
   // ----- AXES SCALES AND LABELS ----- //
   let x = d3
     .scaleTime()
-    .domain(d3.extent(sortedData, (d) => d.date))
+    .domain(d3.extent([new Date(2015,12), d3.max(sortedData, d => d.date)]))
     .range([0, width])
-    .nice();
 
   let xAxis = d3.axisBottom(x);
   let xAxisGroup = svg
     .append("g")
     .call(xAxis)
-    .attr("transform", `translate(0,${height-margin.top})`);
+    .attr("transform", `translate(0,${height})`)//-margin.top})`)
+    // .selectAll("text")
+      // .attr("transform", "translate(-10,5)rotate(-30)");
+  
+  xAxisGroup.selectAll(".tick").each(function(d) {
+    if (this.textContent === d3.timeFormat("%B")(d)) {
+      d3.select(this).select("text").text(d3.timeFormat("%b"))
+    }
+  })
 
   let xAxisLabel = svg.append("text")
     .attr("text-anchor", "end")
     .attr("x", width/2 + margin.right)
-    .attr("y", height + margin.top)
+    .attr("y", height + 2*margin.top)
     .text("Date")
 
   let y = d3
@@ -132,7 +139,7 @@ function generateTimeChart(data) {
   let yAxisGroup = svg
     .append("g")
     .call(yAxis)
-    .attr("transform", `translate(0,${-margin.top})`);
+    // .attr("transform", `translate(0,${-margin.top})`);
 
   let yAxisLabel = svg.append("text")
     .attr("x", -height*3/4)
@@ -146,21 +153,6 @@ function generateTimeChart(data) {
   let color = d3.scaleOrdinal().domain(delayTypes).range(d3.schemeSet2);
 
 
-  // ----- DRAW VERTICAL LINE TO SHOW VALUE ON MOUSEOVER ----- //
-  let hoverLine = svg.append("line")
-    .attr("class", "hoverInfo")
-    .attr("class", "x")
-    .attr("y1", 0)
-    .attr("y2", height - margin.top)// - margin.bottom)
-    .style("stroke", "red")
-    .style("stroke-dasharray", "3,3")
-    .style("opacity", 0);
-
-  let hoverValue = svg.append('g')
-    .append('text')
-      .attr("class", "hoverInfo")
-      .attr("class", "hoverValue")
-      .style("opacity", 0)
 
   // https://stackoverflow.com/questions/38670322/d3-brushing-and-mouse-move-coexist 
   
@@ -170,13 +162,12 @@ function generateTimeChart(data) {
     .scaleTime()
     .domain(d3.extent(sortedData, (d) => d.date))
     .range([0, width])
-    .nice();
 
   let xContextAxis = d3.axisBottom(x);
   let xContextAxisGroup = svg
     .append("g")
     .call(xContextAxis)
-    .attr("transform", `translate(0,${height + previewHeight + margin.bottom})`);
+    .attr("transform", `translate(0,${height + previewHeight + 1.5*margin.bottom})`);
 
   let yContext = d3
     .scaleLinear()
@@ -187,7 +178,7 @@ function generateTimeChart(data) {
   // ----- ADD CONTEXT COMPONENTS ----- //
   let context = svg.append("g")
     .attr("class", "context")
-    .attr("transform", `translate(0,${height + margin.bottom})`)
+    .attr("transform", `translate(0,${height + 1.5*margin.bottom})`)
 
   let areaContext = d3
     .area()
@@ -213,7 +204,7 @@ function generateTimeChart(data) {
     .attr("height", previewHeight)
     .attr("stroke", "black")
     .attr("fill", "#d3d3d3")
-    .attr("opacity", 0.5)
+    .attr("opacity", 0.3)
 
 
   // ----- BRUSH TO ZOOM ----- //
@@ -221,7 +212,7 @@ function generateTimeChart(data) {
     .brushX()
     .extent([
       [0, 0],
-      [width - margin.right, height],
+      [width, height],
     ])
     .on("end", brushed);
 
@@ -241,6 +232,7 @@ function generateTimeChart(data) {
           newX1 = xContext(x.invert(s[1]));
 
       x.domain([x.invert(s[0]), x.invert(s[1])]);
+      console.log(x.domain())
 
       svg.select(".brush").call(brush.move, null);
 
@@ -249,11 +241,18 @@ function generateTimeChart(data) {
       svg.selectAll(".contextRect").transition().duration(1000)
         .attr("x", newX0)
         .attr("width", newX1 - newX0);
+
+      // https://stackoverflow.com/questions/47828945/shorten-months-ticks-on-x-axis
+      xAxisGroup.selectAll(".tick").each(function(d) {
+        if (this.textContent === d3.timeFormat("%B")(d)) {
+          d3.select(this).select("text").text(d3.timeFormat("%b"))
+        }
+      })
     }
   }
 
   svg.on("dblclick", function () {
-    x.domain(d3.extent(data, (d) => d.date)).nice();
+    x.domain(d3.extent([new Date(2015,12), d3.max(sortedData, d => d.date)]));
     xAxisGroup.call(xAxis);
     svg.selectAll(".delayLayers").transition().duration(1000).attr("d", area);
     svg.selectAll(".contextRect").transition().duration(1000)
@@ -270,7 +269,7 @@ function generateTimeChart(data) {
     .attr("id", "clip")
     .append("rect")
     .attr("width", width)
-    .attr("height", height-margin.top)
+    .attr("height", height)//-margin.top)
     .attr("x", 0)
     .attr("y", 0);
 
@@ -297,6 +296,58 @@ function generateTimeChart(data) {
     .attr("fill", (d) => color(d.key));
 
 
+  // ----- DRAW VERTICAL LINE TO SHOW VALUE ON MOUSEOVER ----- //
+  let hoverLine = svg.append("line")
+    .attr("class", "hoverInfo")
+    .attr("class", "x")
+    .attr("y1", 0)
+    .attr("y2", height - margin.top)// - margin.bottom)
+    .style("stroke", "red")
+    .style("stroke-dasharray", "3,3")
+    .style("opacity", 0);
+
+  let hoverValue = svg.append('g')
+    .append('text')
+      .attr("class", "hoverInfo")
+      .attr("class", "hoverValue")
+      .style("opacity", 0)
+
+  for (const delayType of delayTypes) {
+    svg.append('g')
+      .append('circle')
+      .attr('class', "hoverInfo")
+      .attr('class', "hoverCircle " + delayType)
+      .attr("fill", "black")
+      // .attr("fill", (d) => color(delayType))
+      .attr('r', 4)
+      .style('opacity', 0);
+
+    svg.append('g')
+      .append('text')
+      .attr('class', "hoverText " + delayType)
+      .attr('x', 9)
+      .attr('dy', '.35em')
+      .attr("y", function (d, i) {
+        return 20 + 25*i;
+      })
+      .style('font-size',15)
+  }
+
+  // let circles = svg
+  //   .selectAll("circles")
+  //   .data(delayTypes)
+  //   .enter()
+  //   .append("circle")
+  //   .attr('class', "hoverInfo")
+  //   .attr('class', d => "hoverCircle " + d)
+  //   .attr("x", 9)//width+margin.left)
+  //   .attr("y", function (d, i) {
+  //     return 20 + 30*i;
+  //   })
+  //   .attr("fill", "black")
+  //   .attr("r", 4)
+    // .style("opacity", 0);
+
   // ----- ADD HOVER LINE ----- //
 
   let bisect = d3.bisector(d => d.date).right;
@@ -317,14 +368,37 @@ function generateTimeChart(data) {
         .raise();
       svg.select(".hoverValue")
         .attr("transform",
-          `translate(${x(datum.date)}, ${y(total_ct)-100})`)
+          `translate(${x(datum.date)}, ${y(total_ct)-50})`)
         .text(total_ct.toFixed(2) + '\n' + new Intl.DateTimeFormat('en-US', {year: 'numeric', month: 'long'}).format(datum.date))
         .style("opacity",1)
         .raise();
+
+      let datumDelays = new Map();
+      datumDelays.set("carrier_ct", datum.carrier_ct);
+      datumDelays.set("weather_ct", datum.weather_ct);
+      datumDelays.set("nas_ct", datum.nas_ct);
+      datumDelays.set("security_ct", datum.security_ct);
+      datumDelays.set("late_aircraft_ct", datum.late_aircraft_ct);
+
+      for (const delayType of delayTypes) {
+        svg.select(".hoverCircle." + delayType)
+          .attr("transform",
+            `translate(${x(datum.date)}, 0)`)//${y(datumDelays.get(delayType))})`)
+          .style("opacity",1)
+
+        svg.select(".hoverText."+delayType)
+          .attr("transform",
+            `translate(${x(datum.date)}, 0)`)
+          .style("opacity", 1).text(delayType);
+      }
     })
     .on("mouseout", (event, d) => {
       svg.select(".x").style("opacity", 0);
       svg.select(".hoverValue").style("opacity", 0);
+      for (const delayType of delayTypes) {
+        svg.select(".hoverCircle." + delayType).style("opacity",0)
+        svg.select(".hoverText." + delayType).style("opacity", 0);
+      }
     })
 
 
@@ -347,8 +421,15 @@ function generateTimeChart(data) {
     let filteredStack = stackGen(filteredData);
     svg.selectAll(".delayLayers").remove();
 
-    x.domain(d3.extent(data, (d) => d.date)).nice();
+    x.domain(d3.extent(data, (d) => d.date))//.nice();
     xAxisGroup.call(xAxis);
+    
+    // https://stackoverflow.com/questions/47828945/shorten-months-ticks-on-x-axis
+    xAxisGroup.selectAll(".tick").each(function(d) {
+      if (this.textContent === d3.timeFormat("%B")(d)) {
+        d3.select(this).select("text").text(d3.timeFormat("%b"))
+      }
+    })
 
     clipped
       .selectAll("layers")
@@ -395,6 +476,13 @@ function generateTimeChart(data) {
         let datum = (x0 - d0.date > d1.date - x0) ? d1 : d0;
         let total_ct = datum.carrier_ct + datum.weather_ct + datum.nas_ct + datum.security_ct + datum.late_aircraft_ct;
 
+        let datumDelays = new Map();
+        datumDelays.set("carrier_ct", datum.carrier_ct);
+        datumDelays.set("weather_ct", datum.weather_ct);
+        datumDelays.set("nas_ct", datum.nas_ct);
+        datumDelays.set("security_ct", datum.security_ct);
+        datumDelays.set("late_aircraft_ct", datum.late_aircraft_ct);
+
         svg.select(".x")
           .attr("transform",
             `translate(${x(datum.date)}, 0)`)
@@ -406,10 +494,27 @@ function generateTimeChart(data) {
           .text(total_ct.toFixed(2) + '\n' + new Intl.DateTimeFormat('en-US', {year: 'numeric', month: 'long'}).format(datum.date))
           .style("opacity",1)
           .raise();
-      })
-      .on("mouseout", (event, d) => {
-        svg.select(".x").style("opacity", 0);
-      })
+
+        svg.select(".hoverCircle")
+          .attr("transform",
+            `translate(${x(datum.date)}, 0)`)
+          .style("opacity",1)
+          .raise();
+
+        for (const delayType of delayTypes) {
+          svg.select(".hoverCircle." + delayType)
+            .attr("transform",
+              `translate(${x(datum.date)}, ${y(datumDelays.get(delayType))-100})`)
+            .style("opacity",1)
+        }
+    })
+    .on("mouseout", (event, d) => {
+      svg.select(".x").style("opacity", 0);
+      svg.select(".hoverValue").style("opacity", 0);
+      for (const delayType of delayTypes) {
+        svg.select(".hoverCircle." + delayType).style("opacity",0)
+      }
+    })
   }
 
   function updateTitle(selectedCarrier) {
@@ -441,7 +546,7 @@ function generateTimeChart(data) {
     .data(delayTypes)
     .enter()
     .append("rect")
-    .attr("x", width)
+    .attr("x", width+margin.left)
     .attr("y", function (d, i) {
       return 10 + i * (legendSize + 5);
     })
@@ -463,7 +568,7 @@ function generateTimeChart(data) {
     .data(delayTypes)
     .enter()
     .append("text")
-    .attr("x", width + legendSize * 1.2)
+    .attr("x", width + margin.left + legendSize * 1.2)
     .attr("y", function (d, i) {
       return 10 + i * (legendSize + 5) + legendSize / 2;
     })

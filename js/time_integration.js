@@ -312,6 +312,43 @@ function generateTimeChart(data) {
       .attr("class", "hoverValue")
       .style("opacity", 0)
 
+
+
+  // let circle1 = svg.append('g')
+  //   .append("circle")
+  //   .attr("class", "hoverCircle carrier_ct")
+  //   .attr("fill", "black")
+  //   .attr("r", 4)
+  //   .style("opacity", 0);
+
+  // let circle2 = svg.append('g')
+  //   .append("circle")
+  //   .attr("class", "hoverCircle weather_ct")
+  //   .attr("fill", "black")
+  //   .attr("r", 4)
+  //   .style("opacity", 0);
+
+  // let circle3 = svg.append('g')
+  //   .append("circle")
+  //   .attr("class", "hoverCircle nas_ct")
+  //   .attr("fill", "black")
+  //   .attr("r", 4)
+  //   .style("opacity", 0);
+  
+  // let circle4 = svg.append('g')
+  //   .append("circle")
+  //   .attr("class", "hoverCircle security_ct")
+  //   .attr("fill", "black")
+  //   .attr("r", 4)
+  //   .style("opacity", 0);
+
+  // let circle5 = svg.append('g')
+  //   .append("circle")
+  //   .attr("class", "hoverCircle late_aircraft_ct")
+  //   .attr("fill", "black")
+  //   .attr("r", 4)
+  //   .style("opacity", 0);
+
   for (const delayType of delayTypes) {
     svg.append('g')
       .append('circle')
@@ -374,16 +411,28 @@ function generateTimeChart(data) {
         .raise();
 
       let datumDelays = new Map();
-      datumDelays.set("carrier_ct", datum.carrier_ct);
-      datumDelays.set("weather_ct", datum.weather_ct);
-      datumDelays.set("nas_ct", datum.nas_ct);
-      datumDelays.set("security_ct", datum.security_ct);
-      datumDelays.set("late_aircraft_ct", datum.late_aircraft_ct);
+      // datumDelays.set("carrier_ct", datum.carrier_ct);
+      // datumDelays.set("weather_ct", datum.weather_ct);
+      // datumDelays.set("nas_ct", datum.nas_ct);
+      // datumDelays.set("security_ct", datum.security_ct);
+      // datumDelays.set("late_aircraft_ct", datum.late_aircraft_ct);
+
+      y1 = datum.late_aircraft_ct + datum.security_ct + datum.nas_ct + datum.weather_ct + datum.carrier_ct;
+      y2 = datum.security_ct + datum.nas_ct + datum.weather_ct + datum.carrier_ct;
+      y3 = datum.nas_ct + datum.weather_ct + datum.carrier_ct;
+      y4 = datum.weather_ct + datum.carrier_ct;
+      y5 = datum.carrier_ct;
+      
+      datumDelays.set("late_aircraft_ct", y1);
+      datumDelays.set("security_ct", y2);
+      datumDelays.set("nas_ct", y3);
+      datumDelays.set("weather_ct", y4);
+      datumDelays.set("carrier_ct", y5);
 
       for (const delayType of delayTypes) {
         svg.select(".hoverCircle." + delayType)
           .attr("transform",
-            `translate(${x(datum.date)}, 0)`)//${y(datumDelays.get(delayType))})`)
+            `translate(${x(datum.date)}, ${y(datumDelays.get(delayType))})`)
           .style("opacity",1)
 
         svg.select(".hoverText."+delayType)
@@ -400,6 +449,7 @@ function generateTimeChart(data) {
         svg.select(".hoverText." + delayType).style("opacity", 0);
       }
     })
+
 
 
   // ----- ADD TITLE ----- //
@@ -477,11 +527,19 @@ function generateTimeChart(data) {
         let total_ct = datum.carrier_ct + datum.weather_ct + datum.nas_ct + datum.security_ct + datum.late_aircraft_ct;
 
         let datumDelays = new Map();
-        datumDelays.set("carrier_ct", datum.carrier_ct);
-        datumDelays.set("weather_ct", datum.weather_ct);
-        datumDelays.set("nas_ct", datum.nas_ct);
-        datumDelays.set("security_ct", datum.security_ct);
-        datumDelays.set("late_aircraft_ct", datum.late_aircraft_ct);
+
+        y1 = datum.carrier_ct + datum.weather_ct + datum.nas_ct + datum.security_ct + datum.late_aircraft_ct;
+        y2 = datum.weather_ct + datum.nas_ct + datum.security_ct + datum.late_aircraft_ct;
+        y3 = datum.nas_ct + datum.security_ct + datum.late_aircraft_ct;
+        y4 = datum.security_ct + datum.late_aircraft_ct;
+        y5 = datum.late_aircraft_ct;
+
+        datumDelays.set("carrier_ct", y5);
+        datumDelays.set("weather_ct", y4);
+        datumDelays.set("nas_ct", y3);
+        datumDelays.set("security_ct", y2);
+        datumDelays.set("late_aircraft_ct", y1);
+
 
         svg.select(".x")
           .attr("transform",
@@ -504,8 +562,9 @@ function generateTimeChart(data) {
         for (const delayType of delayTypes) {
           svg.select(".hoverCircle." + delayType)
             .attr("transform",
-              `translate(${x(datum.date)}, ${y(datumDelays.get(delayType))-100})`)
+              `translate(${x(datum.date)}, ${y(datumDelays.get(delayType))})`)
             .style("opacity",1)
+          console.log(delayType, svg.select(".hoverCircle."+delayType));
         }
     })
     .on("mouseout", (event, d) => {
@@ -548,7 +607,7 @@ function generateTimeChart(data) {
     .append("rect")
     .attr("x", width+margin.left)
     .attr("y", function (d, i) {
-      return 10 + i * (legendSize + 5);
+      return 10 + (5-i)*(legendSize + 5);
     })
     .attr("width", legendSize)
     .attr("height", legendSize)
@@ -570,7 +629,7 @@ function generateTimeChart(data) {
     .append("text")
     .attr("x", width + margin.left + legendSize * 1.2)
     .attr("y", function (d, i) {
-      return 10 + i * (legendSize + 5) + legendSize / 2;
+      return 10 + (5-i) * (legendSize + 5) + legendSize / 2;
     })
     .style("fill", (d) => color(d))
     .text((d) => labelMap.get(d))

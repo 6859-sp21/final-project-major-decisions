@@ -59,6 +59,7 @@ function generateTimeChart(data) {
       height  = fullHeight - margin.top - margin.bottom;
 
   let previewHeight = 125;
+  let legendSize = 20;
 
   // append the svg object to the body of the page
   const svg = d3.select("#vis")
@@ -312,55 +313,28 @@ function generateTimeChart(data) {
       .attr("class", "hoverValue")
       .style("opacity", 0)
 
-
-
-  // let circle1 = svg.append('g')
-  //   .append("circle")
-  //   .attr("class", "hoverCircle carrier_ct")
-  //   .attr("fill", "black")
-  //   .attr("r", 4)
-  //   .style("opacity", 0);
-
-  // let circle2 = svg.append('g')
-  //   .append("circle")
-  //   .attr("class", "hoverCircle weather_ct")
-  //   .attr("fill", "black")
-  //   .attr("r", 4)
-  //   .style("opacity", 0);
-
-  // let circle3 = svg.append('g')
-  //   .append("circle")
-  //   .attr("class", "hoverCircle nas_ct")
-  //   .attr("fill", "black")
-  //   .attr("r", 4)
-  //   .style("opacity", 0);
-  
-  // let circle4 = svg.append('g')
-  //   .append("circle")
-  //   .attr("class", "hoverCircle security_ct")
-  //   .attr("fill", "black")
-  //   .attr("r", 4)
-  //   .style("opacity", 0);
-
-  // let circle5 = svg.append('g')
-  //   .append("circle")
-  //   .attr("class", "hoverCircle late_aircraft_ct")
-  //   .attr("fill", "black")
-  //   .attr("r", 4)
-  //   .style("opacity", 0);
-
-  let delayColors = new Map();
+  const delayColors = new Map();
   delayColors.set("late_aircraft_ct", "#c5ff6e");
   delayColors.set("security_ct", "#ff9cd7");
   delayColors.set("nas_ct", "#b5ccff");
   delayColors.set("weather_ct", "#d47755");
   delayColors.set("carrier_ct", "#87ffd9");
 
-  for (const delayType of delayTypes) {
+
+  const labelMap = new Map();
+  labelMap.set('carrier_ct', 'Carrier Delays')
+  labelMap.set('weather_ct', 'Weather Delays');    
+  labelMap.set('nas_ct', 'National Air System Delays')
+  labelMap.set('security_ct', 'Security Delays')
+  labelMap.set('late_aircraft_ct', 'Late Aircraft Delays')
+
+  // for (const delayType of delayTypes) {
+  for (i = 0; i < delayTypes.length; i++) {
+    console.log("I:",i);
     svg.append('g')
       .append('circle')
       .attr('class', "hoverInfo")
-      .attr('class', "hoverCircle " + delayType)
+      .attr('class', "hoverCircle " + delayTypes[i])
       .attr("fill", "black")
       // .attr("fill", (d) => color(delayType))
       // .attr("fill", (d) => delayColors.get(delayType))
@@ -369,29 +343,15 @@ function generateTimeChart(data) {
 
     svg.append('g')
       .append('text')
-      .attr('class', "hoverText " + delayType)
-      .attr('x', 9)
+      .attr('class', "hoverText " + delayTypes[i])
+      .attr('x', width + margin.left - 2.5*legendSize)
       .attr('dy', '.35em')
-      .attr("y", function (d, i) {
-        return 20 + 25*i;
+      .attr("y", function (d) {
+        return 20 + (5-i)*(legendSize+5)
       })
       .style('font-size',15)
+      .style('opacity', 0)
   }
-
-  // let circles = svg
-  //   .selectAll("circles")
-  //   .data(delayTypes)
-  //   .enter()
-  //   .append("circle")
-  //   .attr('class', "hoverInfo")
-  //   .attr('class', d => "hoverCircle " + d)
-  //   .attr("x", 9)//width+margin.left)
-  //   .attr("y", function (d, i) {
-  //     return 20 + 30*i;
-  //   })
-  //   .attr("fill", "black")
-  //   .attr("r", 4)
-    // .style("opacity", 0);
 
   // ----- ADD HOVER LINE ----- //
 
@@ -406,6 +366,8 @@ function generateTimeChart(data) {
       let datum = (x0 - d0.date > d1.date - x0) ? d1 : d0;
       let total_ct = datum.carrier_ct + datum.weather_ct + datum.nas_ct + datum.security_ct + datum.late_aircraft_ct;
 
+      let currentTime = d3.timeFormat('%b %Y')(datum.date);
+
       svg.select(".x")
         .attr("transform",
           `translate(${x(datum.date)}, 0)`)
@@ -414,9 +376,19 @@ function generateTimeChart(data) {
       svg.select(".hoverValue")
         .attr("transform",
           `translate(${x(datum.date)}, ${y(total_ct)-50})`)
-        .text(total_ct.toFixed(2) + '\n' + new Intl.DateTimeFormat('en-US', {year: 'numeric', month: 'long'}).format(datum.date))
+        .text(currentTime + ": " + total_ct.toFixed(2) + " Total Delays")
+        // .text(total_ct.toFixed(2) + '\n' + new Intl.DateTimeFormat('en-US', {year: 'numeric', month: 'long'}).format(datum.date))
         .style("opacity",1)
         .raise();
+
+      // d3.select(this).select("text").text(d3.timeFormat("%b"))
+      let datumValues = new Map();
+      datumValues.set("late_aircraft_ct", datum.late_aircraft_ct);
+      datumValues.set("security_ct", datum.security_ct);
+      datumValues.set("nas_ct", datum.nas_ct);
+      datumValues.set("weather_ct", datum.weather_ct);
+      datumValues.set("carrier_ct", datum.carrier_ct);
+
 
       let datumDelays = new Map();
 
@@ -439,9 +411,8 @@ function generateTimeChart(data) {
           .style("opacity",1)
 
         svg.select(".hoverText."+delayType)
-          .attr("transform",
-            `translate(${x(datum.date)}, 0)`)
-          .style("opacity", 1).text(delayType);
+          .style("opacity", 1)
+          .text(datumValues.get(delayType).toFixed(2))
       }
     })
     .on("mouseout", (event, d) => {
@@ -602,7 +573,6 @@ function generateTimeChart(data) {
 
 
   // ----- DRAW LEGEND AND LABELS ----- //
-  let legendSize = 20;
   let legend = svg
     .selectAll("legend")
     .data(delayTypes)
@@ -617,13 +587,6 @@ function generateTimeChart(data) {
     .style("fill", (d) => color(d))
     .on("mouseover", highlight)
     .on("mouseleave", noHighlight);
-
-  const labelMap = new Map();
-  labelMap.set('carrier_ct', 'Carrier Delays')
-  labelMap.set('weather_ct', 'Weather Delays');    
-  labelMap.set('nas_ct', 'National Air System Delays')
-  labelMap.set('security_ct', 'Security Delays')
-  labelMap.set('late_aircraft_ct', 'Late Aircraft Delays')
 
   let labels = svg
     .selectAll("labels")

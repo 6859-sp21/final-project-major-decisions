@@ -349,6 +349,13 @@ function generateTimeChart(data) {
   //   .attr("r", 4)
   //   .style("opacity", 0);
 
+  let delayColors = new Map();
+  delayColors.set("late_aircraft_ct", "#c5ff6e");
+  delayColors.set("security_ct", "#ff9cd7");
+  delayColors.set("nas_ct", "#b5ccff");
+  delayColors.set("weather_ct", "#d47755");
+  delayColors.set("carrier_ct", "#87ffd9");
+
   for (const delayType of delayTypes) {
     svg.append('g')
       .append('circle')
@@ -356,6 +363,7 @@ function generateTimeChart(data) {
       .attr('class', "hoverCircle " + delayType)
       .attr("fill", "black")
       // .attr("fill", (d) => color(delayType))
+      // .attr("fill", (d) => delayColors.get(delayType))
       .attr('r', 4)
       .style('opacity', 0);
 

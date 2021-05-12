@@ -20,12 +20,35 @@
 #vis {
     display: inline-block;
     position: fixed;
-    top: 60px;
+    top: 200;
     z-index: 1;
     margin-left: 0;
     left: 40%;
     width: 1200px;
     height: 600px;
+}
+
+#vis-controller {
+  display: flex;
+  position: fixed;
+  top: 100px;
+  z-index: 1;
+  margin-left: 0;
+  left: 40%;
+  width: 900px;
+  height: 120px;
+}
+
+.replay-button-container {
+  flex: 0 0 100px;
+}
+
+.dynamic-bar-slider {
+  display: inline-block;
+}
+
+.replay-button-container button{
+  margin: 25px auto;
 }
   
 .step {

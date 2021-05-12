@@ -158,13 +158,12 @@
       .attr('display', 'none');
 
       d3.select(".three-step").remove();
-      //try {await createCarrierRankBarPercentDelayed(data);}
-      try { await createCarrierRankBarAveMin(data);}
-      catch(e) {/* we don't plan to do additional promise chaining, swallow the error for now*/}
+      //await createCarrierRankBarPercentDelayed(data);
+      //createCarrierRankBarAveMin(data);
+      //catch(e) {/* we don't plan to do additional promise chaining, swallow the error for now*/}
 
-      //createFinalGraph(data);
-      // catch (e){}
-      d3.select('.dynamic-bar')
+      createFinalGraph(data);
+      d3.selectAll('.dynamic-bar')
       .transition()
       .duration(transitionTime)
       .attr('opacity', 1)

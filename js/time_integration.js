@@ -340,70 +340,76 @@ function generateTimeChart(data) {
 
   let bisect = d3.bisector(d => d.date).right;
 
-  eventsRect
-    .on("mousemove", (event, d) => {
-      let x0 = x.invert(d3.pointer(event)[0]);
-      let i = bisect(sortedData, x0);
-      let d0 = sortedData[i];
-      let d1 = sortedData[i+1];
-      let datum = (x0 - d0.date > d1.date - x0) ? d1 : d0;
-      let total_ct = datum.carrier_ct + datum.weather_ct + datum.nas_ct + datum.security_ct + datum.late_aircraft_ct;
+  function handleMouseMove (event, d, newData) {
+    let x0 = x.invert(d3.pointer(event)[0]);
+    let i = bisect(newData, x0);
+    let d0 = newData[i];
+    let d1 = newData[i+1];
+    let datum = (x0 - d0.date > d1.date - x0) ? d1 : d0;
+    let total_ct = datum.carrier_ct + datum.weather_ct + datum.nas_ct + datum.security_ct + datum.late_aircraft_ct;
 
-      let currentTime = d3.timeFormat('%b %Y')(datum.date);
+    let datumValues = new Map();
+    datumValues.set("late_aircraft_ct", datum.late_aircraft_ct);
+    datumValues.set("security_ct", datum.security_ct);
+    datumValues.set("nas_ct", datum.nas_ct);
+    datumValues.set("weather_ct", datum.weather_ct);
+    datumValues.set("carrier_ct", datum.carrier_ct);
 
-      svg.select(".x")
-        .attr("transform",
-          `translate(${x(datum.date)}, 0)`)
-        .style("opacity",1)
-        .raise();
-      svg.select(".hoverValue")
-        .attr("transform",
-          `translate(${x(datum.date)}, ${y(total_ct)-15})`)
-        .text(currentTime + ": " + total_ct.toFixed(2) + " Total Delays")
-        // .text(total_ct.toFixed(2) + '\n' + new Intl.DateTimeFormat('en-US', {year: 'numeric', month: 'long'}).format(datum.date))
-        .style("opacity",1)
-        .raise();
+    let datumDelays = new Map();
+    y1 = datum.late_aircraft_ct + datum.security_ct + datum.nas_ct + datum.weather_ct + datum.carrier_ct;
+    y2 = datum.security_ct + datum.nas_ct + datum.weather_ct + datum.carrier_ct;
+    y3 = datum.nas_ct + datum.weather_ct + datum.carrier_ct;
+    y4 = datum.weather_ct + datum.carrier_ct;
+    y5 = datum.carrier_ct;
+    
+    datumDelays.set("late_aircraft_ct", y1);
+    datumDelays.set("security_ct", y2);
+    datumDelays.set("nas_ct", y3);
+    datumDelays.set("weather_ct", y4);
+    datumDelays.set("carrier_ct", y5);
+  
+    let currentTime = d3.timeFormat('%b %Y')(datum.date);
 
-      let datumValues = new Map();
-      datumValues.set("late_aircraft_ct", datum.late_aircraft_ct);
-      datumValues.set("security_ct", datum.security_ct);
-      datumValues.set("nas_ct", datum.nas_ct);
-      datumValues.set("weather_ct", datum.weather_ct);
-      datumValues.set("carrier_ct", datum.carrier_ct);
-
-      let datumDelays = new Map();
-
-      y1 = datum.late_aircraft_ct + datum.security_ct + datum.nas_ct + datum.weather_ct + datum.carrier_ct;
-      y2 = datum.security_ct + datum.nas_ct + datum.weather_ct + datum.carrier_ct;
-      y3 = datum.nas_ct + datum.weather_ct + datum.carrier_ct;
-      y4 = datum.weather_ct + datum.carrier_ct;
-      y5 = datum.carrier_ct;
+    svg.select(".x")
+      .attr("transform",
+        `translate(${x(datum.date)}, 0)`)
+      .style("opacity",1)
+      .raise();
       
-      datumDelays.set("late_aircraft_ct", y1);
-      datumDelays.set("security_ct", y2);
-      datumDelays.set("nas_ct", y3);
-      datumDelays.set("weather_ct", y4);
-      datumDelays.set("carrier_ct", y5);
+    svg.select(".hoverValue")
+      .attr("transform",
+        `translate(${x(datum.date)}, ${y(total_ct)-15})`)
+      .text(currentTime + ": " + total_ct.toFixed(2) + " Total Delays")
+      .style("opacity",1)
+      .raise();
 
-      for (const delayType of delayTypes) {
-        svg.select(".hoverCircle." + delayType)
-          .attr("transform",
-            `translate(${x(datum.date)}, ${y(datumDelays.get(delayType))})`)
-          .style("opacity",1)
+    for (const delayType of delayTypes) {
+      svg.select(".hoverCircle." + delayType)
+        .attr("transform",
+          `translate(${x(datum.date)}, ${y(datumDelays.get(delayType))})`)
+        .style("opacity",1)
 
-        svg.select(".hoverText."+delayType)
-          .style("opacity", 1)
-          .text(datumValues.get(delayType).toFixed(2))
-      }
+      svg.select(".hoverText."+delayType)
+        .style("opacity", 1)
+        .text(datumValues.get(delayType).toFixed(2))
+    }
+  }
+
+
+  function handleMouseOut (event, d) {
+    svg.select(".x").style("opacity", 0);
+    svg.select(".hoverValue").style("opacity", 0);
+    for (const delayType of delayTypes) {
+      svg.select(".hoverCircle." + delayType).style("opacity",0)
+      svg.select(".hoverText." + delayType).style("opacity", 0);
+    }
+  }
+
+  eventsRect
+    .on("mousemove", function(event, d) {
+      handleMouseMove(event, d, sortedData);
     })
-    .on("mouseout", (event, d) => {
-      svg.select(".x").style("opacity", 0);
-      svg.select(".hoverValue").style("opacity", 0);
-      for (const delayType of delayTypes) {
-        svg.select(".hoverCircle." + delayType).style("opacity",0)
-        svg.select(".hoverText." + delayType).style("opacity", 0);
-      }
-    })
+    .on("mouseout", handleMouseOut)
 
 
 
@@ -440,18 +446,9 @@ function generateTimeChart(data) {
       .selectAll("layers")
       .data(filteredStack)
       .join("path")
-      .attr("class", function (d) {
-        return "delayLayers " + d.key;
-      })
+      .attr("class", (d) => "delayLayers " + d.key)
       .attr("fill", (d) => color(d.key))
-      .attr(
-        "d",
-        d3
-          .area()
-          .x((d) => x(d.data.date))
-          .y0((d) => y(d[0]))
-          .y1((d) => y(d[1]))
-      )
+      .attr("d", area);
 
     svg.selectAll(".contextLayers").remove();
     context
@@ -473,72 +470,10 @@ function generateTimeChart(data) {
 
     // change data for hover line with tooltip
     eventsRect
-      .on("mousemove", (event, d) => {
-        let x0 = x.invert(d3.pointer(event)[0]);
-        let i = bisect(filteredData, x0);
-        let d0 = filteredData[i];
-        let d1 = filteredData[i+1];
-        let datum = (x0 - d0.date > d1.date - x0) ? d1 : d0;
-        let total_ct = datum.carrier_ct + datum.weather_ct + datum.nas_ct + datum.security_ct + datum.late_aircraft_ct;
-
-        let datumValues = new Map();
-        datumValues.set("late_aircraft_ct", datum.late_aircraft_ct);
-        datumValues.set("security_ct", datum.security_ct);
-        datumValues.set("nas_ct", datum.nas_ct);
-        datumValues.set("weather_ct", datum.weather_ct);
-        datumValues.set("carrier_ct", datum.carrier_ct);
-
-        let datumDelays = new Map();
-        y1 = datum.late_aircraft_ct + datum.security_ct + datum.nas_ct + datum.weather_ct + datum.carrier_ct;
-        y2 = datum.security_ct + datum.nas_ct + datum.weather_ct + datum.carrier_ct;
-        y3 = datum.nas_ct + datum.weather_ct + datum.carrier_ct;
-        y4 = datum.weather_ct + datum.carrier_ct;
-        y5 = datum.carrier_ct;
-        
-        datumDelays.set("late_aircraft_ct", y1);
-        datumDelays.set("security_ct", y2);
-        datumDelays.set("nas_ct", y3);
-        datumDelays.set("weather_ct", y4);
-        datumDelays.set("carrier_ct", y5);
-      
-        let currentTime = d3.timeFormat('%b %Y')(datum.date);
-
-        svg.select(".x")
-          .attr("transform",
-            `translate(${x(datum.date)}, 0)`)
-          .style("opacity",1)
-          .raise();
-        svg.select(".hoverValue")
-          .attr("transform",
-            `translate(${x(datum.date)}, ${y(total_ct)-15})`)
-          .text(currentTime + ": " + total_ct.toFixed(2) + " Total Delays")
-          .style("opacity",1)
-          .raise();
-
-        svg.select(".hoverCircle")
-          .attr("transform",
-            `translate(${x(datum.date)}, 0)`)
-          .style("opacity",1)
-          .raise();
-
-        for (const delayType of delayTypes) {
-          svg.select(".hoverCircle." + delayType)
-            .attr("transform",
-              `translate(${x(datum.date)}, ${y(datumDelays.get(delayType))})`)
-            .style("opacity",1)
-
-          svg.select(".hoverText."+delayType)
-            .style("opacity", 1)
-            .text(datumValues.get(delayType).toFixed(2))
-      }
-    })
-    .on("mouseout", (event, d) => {
-      svg.select(".x").style("opacity", 0);
-      svg.select(".hoverValue").style("opacity", 0);
-      for (const delayType of delayTypes) {
-        svg.select(".hoverCircle." + delayType).style("opacity",0)
-      }
-    })
+      .on("mousemove", function(event, d) {
+        handleMouseMove(event, d, filteredData);
+      })
+      .on("mouseout", handleMouseOut)
   }
 
   function updateTitle(selectedCarrier) {

@@ -69,7 +69,7 @@ function generateTimeChart(data) {
     // .attr("width", width + margin.left + margin.right)
     .attr("width", width + 5*margin.left) // 800
     .attr("height", height + 2*previewHeight) //margin.top + margin.bottom) // 500
-    .attr("style","outline: thin solid red;") // use this to see full size of svg
+    // .attr("style","outline: thin solid red;") // use this to see full size of svg
     .append("g")
       .attr(
         "transform",
@@ -328,16 +328,12 @@ function generateTimeChart(data) {
   labelMap.set('security_ct', 'Security Delays')
   labelMap.set('late_aircraft_ct', 'Late Aircraft Delays')
 
-  // for (const delayType of delayTypes) {
   for (i = 0; i < delayTypes.length; i++) {
-    console.log("I:",i);
     svg.append('g')
       .append('circle')
       .attr('class', "hoverInfo")
       .attr('class', "hoverCircle " + delayTypes[i])
-      .attr("fill", "black")
-      // .attr("fill", (d) => color(delayType))
-      // .attr("fill", (d) => delayColors.get(delayType))
+      .attr("fill", (d) => delayColors.get(delayTypes[i]))
       .attr('r', 4)
       .style('opacity', 0);
 
@@ -381,7 +377,6 @@ function generateTimeChart(data) {
         .style("opacity",1)
         .raise();
 
-      // d3.select(this).select("text").text(d3.timeFormat("%b"))
       let datumValues = new Map();
       datumValues.set("late_aircraft_ct", datum.late_aircraft_ct);
       datumValues.set("security_ct", datum.security_ct);
@@ -523,7 +518,7 @@ function generateTimeChart(data) {
         svg.select(".hoverValue")
           .attr("transform",
             `translate(${x(datum.date)}, ${y(total_ct)-100})`)
-          .text(total_ct.toFixed(2) + '\n' + new Intl.DateTimeFormat('en-US', {year: 'numeric', month: 'long'}).format(datum.date))
+          .text(currentTime + ": " + total_ct.toFixed(2) + " Total Delays")
           .style("opacity",1)
           .raise();
 
@@ -560,39 +555,32 @@ function generateTimeChart(data) {
   });
 
 
-  // ----- HOVER ON LEGEND TO HIGHLIGHT DELAY AREA ----- //
-  let highlight = function (event, d) {
-    d3.selectAll(".delayLayers").style("opacity", 0.2); // lower opacity if not selected
-    d3.select("path.delayLayers." + d).style("opacity", 1); // selected should have full opacity
-  };
-
-  let noHighlight = function (event, d) {
-    d3.selectAll("path.delayLayers").style("opacity", 1);
-  };
-
-
   // ----- DRAW LEGEND AND LABELS ----- //
   let legend = svg
     .selectAll("legend")
     .data(delayTypes)
     .enter()
     .append("rect")
+    .attr("class", d => "delayLegend " + d)
     .attr("x", width+margin.left)
     .attr("y", function (d, i) {
       return 10 + (5-i)*(legendSize + 5);
     })
-    .attr("width", legendSize)
+    .attr("width", 8.5*legendSize)
     .attr("height", legendSize)
-    .style("fill", (d) => color(d))
+    .attr("rx", 5)
+    .style("stroke", (d) => color(d))
+    .style("fill", "white")
     .on("mouseover", highlight)
-    .on("mouseleave", noHighlight);
+    .on("mouseleave", noHighlight)
+    .on("click", onClick);
 
   let labels = svg
     .selectAll("labels")
     .data(delayTypes)
     .enter()
     .append("text")
-    .attr("x", width + margin.left + legendSize * 1.2)
+    .attr("x", width + margin.left + 0.3*legendSize)
     .attr("y", function (d, i) {
       return 10 + (5-i) * (legendSize + 5) + legendSize / 2;
     })
@@ -601,5 +589,22 @@ function generateTimeChart(data) {
     .attr("text-anchor", "left")
     .style("alignment-baseline", "middle")
     .on("mouseover", highlight)
-    .on("mouseleave", noHighlight);
+    .on("mouseleave", noHighlight)
+    .on("click", onClick);
 }
+
+  // ----- HOVER ON LEGEND TO HIGHLIGHT DELAY AREA ----- //
+  let highlight = function (event, d) {
+    d3.selectAll(".delayLayers").style("opacity", 0.2); // lower opacity if not selected
+    d3.select("path.delayLayers." + d).style("opacity", 1); // selected should have full opacity
+    d3.select(".delayLegend." + d).style("fill", "#f2f2f2");
+  };
+
+  let noHighlight = function (event, d) {
+    d3.selectAll("path.delayLayers").style("opacity", 1);
+    d3.selectAll(".delayLegend").style("fill", "white");
+  };
+
+  let onClick = function (event, d) {
+    console.log("in click!", d)
+  }

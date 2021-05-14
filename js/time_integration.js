@@ -58,17 +58,16 @@ function generateTimeChart(data) {
       width = fullWidth - margin.left - margin.right,
       height  = fullHeight - margin.top - margin.bottom;
 
-  let previewHeight = 150;
+  let previewHeight = 125;
+  let legendSize = 20;
 
   // append the svg object to the body of the page
   const svg = d3.select("#vis")
     .append("svg")
     .attr("class", "five-step")
     .attr("id", "time_vis")
-    // .attr("width", width + margin.left + margin.right)
     .attr("width", width + 5*margin.left) // 800
-    .attr("height", height + 2*previewHeight) //margin.top + margin.bottom) // 500
-    .attr("style","outline: thin solid red;") // use this to see full size of svg
+    .attr("height", height + 2*previewHeight)
     .append("g")
       .attr(
         "transform",
@@ -91,24 +90,34 @@ function generateTimeChart(data) {
   let stackGen = d3.stack().keys(delayTypes);
   let stackedData = stackGen(aggData);
 
+  // var to save state: in all-delays view or individual delay type view?
+  let individualView = false;
+
 
   // ----- AXES SCALES AND LABELS ----- //
   let x = d3
     .scaleTime()
-    .domain(d3.extent(sortedData, (d) => d.date))
+    .domain(d3.extent([new Date(2015,12), d3.max(sortedData, d => d.date)]))
     .range([0, width])
-    .nice();
 
   let xAxis = d3.axisBottom(x);
   let xAxisGroup = svg
     .append("g")
     .call(xAxis)
-    .attr("transform", `translate(0,${height-margin.top})`);
+    .attr("transform", `translate(0,${height})`)
+    // .selectAll("text")
+      // .attr("transform", "translate(-10,5)rotate(-30)");
+  
+  xAxisGroup.selectAll(".tick").each(function(d) {
+    if (this.textContent === d3.timeFormat("%B")(d)) {
+      d3.select(this).select("text").text(d3.timeFormat("%b"))
+    }
+  })
 
   let xAxisLabel = svg.append("text")
     .attr("text-anchor", "end")
     .attr("x", width/2 + margin.right)
-    .attr("y", height + margin.top)
+    .attr("y", height + 2*margin.top)
     .text("Date")
 
   let y = d3
@@ -132,7 +141,6 @@ function generateTimeChart(data) {
   let yAxisGroup = svg
     .append("g")
     .call(yAxis)
-    .attr("transform", `translate(0,${-margin.top})`);
 
   let yAxisLabel = svg.append("text")
     .attr("x", -height*3/4)
@@ -143,24 +151,13 @@ function generateTimeChart(data) {
 
 
   // ----- COLOR ENCODING ----- //
-  let color = d3.scaleOrdinal().domain(delayTypes).range(d3.schemeSet2);
+  const delayColors = ["#CFEBDE","#FFD7BB","#e6f5c9","#cbd5e8","#F5E3EE"];
+  const highlightColors = ["#82D9B2","#FFB480","#C3E189","#ACC0E5","#E9BDD8"];
+
+  const color = d3.scaleOrdinal().domain(delayTypes).range(delayColors);
+  const highlightColor = d3.scaleOrdinal().domain(delayTypes).range(highlightColors);
 
 
-  // ----- DRAW VERTICAL LINE TO SHOW VALUE ON MOUSEOVER ----- //
-  let hoverLine = svg.append("line")
-    .attr("class", "hoverInfo")
-    .attr("class", "x")
-    .attr("y1", 0)
-    .attr("y2", height - margin.top)// - margin.bottom)
-    .style("stroke", "red")
-    .style("stroke-dasharray", "3,3")
-    .style("opacity", 0);
-
-  let hoverValue = svg.append('g')
-    .append('text')
-      .attr("class", "hoverInfo")
-      .attr("class", "hoverValue")
-      .style("opacity", 0)
 
   // https://stackoverflow.com/questions/38670322/d3-brushing-and-mouse-move-coexist 
   
@@ -170,13 +167,12 @@ function generateTimeChart(data) {
     .scaleTime()
     .domain(d3.extent(sortedData, (d) => d.date))
     .range([0, width])
-    .nice();
 
   let xContextAxis = d3.axisBottom(x);
   let xContextAxisGroup = svg
     .append("g")
     .call(xContextAxis)
-    .attr("transform", `translate(0,${height + previewHeight + margin.bottom})`);
+    .attr("transform", `translate(0,${height + previewHeight + 1.5*margin.bottom})`);
 
   let yContext = d3
     .scaleLinear()
@@ -187,7 +183,7 @@ function generateTimeChart(data) {
   // ----- ADD CONTEXT COMPONENTS ----- //
   let context = svg.append("g")
     .attr("class", "context")
-    .attr("transform", `translate(0,${height + margin.bottom})`)
+    .attr("transform", `translate(0,${height + 1.5*margin.bottom})`)
 
   let areaContext = d3
     .area()
@@ -195,15 +191,19 @@ function generateTimeChart(data) {
     .y0((d) => yContext(d[0]))
     .y1((d) => yContext(d[1]));
 
-  let contextView = context
-    .selectAll("contextLayers")
-    .data(stackedData)
-    .join("path")
-    .attr("class", function (d) {
-        return "contextLayers " + d.key;
-    })
-    .attr("d", areaContext)
-    .attr("fill", "#B2C8EE")
+  function drawContextArea(layerData) {
+    context
+      .selectAll("contextLayers")
+      .data(layerData)
+      .join("path")
+      .attr("class", function (d) {
+          return "contextLayers " + d.key;
+      })
+      .attr("d", areaContext)
+      .attr("fill", "#B2C8EE")
+  }
+
+  drawContextArea(stackedData);
 
   let contextRect = context.append('rect')
     .attr("class", "contextRect")
@@ -213,7 +213,7 @@ function generateTimeChart(data) {
     .attr("height", previewHeight)
     .attr("stroke", "black")
     .attr("fill", "#d3d3d3")
-    .attr("opacity", 0.5)
+    .attr("opacity", 0.3)
 
 
   // ----- BRUSH TO ZOOM ----- //
@@ -221,7 +221,7 @@ function generateTimeChart(data) {
     .brushX()
     .extent([
       [0, 0],
-      [width - margin.right, height],
+      [width, height],
     ])
     .on("end", brushed);
 
@@ -241,21 +241,32 @@ function generateTimeChart(data) {
           newX1 = xContext(x.invert(s[1]));
 
       x.domain([x.invert(s[0]), x.invert(s[1])]);
+      console.log(x.domain())
 
       svg.select(".brush").call(brush.move, null);
 
       xAxisGroup.call(xAxis.scale(x));
       svg.selectAll(".delayLayers").transition().duration(1000).attr("d", area);
+      console.log(svg.selectAll(".soloLayers"))
+      svg.selectAll(".soloLayers").transition().duration(1000).attr("d", individualArea).style("opacity", 1);
       svg.selectAll(".contextRect").transition().duration(1000)
         .attr("x", newX0)
         .attr("width", newX1 - newX0);
+
+      // https://stackoverflow.com/questions/47828945/shorten-months-ticks-on-x-axis
+      xAxisGroup.selectAll(".tick").each(function(d) {
+        if (this.textContent === d3.timeFormat("%B")(d)) {
+          d3.select(this).select("text").text(d3.timeFormat("%b"))
+        }
+      })
     }
   }
 
   svg.on("dblclick", function () {
-    x.domain(d3.extent(data, (d) => d.date)).nice();
+    x.domain(d3.extent([new Date(2015,12), d3.max(sortedData, d => d.date)]));
     xAxisGroup.call(xAxis);
     svg.selectAll(".delayLayers").transition().duration(1000).attr("d", area);
+    svg.selectAll(".soloLayers").transition().duration(1000).attr("d", individualArea).style("opacity", 0);
     svg.selectAll(".contextRect").transition().duration(1000)
       .attr("x", 0)
       .attr("width", width);
@@ -270,7 +281,7 @@ function generateTimeChart(data) {
     .attr("id", "clip")
     .append("rect")
     .attr("width", width)
-    .attr("height", height-margin.top)
+    .attr("height", height)//-margin.top)
     .attr("x", 0)
     .attr("y", 0);
 
@@ -280,52 +291,207 @@ function generateTimeChart(data) {
     .attr("class", "brush");
   eventsRect.call(brush);
 
-  let area = d3
+  const area = d3
     .area()
     .x((d) => x(d.data.date))
     .y0((d) => y(d[0]))
     .y1((d) => y(d[1]));
+    
+  const individualArea = d3
+    .area()
+    .x((d) => x(d.data.date))
+    .y0((d) => y(0))
+    .y1((d) => y(d[1]-d[0]));
 
-  let layers = clipped
-    .selectAll("layers")
-    .data(stackedData)
-    .join("path")
-    .attr("d", area)
-    .attr("class", function (d) {
-      return "delayLayers " + d.key;
-    })
-    .attr("fill", (d) => color(d.key));
+  function drawStackedArea(layerData) {
+    console.log(layerData);
+    clipped
+      .selectAll("layers")
+      .data(layerData)
+      .join("path")
+      .attr("class", (d) => "delayLayers " + d.key)
+      .attr("fill", (d) => color(d.key))
+      .attr("d", area);
+  }
 
+  function drawIndividualArea(layerData) {
+    console.log(layerData);
+    clipped
+      .selectAll("soloLayers")
+      .data(layerData)
+      .join("path")
+      .attr("class", (d) => "soloLayers " + d.key)
+      .attr("fill", (d) => color(d.key))
+      .attr("d", individualArea)
+      .style("opacity", 0);
+  }
+
+  drawStackedArea(stackedData);
+  drawIndividualArea(stackedData);
+
+  // ----- DRAW VERTICAL LINE AND TOOLTIPS TO SHOW VALUE ON MOUSEOVER ----- //
+  let hoverLine = eventsRect.append("line")
+    .attr("class", "hoverInfo")
+    .attr("class", "x")
+    .attr("y1", 0)
+    .attr("y2", height)
+    .style("stroke", "red")
+    .style("stroke-dasharray", "3,3")
+    .style("opacity", 0);
+
+  let hoverTotalLabel = svg.append('g')
+    .append('text')
+      .attr("class", "hoverInfo")
+      .attr("class", "hoverTotalLabel")
+
+  function getTextBox(selection) {
+    selection.each(function(d) {d.bbox = this.getBBox();})
+  }
+
+  let labelBackgroundWidth = 0;
+
+  for (i = 0; i < delayTypes.length; i++) {
+    svg.append('g')
+      .append('circle')
+      .attr('class', "hoverInfo")
+      .attr('class', "hoverCircle " + delayTypes[i])
+      .attr("fill", highlightColors[i])
+      .attr('r', 4)
+      .style('opacity', 0);
+
+    svg.append('g')
+      .append('text')
+      .attr("text-anchor", "end")
+      .attr('class', "hoverText " + delayTypes[i])
+      .attr('x', width + labelBackgroundWidth + margin.left - 0.5*legendSize)
+      .attr('dy', '.35em')
+      .attr("y", function (d) {
+        return 20 + (5-i)*(legendSize+5)
+      })
+      .style('font-size',15)
+      .style('opacity', 0)
+  }
 
   // ----- ADD HOVER LINE ----- //
 
   let bisect = d3.bisector(d => d.date).right;
 
-  eventsRect
-    .on("mousemove", (event, d) => {
-      let x0 = x.invert(d3.pointer(event)[0]);
-      let i = bisect(sortedData, x0);
-      let d0 = sortedData[i];
-      let d1 = sortedData[i+1];
-      let datum = (x0 - d0.date > d1.date - x0) ? d1 : d0;
-      let total_ct = datum.carrier_ct + datum.weather_ct + datum.nas_ct + datum.security_ct + datum.late_aircraft_ct;
+  function handleMouseMove (event, d, newData) {
+    let x0 = x.invert(d3.pointer(event)[0]);
+    let i = bisect(newData, x0);
+    let d0 = newData[i];
+    let d1 = newData[i+1];
+    let datum = (x0 - d0.date > d1.date - x0) ? d1 : d0;
+    let total_ct = datum.carrier_ct + datum.weather_ct + datum.nas_ct + datum.security_ct + datum.late_aircraft_ct;
 
-      svg.select(".x")
-        .attr("transform",
-          `translate(${x(datum.date)}, 0)`)
+    let datumValues = new Map();
+    datumValues.set("late_aircraft_ct", datum.late_aircraft_ct);
+    datumValues.set("security_ct", datum.security_ct);
+    datumValues.set("nas_ct", datum.nas_ct);
+    datumValues.set("weather_ct", datum.weather_ct);
+    datumValues.set("carrier_ct", datum.carrier_ct);
+
+    // source for stacked area tooltips: https://bl.ocks.org/fabiomainardi/3976176cb36e718a608f
+    let datumDelays = new Map();
+    y1 = datum.late_aircraft_ct + datum.security_ct + datum.nas_ct + datum.weather_ct + datum.carrier_ct;
+    y2 = datum.security_ct + datum.nas_ct + datum.weather_ct + datum.carrier_ct;
+    y3 = datum.nas_ct + datum.weather_ct + datum.carrier_ct;
+    y4 = datum.weather_ct + datum.carrier_ct;
+    y5 = datum.carrier_ct;
+    
+    datumDelays.set("late_aircraft_ct", y1);
+    datumDelays.set("security_ct", y2);
+    datumDelays.set("nas_ct", y3);
+    datumDelays.set("weather_ct", y4);
+    datumDelays.set("carrier_ct", y5);
+  
+    let currentTime = d3.timeFormat('%b %Y')(datum.date);
+
+    svg.select(".x")
+      .attr("transform",
+        `translate(${x(datum.date)}, 0)`)
+      .style("opacity",1)
+      .raise();
+      
+    svg.select(".hoverTotalLabel")
+      .attr("transform",
+        `translate(${x(datum.date)}, ${y(total_ct)-15})`)
+      .attr("dx", "0.5em")
+      .text(currentTime)
+      .style("opacity",1)
+      .append("tspan")
+        .attr("x",0)
+        .attr("dx", "0.5em")
+        .attr("dy","1.2em")
+        .text(total_ct.toFixed(2) + " Total Delays")
         .style("opacity",1)
-        .raise();
-      svg.select(".hoverValue")
-        .attr("transform",
-          `translate(${x(datum.date)}, ${y(total_ct)-100})`)
-        .text(total_ct.toFixed(2) + '\n' + new Intl.DateTimeFormat('en-US', {year: 'numeric', month: 'long'}).format(datum.date))
+      
+    svg.select(".hoverTotalLabel").call(getTextBox);
+
+    svg.selectAll(".hoverLabelRect").remove();
+    svg.select(".hoverTotalLabel").remove(); // remove text and add after drawing rectangle so text is on top
+
+    // redraw background rectangle behind total delays label
+    svg.append("g")
+      .append("rect")
+      .attr("class", "hoverLabelRect")
+      .attr("x", function(d){return d.bbox.x})
+      .attr("y", function(d){return d.bbox.y})
+      .attr("transform",
+          `translate(${x(datum.date)}, ${y(total_ct)-15})`)
+      .attr("width", function(d){return d.bbox.width})
+      .attr("height", function(d){return d.bbox.height})
+      .style("fill", "#B2C8EE")
+      .style("opacity", 0.6)
+      .lower();
+
+    // re-add label text on top of background rect
+    // https://brettromero.com/d3-js-adding-a-colored-background-to-a-text-element/
+    svg.append('g')
+    .append('text')
+      .attr("class", "hoverInfo")
+      .attr("class", "hoverTotalLabel")
+      .attr("transform",
+        `translate(${x(datum.date)}, ${y(total_ct)-15})`)
+      .attr("dx", "0.5em")
+      .text(currentTime)
+      .style("opacity",1)
+      .append("tspan")
+        .attr("x",0)
+        .attr("dx", "0.5em")
+        .attr("dy","1.2em")
+        .text(total_ct.toFixed(2) + " Total Delays")
         .style("opacity",1)
-        .raise();
+
+    for (const delayType of delayTypes) {
+      svg.select(".hoverCircle." + delayType)
+        .attr("transform",
+          `translate(${x(datum.date)}, ${y(datumDelays.get(delayType))})`)
+        .style("opacity",1)
+
+      svg.select(".hoverText."+delayType)
+        .style("opacity", 1)
+        .text(datumValues.get(delayType).toFixed(2))
+    }
+  }
+
+
+  function handleMouseOut (event, d) {
+    svg.select(".x").style("opacity", 0);
+    svg.select(".hoverTotalLabel").style("opacity", 0);
+    svg.selectAll(".hoverLabelRect").remove();
+    for (const delayType of delayTypes) {
+      svg.select(".hoverCircle." + delayType).style("opacity",0)
+      svg.select(".hoverText." + delayType).style("opacity", 0);
+    }
+  }
+
+  eventsRect
+    .on("mousemove", function(event, d) {
+      handleMouseMove(event, d, sortedData);
     })
-    .on("mouseout", (event, d) => {
-      svg.select(".x").style("opacity", 0);
-      svg.select(".hoverValue").style("opacity", 0);
-    })
+    .on("mouseout", handleMouseOut)
+
 
 
   // ----- ADD TITLE ----- //
@@ -346,39 +512,20 @@ function generateTimeChart(data) {
     );
     let filteredStack = stackGen(filteredData);
     svg.selectAll(".delayLayers").remove();
+    drawStackedArea(filteredStack);
 
-    x.domain(d3.extent(data, (d) => d.date)).nice();
+    x.domain(d3.extent(data, (d) => d.date))//.nice();
     xAxisGroup.call(xAxis);
-
-    clipped
-      .selectAll("layers")
-      .data(filteredStack)
-      .join("path")
-      .attr("class", function (d) {
-        return "delayLayers " + d.key;
-      })
-      .attr("fill", (d) => color(d.key))
-      .attr(
-        "d",
-        d3
-          .area()
-          .x((d) => x(d.data.date))
-          .y0((d) => y(d[0]))
-          .y1((d) => y(d[1]))
-      )
+    
+    // https://stackoverflow.com/questions/47828945/shorten-months-ticks-on-x-axis
+    xAxisGroup.selectAll(".tick").each(function(d) {
+      if (this.textContent === d3.timeFormat("%B")(d)) {
+        d3.select(this).select("text").text(d3.timeFormat("%b"))
+      }
+    })
 
     svg.selectAll(".contextLayers").remove();
-    context
-      .selectAll("contextLayers")
-      .data(filteredStack)
-      .join("path")
-      .attr("class", function(d) {return "contextLayers " + d.key;})
-      .attr("d", 
-        d3.area()
-        .x((d) => x(d.data.date))
-        .y0((d) => yContext(d[0]))
-        .y1((d) => yContext(d[1])))
-      .attr("fill", "#B2C8EE")
+    drawContextArea(filteredStack);
 
     svg.select(".contextRect")
       .attr("x", 0)
@@ -387,29 +534,10 @@ function generateTimeChart(data) {
 
     // change data for hover line with tooltip
     eventsRect
-      .on("mousemove", (event, d) => {
-        let x0 = x.invert(d3.pointer(event)[0]);
-        let i = bisect(filteredData, x0);
-        let d0 = filteredData[i];
-        let d1 = filteredData[i+1];
-        let datum = (x0 - d0.date > d1.date - x0) ? d1 : d0;
-        let total_ct = datum.carrier_ct + datum.weather_ct + datum.nas_ct + datum.security_ct + datum.late_aircraft_ct;
-
-        svg.select(".x")
-          .attr("transform",
-            `translate(${x(datum.date)}, 0)`)
-          .style("opacity",1)
-          .raise();
-        svg.select(".hoverValue")
-          .attr("transform",
-            `translate(${x(datum.date)}, ${y(total_ct)-100})`)
-          .text(total_ct.toFixed(2) + '\n' + new Intl.DateTimeFormat('en-US', {year: 'numeric', month: 'long'}).format(datum.date))
-          .style("opacity",1)
-          .raise();
+      .on("mousemove", function(event, d) {
+        handleMouseMove(event, d, filteredData);
       })
-      .on("mouseout", (event, d) => {
-        svg.select(".x").style("opacity", 0);
-      })
+      .on("mouseout", handleMouseOut)
   }
 
   function updateTitle(selectedCarrier) {
@@ -424,32 +552,130 @@ function generateTimeChart(data) {
 
 
   // ----- HOVER ON LEGEND TO HIGHLIGHT DELAY AREA ----- //
+  let selectedDelay = "";
+  
   let highlight = function (event, d) {
-    d3.selectAll(".delayLayers").style("opacity", 0.2); // lower opacity if not selected
-    d3.select("path.delayLayers." + d).style("opacity", 1); // selected should have full opacity
+    d3.selectAll(".soloLayers").style("opacity", 0);
+    d3.selectAll(".delayLayers").style("opacity", 0.3); // lower opacity if not selected
+    d3.select("path.delayLayers." + d)
+      // .attr("fill", function(d) {return highlightColor(d.key)})
+      .style("opacity", 1); // selected should have full opacity
+    d3.select(".delayLegend." + d).style("fill", "#f2f2f2");
   };
+
 
   let noHighlight = function (event, d) {
-    d3.selectAll("path.delayLayers").style("opacity", 1);
+    if (!individualView) {
+      d3.selectAll("path.delayLayers")
+        // .attr("fill", function(d) {return color(d.key)})
+        .style("opacity", 1);
+    } else {
+      d3.selectAll("path.delayLayers").style("opacity", 0);
+      d3.select(".soloLayers."+selectedDelay).style("opacity", 1);
+    }
+    d3.selectAll(".delayLegend").style("fill", "white");
   };
 
 
+
+  let onClick = function (event, d) {
+    console.log("in click!", d)
+    individualView = true;
+    selectedDelay = d;
+
+    let filteredData = sortedData.filter(
+      (d) => d.carrier_name === selectedCarrier
+    );
+    let filteredStack = stackGen(filteredData);
+
+    svg.selectAll(".delayLayers").transition().duration(500).style("opacity", 0);
+
+    svg.select(".soloLayers." + d).transition().duration(500).style("opacity", 1);
+
+    // now hide areas of all that currently exist
+
+    x.domain(d3.extent(data, (d) => d.date))
+    xAxisGroup.call(xAxis);
+    
+    // https://stackoverflow.com/questions/47828945/shorten-months-ticks-on-x-axis
+    xAxisGroup.selectAll(".tick").each(function(d) {
+      if (this.textContent === d3.timeFormat("%B")(d)) {
+        d3.select(this).select("text").text(d3.timeFormat("%b"))
+      }
+    })
+
+    // svg.selectAll(".contextLayers").remove();
+    // drawContextArea(filteredStack);
+
+    // svg.select(".contextRect")
+    //   .attr("x", 0)
+    //   .attr("width", width)
+    //   .raise();
+
+    // change data for hover line with tooltip
+    eventsRect
+      .on("mousemove", function(event, d) {
+        handleMouseMove(event, d, filteredData);
+      })
+      .on("mouseout", handleMouseOut)
+  }
+
+
+  // ----- DEFINE RESET VIEW AND DRAW RESET BUTTON ----- //
+  
+  
+  let resetButton = svg
+    .selectAll("reset")
+    .data(["Reset View"])
+    .enter()
+    // .append("g")
+    .append("rect")
+    .attr("class", "resetButton")
+    .attr("x", width + margin.left + labelBackgroundWidth)
+    .attr("y", 10 + 7*(legendSize+5) - legendSize/2)
+    .attr("width", 8.5*legendSize)
+    .attr("height", legendSize)
+    .attr("rx", 5)
+    .style("stroke", "#d3d3d3")
+    .style("fill", "white")
+    .on("mouseover", function(event, d) {d3.select(this).style("fill", "#f2f2f2");})
+    .on("mouseleave", function(event, d) {d3.select(this).style("fill", "white");})
+
+  let resetLabel = svg
+    .selectAll("resetLabel")
+    .data(["Reset View"])
+    .enter()
+    .append("text")
+    .attr("x", width + margin.left + labelBackgroundWidth + 0.3*legendSize)
+    .attr("y", 10 + 7*(legendSize+5))
+    .style("fill", "#a6a6a6")
+    .text(d => d)
+    .attr("text-anchor", "left")
+    .style("alignment-baseline", "middle")
+    .on("mouseover", function(event, d) {d3.select(".resetButton").style("fill", "#f2f2f2");})
+    .on("mouseleave", function(event, d) {d3.select(".resetButton").style("fill", "white");})
+    .on("click", resetView);
+  
+
   // ----- DRAW LEGEND AND LABELS ----- //
-  let legendSize = 20;
   let legend = svg
     .selectAll("legend")
     .data(delayTypes)
     .enter()
     .append("rect")
-    .attr("x", width)
+    .attr("class", d => "delayLegend " + d)
+    .attr("x", width + margin.left + labelBackgroundWidth)
     .attr("y", function (d, i) {
-      return 10 + i * (legendSize + 5);
+      return 10 + (5-i)*(legendSize + 5);
     })
-    .attr("width", legendSize)
+    .attr("width", 8.5*legendSize)
     .attr("height", legendSize)
-    .style("fill", (d) => color(d))
+    .attr("rx", 5)
+    .style("stroke", (d) => highlightColor(d))
+    .style("fill", "white")
     .on("mouseover", highlight)
-    .on("mouseleave", noHighlight);
+    .on("mouseleave", noHighlight)
+    .on("click", onClick);
 
   const labelMap = new Map();
   labelMap.set('carrier_ct', 'Carrier Delays')
@@ -463,14 +689,15 @@ function generateTimeChart(data) {
     .data(delayTypes)
     .enter()
     .append("text")
-    .attr("x", width + legendSize * 1.2)
+    .attr("x", width + margin.left + labelBackgroundWidth + 0.3*legendSize)
     .attr("y", function (d, i) {
-      return 10 + i * (legendSize + 5) + legendSize / 2;
+      return 10 + (5-i) * (legendSize + 5) + legendSize / 2;
     })
-    .style("fill", (d) => color(d))
+    .style("fill", (d) => highlightColor(d))
     .text((d) => labelMap.get(d))
     .attr("text-anchor", "left")
     .style("alignment-baseline", "middle")
     .on("mouseover", highlight)
-    .on("mouseleave", noHighlight);
+    .on("mouseleave", noHighlight)
+    .on("click", onClick);
 }

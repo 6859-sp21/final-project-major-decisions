@@ -90,6 +90,9 @@ function generateTimeChart(data) {
   let stackGen = d3.stack().keys(delayTypes);
   let stackedData = stackGen(aggData);
 
+  // var to save state: in all-delays view or individual delay type view?
+  let individualView = false;
+
 
   // ----- AXES SCALES AND LABELS ----- //
   let x = d3
@@ -151,8 +154,8 @@ function generateTimeChart(data) {
   const delayColors = ["#CFEBDE","#FFD7BB","#e6f5c9","#cbd5e8","#F5E3EE"];
   const highlightColors = ["#82D9B2","#FFB480","#C3E189","#ACC0E5","#E9BDD8"];
 
-  let color = d3.scaleOrdinal().domain(delayTypes).range(delayColors);
-  let highlightColor = d3.scaleOrdinal().domain(delayTypes).range(highlightColors);
+  const color = d3.scaleOrdinal().domain(delayTypes).range(delayColors);
+  const highlightColor = d3.scaleOrdinal().domain(delayTypes).range(highlightColors);
 
 
 
@@ -244,6 +247,8 @@ function generateTimeChart(data) {
 
       xAxisGroup.call(xAxis.scale(x));
       svg.selectAll(".delayLayers").transition().duration(1000).attr("d", area);
+      console.log(svg.selectAll(".soloLayers"))
+      svg.selectAll(".soloLayers").transition().duration(1000).attr("d", individualArea).style("opacity", 1);
       svg.selectAll(".contextRect").transition().duration(1000)
         .attr("x", newX0)
         .attr("width", newX1 - newX0);
@@ -261,6 +266,7 @@ function generateTimeChart(data) {
     x.domain(d3.extent([new Date(2015,12), d3.max(sortedData, d => d.date)]));
     xAxisGroup.call(xAxis);
     svg.selectAll(".delayLayers").transition().duration(1000).attr("d", area);
+    svg.selectAll(".soloLayers").transition().duration(1000).attr("d", individualArea).style("opacity", 0);
     svg.selectAll(".contextRect").transition().duration(1000)
       .attr("x", 0)
       .attr("width", width);
@@ -285,13 +291,20 @@ function generateTimeChart(data) {
     .attr("class", "brush");
   eventsRect.call(brush);
 
-  let area = d3
+  const area = d3
     .area()
     .x((d) => x(d.data.date))
     .y0((d) => y(d[0]))
     .y1((d) => y(d[1]));
+    
+  const individualArea = d3
+    .area()
+    .x((d) => x(d.data.date))
+    .y0((d) => y(0))
+    .y1((d) => y(d[1]-d[0]));
 
   function drawStackedArea(layerData) {
+    console.log(layerData);
     clipped
       .selectAll("layers")
       .data(layerData)
@@ -301,8 +314,20 @@ function generateTimeChart(data) {
       .attr("d", area);
   }
 
-  drawStackedArea(stackedData);
+  function drawIndividualArea(layerData) {
+    console.log(layerData);
+    clipped
+      .selectAll("soloLayers")
+      .data(layerData)
+      .join("path")
+      .attr("class", (d) => "soloLayers " + d.key)
+      .attr("fill", (d) => color(d.key))
+      .attr("d", individualArea)
+      .style("opacity", 0);
+  }
 
+  drawStackedArea(stackedData);
+  drawIndividualArea(stackedData);
 
   // ----- DRAW VERTICAL LINE AND TOOLTIPS TO SHOW VALUE ON MOUSEOVER ----- //
   let hoverLine = eventsRect.append("line")
@@ -366,6 +391,7 @@ function generateTimeChart(data) {
     datumValues.set("weather_ct", datum.weather_ct);
     datumValues.set("carrier_ct", datum.carrier_ct);
 
+    // source for stacked area tooltips: https://bl.ocks.org/fabiomainardi/3976176cb36e718a608f
     let datumDelays = new Map();
     y1 = datum.late_aircraft_ct + datum.security_ct + datum.nas_ct + datum.weather_ct + datum.carrier_ct;
     y2 = datum.security_ct + datum.nas_ct + datum.weather_ct + datum.carrier_ct;
@@ -525,6 +551,112 @@ function generateTimeChart(data) {
   });
 
 
+  // ----- HOVER ON LEGEND TO HIGHLIGHT DELAY AREA ----- //
+  let selectedDelay = "";
+  
+  let highlight = function (event, d) {
+    d3.selectAll(".soloLayers").style("opacity", 0);
+    d3.selectAll(".delayLayers").style("opacity", 0.3); // lower opacity if not selected
+    d3.select("path.delayLayers." + d)
+      // .attr("fill", function(d) {return highlightColor(d.key)})
+      .style("opacity", 1); // selected should have full opacity
+    d3.select(".delayLegend." + d).style("fill", "#f2f2f2");
+  };
+
+
+  let noHighlight = function (event, d) {
+    if (!individualView) {
+      d3.selectAll("path.delayLayers")
+        // .attr("fill", function(d) {return color(d.key)})
+        .style("opacity", 1);
+    } else {
+      d3.selectAll("path.delayLayers").style("opacity", 0);
+      d3.select(".soloLayers."+selectedDelay).style("opacity", 1);
+    }
+    d3.selectAll(".delayLegend").style("fill", "white");
+  };
+
+
+
+  let onClick = function (event, d) {
+    console.log("in click!", d)
+    individualView = true;
+    selectedDelay = d;
+
+    let filteredData = sortedData.filter(
+      (d) => d.carrier_name === selectedCarrier
+    );
+    let filteredStack = stackGen(filteredData);
+
+    svg.selectAll(".delayLayers").transition().duration(500).style("opacity", 0);
+
+    svg.select(".soloLayers." + d).transition().duration(500).style("opacity", 1);
+
+    // now hide areas of all that currently exist
+
+    x.domain(d3.extent(data, (d) => d.date))
+    xAxisGroup.call(xAxis);
+    
+    // https://stackoverflow.com/questions/47828945/shorten-months-ticks-on-x-axis
+    xAxisGroup.selectAll(".tick").each(function(d) {
+      if (this.textContent === d3.timeFormat("%B")(d)) {
+        d3.select(this).select("text").text(d3.timeFormat("%b"))
+      }
+    })
+
+    // svg.selectAll(".contextLayers").remove();
+    // drawContextArea(filteredStack);
+
+    // svg.select(".contextRect")
+    //   .attr("x", 0)
+    //   .attr("width", width)
+    //   .raise();
+
+    // change data for hover line with tooltip
+    eventsRect
+      .on("mousemove", function(event, d) {
+        handleMouseMove(event, d, filteredData);
+      })
+      .on("mouseout", handleMouseOut)
+  }
+
+
+  // ----- DEFINE RESET VIEW AND DRAW RESET BUTTON ----- //
+  
+  
+  let resetButton = svg
+    .selectAll("reset")
+    .data(["Reset View"])
+    .enter()
+    // .append("g")
+    .append("rect")
+    .attr("class", "resetButton")
+    .attr("x", width + margin.left + labelBackgroundWidth)
+    .attr("y", 10 + 7*(legendSize+5) - legendSize/2)
+    .attr("width", 8.5*legendSize)
+    .attr("height", legendSize)
+    .attr("rx", 5)
+    .style("stroke", "#d3d3d3")
+    .style("fill", "white")
+    .on("mouseover", function(event, d) {d3.select(this).style("fill", "#f2f2f2");})
+    .on("mouseleave", function(event, d) {d3.select(this).style("fill", "white");})
+
+  let resetLabel = svg
+    .selectAll("resetLabel")
+    .data(["Reset View"])
+    .enter()
+    .append("text")
+    .attr("x", width + margin.left + labelBackgroundWidth + 0.3*legendSize)
+    .attr("y", 10 + 7*(legendSize+5))
+    .style("fill", "#a6a6a6")
+    .text(d => d)
+    .attr("text-anchor", "left")
+    .style("alignment-baseline", "middle")
+    .on("mouseover", function(event, d) {d3.select(".resetButton").style("fill", "#f2f2f2");})
+    .on("mouseleave", function(event, d) {d3.select(".resetButton").style("fill", "white");})
+    .on("click", resetView);
+  
+
   // ----- DRAW LEGEND AND LABELS ----- //
   let legend = svg
     .selectAll("legend")
@@ -569,19 +701,3 @@ function generateTimeChart(data) {
     .on("mouseleave", noHighlight)
     .on("click", onClick);
 }
-
-  // ----- HOVER ON LEGEND TO HIGHLIGHT DELAY AREA ----- //
-  let highlight = function (event, d) {
-    d3.selectAll(".delayLayers").style("opacity", 0.2); // lower opacity if not selected
-    d3.select("path.delayLayers." + d).style("opacity", 1); // selected should have full opacity
-    d3.select(".delayLegend." + d).style("fill", "#f2f2f2");
-  };
-
-  let noHighlight = function (event, d) {
-    d3.selectAll("path.delayLayers").style("opacity", 1);
-    d3.selectAll(".delayLegend").style("fill", "white");
-  };
-
-  let onClick = function (event, d) {
-    console.log("in click!", d)
-  }

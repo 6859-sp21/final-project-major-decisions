@@ -318,7 +318,6 @@ function generateTimeChart(data) {
     .append('text')
       .attr("class", "hoverInfo")
       .attr("class", "hoverTotalLabel")
-      .style("opacity", 0)
 
   function getTextBox(selection) {
     selection.each(function(d) {d.bbox = this.getBBox();})
@@ -390,13 +389,22 @@ function generateTimeChart(data) {
     svg.select(".hoverTotalLabel")
       .attr("transform",
         `translate(${x(datum.date)}, ${y(total_ct)-15})`)
-      .text(currentTime + ": " + total_ct.toFixed(2) + " Total Delays")
+      .attr("dx", "0.5em")
+      .text(currentTime)
       .style("opacity",1)
-      .call(getTextBox)
-      .raise();
+      .append("tspan")
+        .attr("x",0)
+        .attr("dx", "0.5em")
+        .attr("dy","1.2em")
+        .text(total_ct.toFixed(2) + " Total Delays")
+        .style("opacity",1)
+      
+    svg.select(".hoverTotalLabel").call(getTextBox);
 
     svg.selectAll(".hoverLabelRect").remove();
+    svg.select(".hoverTotalLabel").remove();
 
+    // redraw background rectangle behind total delays label
     svg.append("g")
       .append("rect")
       .attr("class", "hoverLabelRect")
@@ -407,8 +415,24 @@ function generateTimeChart(data) {
       .attr("width", function(d){return d.bbox.width})
       .attr("height", function(d){return d.bbox.height})
       .style("fill", "#B2C8EE")
-      .style("opacity", 0.4)
+      .style("opacity", 0.8)
       .lower();
+
+    svg.append('g')
+    .append('text')
+      .attr("class", "hoverInfo")
+      .attr("class", "hoverTotalLabel")
+      .attr("transform",
+        `translate(${x(datum.date)}, ${y(total_ct)-15})`)
+      .attr("dx", "0.5em")
+      .text(currentTime)
+      .style("opacity",1)
+      .append("tspan")
+        .attr("x",0)
+        .attr("dx", "0.5em")
+        .attr("dy","1.2em")
+        .text(total_ct.toFixed(2) + " Total Delays")
+        .style("opacity",1)
 
     for (const delayType of delayTypes) {
       svg.select(".hoverCircle." + delayType)

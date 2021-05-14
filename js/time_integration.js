@@ -323,6 +323,7 @@ function generateTimeChart(data) {
     selection.each(function(d) {d.bbox = this.getBBox();})
   }
 
+  let labelBackgroundWidth = 0;
 
   for (i = 0; i < delayTypes.length; i++) {
     svg.append('g')
@@ -337,7 +338,7 @@ function generateTimeChart(data) {
       .append('text')
       .attr("text-anchor", "end")
       .attr('class', "hoverText " + delayTypes[i])
-      .attr('x', width + margin.left - 0.5*legendSize)
+      .attr('x', width + labelBackgroundWidth + margin.left - 0.5*legendSize)
       .attr('dy', '.35em')
       .attr("y", function (d) {
         return 20 + (5-i)*(legendSize+5)
@@ -415,7 +416,7 @@ function generateTimeChart(data) {
       .attr("width", function(d){return d.bbox.width})
       .attr("height", function(d){return d.bbox.height})
       .style("fill", "#B2C8EE")
-      .style("opacity", 0.8)
+      .style("opacity", 0.6)
       .lower();
 
     // re-add label text on top of background rect
@@ -531,7 +532,7 @@ function generateTimeChart(data) {
     .enter()
     .append("rect")
     .attr("class", d => "delayLegend " + d)
-    .attr("x", width+margin.left)
+    .attr("x", width + margin.left + labelBackgroundWidth)
     .attr("y", function (d, i) {
       return 10 + (5-i)*(legendSize + 5);
     })
@@ -556,7 +557,7 @@ function generateTimeChart(data) {
     .data(delayTypes)
     .enter()
     .append("text")
-    .attr("x", width + margin.left + 0.3*legendSize)
+    .attr("x", width + margin.left + labelBackgroundWidth + 0.3*legendSize)
     .attr("y", function (d, i) {
       return 10 + (5-i) * (legendSize + 5) + legendSize / 2;
     })

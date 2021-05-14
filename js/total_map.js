@@ -40,7 +40,8 @@ function generateMapTotal(){
             // The svg
         const svg = d3.select("#vis")
         .append("svg")
-        .attr("viewBox", [0, 0, width, height])
+        .attr("width", width)
+        .attr("height", height)
         .on("click", reset)
         .attr("id", "total_map")
         .attr('class', 'three-step');

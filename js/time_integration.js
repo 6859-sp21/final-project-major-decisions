@@ -188,15 +188,19 @@ function generateTimeChart(data) {
     .y0((d) => yContext(d[0]))
     .y1((d) => yContext(d[1]));
 
-  let contextView = context
-    .selectAll("contextLayers")
-    .data(stackedData)
-    .join("path")
-    .attr("class", function (d) {
-        return "contextLayers " + d.key;
-    })
-    .attr("d", areaContext)
-    .attr("fill", "#B2C8EE")
+  function drawContextArea(layerData) {
+    context
+      .selectAll("contextLayers")
+      .data(layerData)
+      .join("path")
+      .attr("class", function (d) {
+          return "contextLayers " + d.key;
+      })
+      .attr("d", areaContext)
+      .attr("fill", "#B2C8EE")
+  }
+
+  drawContextArea(stackedData);
 
   let contextRect = context.append('rect')
     .attr("class", "contextRect")
@@ -287,15 +291,17 @@ function generateTimeChart(data) {
     .y0((d) => y(d[0]))
     .y1((d) => y(d[1]));
 
-  let layers = clipped
-    .selectAll("layers")
-    .data(stackedData)
-    .join("path")
-    .attr("d", area)
-    .attr("class", function (d) {
-      return "delayLayers " + d.key;
-    })
-    .attr("fill", (d) => color(d.key));
+  function drawStackedArea(layerData) {
+    clipped
+      .selectAll("layers")
+      .data(layerData)
+      .join("path")
+      .attr("class", (d) => "delayLayers " + d.key)
+      .attr("fill", (d) => color(d.key))
+      .attr("d", area);
+  }
+
+  drawStackedArea(stackedData);
 
 
   // ----- DRAW VERTICAL LINE AND TOOLTIPS TO SHOW VALUE ON MOUSEOVER ----- //
@@ -308,11 +314,16 @@ function generateTimeChart(data) {
     .style("stroke-dasharray", "3,3")
     .style("opacity", 0);
 
-  let hoverValue = svg.append('g')
+  let hoverTotalLabel = svg.append('g')
     .append('text')
       .attr("class", "hoverInfo")
-      .attr("class", "hoverValue")
+      .attr("class", "hoverTotalLabel")
       .style("opacity", 0)
+
+  function getTextBox(selection) {
+    selection.each(function(d) {d.bbox = this.getBBox();})
+  }
+
 
   for (i = 0; i < delayTypes.length; i++) {
     svg.append('g')
@@ -376,12 +387,28 @@ function generateTimeChart(data) {
       .style("opacity",1)
       .raise();
       
-    svg.select(".hoverValue")
+    svg.select(".hoverTotalLabel")
       .attr("transform",
         `translate(${x(datum.date)}, ${y(total_ct)-15})`)
       .text(currentTime + ": " + total_ct.toFixed(2) + " Total Delays")
       .style("opacity",1)
+      .call(getTextBox)
       .raise();
+
+    svg.selectAll(".hoverLabelRect").remove();
+
+    svg.append("g")
+      .append("rect")
+      .attr("class", "hoverLabelRect")
+      .attr("x", function(d){return d.bbox.x})
+      .attr("y", function(d){return d.bbox.y})
+      .attr("transform",
+          `translate(${x(datum.date)}, ${y(total_ct)-15})`)
+      .attr("width", function(d){return d.bbox.width})
+      .attr("height", function(d){return d.bbox.height})
+      .style("fill", "#B2C8EE")
+      .style("opacity", 0.4)
+      .lower();
 
     for (const delayType of delayTypes) {
       svg.select(".hoverCircle." + delayType)
@@ -398,7 +425,8 @@ function generateTimeChart(data) {
 
   function handleMouseOut (event, d) {
     svg.select(".x").style("opacity", 0);
-    svg.select(".hoverValue").style("opacity", 0);
+    svg.select(".hoverTotalLabel").style("opacity", 0);
+    svg.selectAll(".hoverLabelRect").remove();
     for (const delayType of delayTypes) {
       svg.select(".hoverCircle." + delayType).style("opacity",0)
       svg.select(".hoverText." + delayType).style("opacity", 0);
@@ -431,6 +459,7 @@ function generateTimeChart(data) {
     );
     let filteredStack = stackGen(filteredData);
     svg.selectAll(".delayLayers").remove();
+    drawStackedArea(filteredStack);
 
     x.domain(d3.extent(data, (d) => d.date))//.nice();
     xAxisGroup.call(xAxis);
@@ -442,26 +471,8 @@ function generateTimeChart(data) {
       }
     })
 
-    clipped
-      .selectAll("layers")
-      .data(filteredStack)
-      .join("path")
-      .attr("class", (d) => "delayLayers " + d.key)
-      .attr("fill", (d) => color(d.key))
-      .attr("d", area);
-
     svg.selectAll(".contextLayers").remove();
-    context
-      .selectAll("contextLayers")
-      .data(filteredStack)
-      .join("path")
-      .attr("class", function(d) {return "contextLayers " + d.key;})
-      .attr("d", 
-        d3.area()
-        .x((d) => x(d.data.date))
-        .y0((d) => yContext(d[0]))
-        .y1((d) => yContext(d[1])))
-      .attr("fill", "#B2C8EE")
+    drawContextArea(filteredStack);
 
     svg.select(".contextRect")
       .attr("x", 0)

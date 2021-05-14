@@ -162,12 +162,13 @@
       //createCarrierRankBarAveMin(data);
       //catch(e) {/* we don't plan to do additional promise chaining, swallow the error for now*/}
 
-      createFinalGraph(data);
       d3.selectAll('.dynamic-bar')
       .transition()
       .duration(transitionTime)
       .attr('opacity', 1)
       .attr('display', 'block');
+      createPercentBarGroup(data);
+
 
       d3.select('.three-step')
       .transition()

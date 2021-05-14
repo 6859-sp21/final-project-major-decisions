@@ -32,7 +32,31 @@
       </section>
       <section class="step">
         We calculated the percentage of delayed flights per flight carrier per year. So which are the <b>worst</b> airlines?
-        (This chart is supposed to be animated, so that it shifts per year)
+        <button class='percent-top-5' onclick="setTop5()">Top 5</button>
+        <div class='airline-buttons-container'>
+          <button class='percent-carrier percent-Alaska-Airlines-Inc' onclick="updateSelectedCarrier('Alaska Airlines Inc.')">Alaska Airlines Inc.</button>
+          <button class='percent-carrier percent-Allegiant-Air' onclick="updateSelectedCarrier('Allegiant Air')">Allegiant Air</button>
+          <button class='percent-carrier percent-American-Airlines-Inc' onclick="updateSelectedCarrier('American Airlines Inc.')">American Airlines Inc.</button>
+          <button class='percent-carrier percent-Delta-Air-Lines-Inc' onclick="updateSelectedCarrier('Delta Air Lines Inc.')">Delta Air Lines Inc.</button>
+          <button class='percent-carrier percent-Endeavor-Air-Inc' onclick="updateSelectedCarrier('Endeavor Air Inc.')">Endeavor Air Inc.</button>
+          <button class='percent-carrier percent-Envoy-Air' onclick="updateSelectedCarrier('Envoy Air')">Envoy Air</button>
+          <button class='percent-carrier percent-ExpressJet-Airlines-Inc' onclick="updateSelectedCarrier('ExpressJet Airlines Inc.')">ExpressJet Airlines Inc.</button>
+          <button class='percent-carrier' onclick="updateSelectedCarrier('ExpressJet Airlines LLC')">ExpressJet Airlines LLC</button>
+          <button class='percent-carrier' onclick="updateSelectedCarrier('Frontier Airlines Inc.')">Frontier Airlines Inc.</button>
+          <button class='percent-carrier' onclick="updateSelectedCarrier('Hawaiian Airlines Inc.')">Hawaiian Airlines Inc.</button>
+          <button class='percent-carrier' onclick="updateSelectedCarrier('Horizon Air')">Horizon Air</button>
+          <button class='percent-carrier' onclick="updateSelectedCarrier('JetBlue Airways')">JetBlue Airways</button>
+          <button class='percent-carrier' onclick="updateSelectedCarrier('Mesa Airlines Inc.')">Mesa Airlines Inc.</button>
+          <button class='percent-carrier' onclick="updateSelectedCarrier('PSA Airlines Inc.')">PSA Airlines Inc.</button>
+          <button class='percent-carrier' onclick="updateSelectedCarrier('Republic Airline')">Republic Airline</button>
+          <button class='percent-carrier' onclick="updateSelectedCarrier('SkyWest Airlines Inc.')">SkyWest Airlines Inc.</button>
+          <button class='percent-carrier' onclick="updateSelectedCarrier('Spirit Air Lines')">Spirit Air Lines.</button>
+          <button class='percent-carrier' onclick="updateSelectedCarrier('Southwest Airlines Co.')">Southwest Airlines Co.</button>
+          <button class='percent-carrier' onclick="updateSelectedCarrier('United Air Lines Inc.')">United Air Lines Inc.</button>
+          <button class='percent-carrier' onclick="updateSelectedCarrier('Virgin America')">Virgin America</button>
+        </div>
+
+
       </section>
       <section class="step">
         Where are airports around the United States and how many arrivals has each had since 2016?
@@ -68,8 +92,7 @@
     </div>
     <div id='vis-container'>
       <div id='vis-controller'>
-        <div class='replay-button-container'>
-          <button class='replay-button'>Auto Play</button>
+        <div id='replay-button-container'>
         </div>
       </div>
       <div id='vis'>

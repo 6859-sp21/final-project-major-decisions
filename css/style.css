@@ -28,6 +28,11 @@
     height: 600px;
 }
 
+#replay-button-container {
+  width: 100px;
+  height:30px;
+}
+
 #vis-controller {
   display: flex;
   position: fixed;
@@ -49,6 +54,43 @@
 
 .replay-button-container button{
   margin: 25px auto;
+}
+
+.airline-buttons-container {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 10px;
+  row-gap: 10px;
+}
+
+.percent-top-5 {
+  margin-top: 10px;
+  width: 80px;
+  height: 40px;
+  font-size: 16px;
+  font-weight:bold;
+  background-color:white;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.percent-top-5:hover {
+  background-color: grey; /* Green */
+  color: white;
+}
+
+.percent-carrier {
+  height: 40px;
+  font-size: 16px;
+}
+
+.replay-button {
+  text-align: center;
+  height: 35;
+  margin-top: 15px;
+  font-size: 15px;
+  border-radius: 20px;
 }
   
 .step {

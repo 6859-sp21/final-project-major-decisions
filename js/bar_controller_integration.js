@@ -17,16 +17,46 @@ const names = ["Envoy Air", "Spirit Air Lines","PSA Airlines Inc."
 , "ExpressJet Airlines LLC"
 , "Horizon Air", "Virgin America"] // 20 names in total, some has nun 
 const colorScaleBar = d3.scaleOrdinal(d3v4.schemeCategory20).domain(names);
-let margin = ({top: 50, right: 6, bottom: 6, left: 0});
+const marginBarGraph = ({top: 50, right: 50, bottom: 6, left: 0});
+const barSize = 36;
 
 let SELECTED_YEAR = 2016
 let IS_AUTOPLAY = true;
-let SELECTED_AIRLINES = [];
+let SELECTED_AIRLINES = new Set(); // remove it after
 let IS_PERCENT = false;
+let IS_CUSTOMIZABLE = false;
+let DATA =[];
 
+function produceCarrierAnnualMapPercentDelayed(data, isCustomizable, selectedCarriers = SELECTED_AIRLINES) {
+    const carrierMap= generateMap(d3.groups(data, d=>d.carrier_name));
+    return carrierMap;
+    // from an array of objects like this: 0: {year: "2017", month: "8", carrier: "B6", carrier_name: "JetBlue Airways", airport: "PSE", …}
+    // To [delay_flights, total_flights]
+    function sumFlightsFromArrayOfObject(entryList) {
+        let delay_flights = 0;
+        let total_flights = 0;
+        for (const entry of entryList) {
+            
+            delay_flights = delay_flights + nonNaNParseFloat(entry.arr_del15);
+            total_flights = total_flights + nonNaNParseFloat(entry.arr_flights);
+        }
+        const result = (delay_flights/total_flights)*100;
+        return result;
+    }
 
+    function generateMap(carrierList) {
+        let generateMap = new Map();
+        for (const [carrier, carrier_data] of carrierList) {
+            // only add if it is included in filter or is the default map which should includes everything
+            if ((SELECTED_AIRLINES.has(carrier) && IS_CUSTOMIZABLE) || !IS_CUSTOMIZABLE){
+                generateMap.set(carrier, sumFlightsFromArrayOfObject(carrier_data));
+            }
+        }
+        return generateMap;
+    }
+}
 
-function produceCarrierAnnualMapAveMin(data) {
+function produceCarrierAnnualMapAveMin(data, isCustomizable = false, selectedCarriers = SELECTED_AIRLINES) {
     const carrierMap= generateMap(d3.groups(data, d=>d.carrier_name));
     return carrierMap;
     // from an array of objects like this: 0: {year: "2017", month: "8", carrier: "B6", carrier_name: "JetBlue Airways", airport: "PSE", …}
@@ -45,20 +75,22 @@ function produceCarrierAnnualMapAveMin(data) {
     function generateMap(carrierList) {
         let generateMap = new Map();
         for (const [carrier, carrier_data] of carrierList) {
-            generateMap.set(carrier, sumFlightsFromArrayOfObject(carrier_data));
+            if ((SELECTED_AIRLINES.has(carrier) && IS_CUSTOMIZABLE) || !IS_CUSTOMIZABLE) {
+                generateMap.set(carrier, sumFlightsFromArrayOfObject(carrier_data));
+            }
         }
         return generateMap;
     }
 }
 
-// provided key frames for animation and static bar charts
+// provided key frames for animation and static bar charts, one frame per year
 // data is the intial raw data
-function processKeyFrames(data, isPercent = true, isCustomizable = false, selectedCarriers =[]){
+function processKeyFrames(data, isPercent = true, isCustomizable = false){
     // ========================== data processing ================================
     const n= 5;
     const yearMap = d3.groups(data, d=>d.year).map(([year, data])=>[createDate(year), data]);
     let datevalues = []
-    if (isPercent) {
+    if (IS_PERCENT) {
         datevalues = yearMap.map(([year, data]) =>
         [year,produceCarrierAnnualMapPercentDelayed(data)]).sort(
             (a,b) => {return a[0].getFullYear()-b[0].getFullYear()});
@@ -67,15 +99,19 @@ function processKeyFrames(data, isPercent = true, isCustomizable = false, select
         [year,produceCarrierAnnualMapAveMin(data)]).sort(
             (a,b) => {return a[0].getFullYear()-b[0].getFullYear()});
     }
-    console.log(datevalues);
     // ======================== keyframes ==================================
-    const names = new Set(data.map(data => data.carrier_name)) // 20 names in total
-    console.log(names);
     function rank(value) {
-        const data = Array.from(names, name => ({name, value: value(name)}));
-        data.sort((a, b) => d3.descending(a.value, b.value));
-        for (let i = 0; i < data.length; ++i) data[i].rank = Math.min(n, i);
-        return data;
+        if (!IS_CUSTOMIZABLE) {
+            const data = Array.from(names, name => ({name, value: value(name)}));
+            data.sort((a, b) => d3.descending(a.value, b.value));
+            for (let i = 0; i < data.length; ++i) data[i].rank = Math.min(n, i);
+            return data;
+        } else { // not custamizable
+            const data = Array.from(SELECTED_AIRLINES, name => ({name, value: value(name)}));
+            data.sort((a, b) => d3.descending(a.value, b.value));
+            for (let i = 0; i < data.length; ++i) data[i].rank = Math.min(SELECTED_AIRLINES.size, i);
+            return data;
+        }
     }
 
     let keyframes = [];
@@ -98,19 +134,15 @@ function processKeyFrames(data, isPercent = true, isCustomizable = false, select
 
 }
 
-async function createCarrierRankBarAveMin(data, n=5) {
+async function createCarrierRankBarAveMin(data) {
     d3.selectAll('dynamic-bar-content').remove();
+    IS_AUTOPLAY = true;
+    const n = IS_CUSTOMIZABLE ? SELECTED_AIRLINES.size : 5;
     const keyframes = processKeyFrames(data, false);
-
     const nameframes = d3.groups(keyframes.flatMap(([, data]) => data), d => d.name)
     const prev = new Map(nameframes.flatMap(([, data]) => d3.pairs(data, (a, b) => [b, a])));
     const next = new Map(nameframes.flatMap(([, data]) => d3.pairs(data)));
 
-    console.log("The next")
-    console.log(keyframes);
-    console.log(n);
-    // createStaticBarAveMin(keyframes, 2016);
-    // return;
     // ============================== drawing functions ========================
     const xAxisMax = 30; //??
     function bars(svg) {
@@ -142,7 +174,9 @@ async function createCarrierRankBarAveMin(data, n=5) {
         let label = svg.append("g")
             .style("font", "bold 12px var(--sans-serif)")
             .style("font-variant-numeric", "tabular-nums")
-            .attr("text-anchor", "end")
+            .attr("text-anchor", "start")
+            .style('font-size', "13px")
+
           .selectAll("text");
       
         return ([date, data], transition) => label = label
@@ -151,13 +185,12 @@ async function createCarrierRankBarAveMin(data, n=5) {
             enter => enter.append("text")
               .attr("transform", d => `translate(${x((prev.get(d) || d).value)},${y((prev.get(d) || d).rank)})`)
               .attr("y", y.bandwidth() / 2)
-              .attr("x", -6)
+              .attr("x", 5)
               .attr("dy", "-0.25em")
               .text(d => d.name)
               .call(text => text.append("tspan")
                 .attr("fill-opacity", 0.7)
-                .attr("font-weight", "normal")
-                .attr("x", -6)
+                .attr("x", 5)
                 .attr("dy", "1.15em")),
             update => update,
             exit => exit.transition(transition).remove()
@@ -172,7 +205,7 @@ async function createCarrierRankBarAveMin(data, n=5) {
 
     function axis(svg) {
         const g = svg.append("g")
-            .attr("transform", `translate(0,${margin.top})`);
+            .attr("transform", `translate(0,${marginBarGraph.top})`);
 
         const axis = d3.axisTop(x)
             .ticks(width / 160)
@@ -196,7 +229,7 @@ async function createCarrierRankBarAveMin(data, n=5) {
             .attr("text-anchor", "end")
             .style('font-size', "30px")
             .attr("x", width - 80)
-            .attr("y", margin.top + barSize * (n - 0.45))
+            .attr("y", marginBarGraph.top + barSize * (n - 0.45))
             // .attr("dy", "0.32em")
             .text(formatDate(keyframes[0][0]));
       
@@ -206,20 +239,18 @@ async function createCarrierRankBarAveMin(data, n=5) {
       }
 
     // ================== final step drawing the graphs ====================
-    let barSize = 48;
     let duration = 1000;
-    const height = margin.top + barSize * n + margin.bottom;
-    const width = 900;
-    console.log(height);
+    const height = marginBarGraph.top + barSize * n + marginBarGraph.bottom;
+    const width = 700;
 
-    let x = d3.scaleLinear([0, xAxisMax], [margin.left, width - margin.right])
+    let x = d3.scaleLinear([0, xAxisMax], [marginBarGraph.left, width - marginBarGraph.right])
     let y = d3.scaleBand()
     .domain(d3.range(n + 1))
-    .rangeRound([margin.top, margin.top + barSize * (n + 1 + 0.1)])
+    .rangeRound([marginBarGraph.top, marginBarGraph.top + barSize * (n + 1 + 0.1)])
     .padding(0.1) 
 
     const svg = d3.create("svg")
-    .attr("viewBox", [0, 0, width, height + 10]) // changes here 
+    .attr("viewBox", [0, 0, width, height]) // changes here 
     .attr("class", "dynamic-bar-content dynamic-bar")
     .attr('display', 'block')
     .attr('opacity', 1);
@@ -229,7 +260,7 @@ async function createCarrierRankBarAveMin(data, n=5) {
     .attr("y", 25)
     .attr("x", width/2)
     .attr("text-anchor", "middle")
-    .text('Top 5 Carriers with longest average delays by minutes from 2016 - present')
+    .text(graphTitle())
     .attr("text-anchor", "middle")
 
     document.getElementById("vis").appendChild(svg.node());
@@ -239,7 +270,6 @@ async function createCarrierRankBarAveMin(data, n=5) {
     const updateLabels = labels(svg);
     const updateTicker = ticker(svg);
 
-    console.log("looping through animation")
     for (const keyframe of keyframes) {
         const transition = svg.transition()
             .duration(duration)
@@ -256,48 +286,13 @@ async function createCarrierRankBarAveMin(data, n=5) {
 
 }
 
-function produceCarrierAnnualMapPercentDelayed(data, isCustomizable, selectedCarriers = names) {
-    const carrierMap= generateMap(d3.groups(data, d=>d.carrier_name));
-    return carrierMap;
-    // from an array of objects like this: 0: {year: "2017", month: "8", carrier: "B6", carrier_name: "JetBlue Airways", airport: "PSE", …}
-    // To [delay_flights, total_flights]
-    function sumFlightsFromArrayOfObject(entryList) {
-        let delay_flights = 0;
-        let total_flights = 0;
-        for (const entry of entryList) {
-            
-            delay_flights = delay_flights + nonNaNParseFloat(entry.arr_del15);
-            total_flights = total_flights + nonNaNParseFloat(entry.arr_flights);
-        }
-        const result = (delay_flights/total_flights)*100;
-        return result;
-    }
-
-    function generateMap(carrierList) {
-        let generateMap = new Map();
-        for (const [carrier, carrier_data] of carrierList) {
-            // only add if it is included in filter or is the default map which should includes everything
-            if (selectedCarriers.includes(carrier) || !isCustomizable){
-                generateMap.set(carrier, sumFlightsFromArrayOfObject(carrier_data));
-            }
-        }
-        return generateMap;
-    }
-}
-
-// arrays of [time, datamap]
-// data map is carrier = > desired data
-function datedDataMapPercentDelayed(data, isCustomizable, selectedCarriers){
-    const yearMap = d3.groups(data, d=>d.year).map(([year, data])=>[createDate(year), data]);
-    const datevalues = yearMap.map(([year, data]) =>
-     [year,produceCarrierAnnualMapPercentDelayed(data, isCustomizable, selectedCarriers)]).sort(
-         (a,b) => {return a[0].getFullYear()-b[0].getFullYear()});
-    return datevalues;
-}
-
 // add when is something that is unavailable
-async function createCarrierRankBarPercentDelayed(data, isCustomizable=false, selectedCarriers=[], isAutoPlay = true, n=5) {
+async function createCarrierRankBarPercentDelayed(data) {
+    d3.selectAll('dynamic-bar-content').remove();
+    IS_AUTOPLAY = true;
+    const n = IS_CUSTOMIZABLE ? SELECTED_AIRLINES.size : 5;
     const keyframes = processKeyFrames(data,true);
+
     const nameframes = d3.groups(keyframes.flatMap(([, data]) => data), d => d.name)
     const prev = new Map(nameframes.flatMap(([, data]) => d3.pairs(data, (a, b) => [b, a])));
     const next = new Map(nameframes.flatMap(([, data]) => d3.pairs(data)));
@@ -332,7 +327,7 @@ async function createCarrierRankBarPercentDelayed(data, isCustomizable=false, se
         let label = svg.append("g")
             .style("font", "bold 12px var(--sans-serif)")
             .style("font-variant-numeric", "tabular-nums")
-            .attr("text-anchor", "end")
+            .attr("text-anchor", "start")
             .selectAll("text");
       
         return ([date, data], transition) => label = label
@@ -341,15 +336,14 @@ async function createCarrierRankBarPercentDelayed(data, isCustomizable=false, se
             enter => enter.append("text")
               .attr("transform", d => `translate(${x((prev.get(d) || d).value)},${y((prev.get(d) || d).rank)})`)
               .attr("y", y.bandwidth() / 2)
-                .attr("x", -5)
-
+              .attr("x", 5)
               .attr("dy", "-0.25em")
               .text(d => d.name)
+              .style('font-size', "13px")
               .call(text => text.append("tspan")
                 .attr("fill-opacity", 0.7)
                 .attr("font-weight", "normal")
-                .attr("x", -5)
-
+                .attr("x", 5)
                 .attr("dy", "1.15em")),
             update => update,
             exit => exit.transition(transition).remove()
@@ -364,7 +358,7 @@ async function createCarrierRankBarPercentDelayed(data, isCustomizable=false, se
 
     function axis(svg) {
         const g = svg.append("g")
-            .attr("transform", `translate(0,${margin.top})`);
+            .attr("transform", `translate(0,${marginBarGraph.top})`);
 
         const axis = d3.axisTop(x)
             .ticks(width / 160)
@@ -388,7 +382,7 @@ async function createCarrierRankBarPercentDelayed(data, isCustomizable=false, se
             .attr("text-anchor", "end")
             .style('font-size', "30px")
             .attr("x", width - 80)
-            .attr("y", margin.top + barSize * (n - 0.45))
+            .attr("y", marginBarGraph.top + barSize * (n - 0.45))
             // .attr("dy", "0.32em")
             .text(formatDate(keyframes[0][0]));
       
@@ -398,20 +392,19 @@ async function createCarrierRankBarPercentDelayed(data, isCustomizable=false, se
       }
 
     // ================== final step drawing the graphs ====================
-    let barSize = 48;
     let duration = 1000;
-    const height = margin.top + barSize * n + margin.bottom;
-    const width = 900;
+    const height = marginBarGraph.top + barSize * n + marginBarGraph.bottom;
+    const width = 700;
 
-    let x = d3.scaleLinear([0, xAxisMax], [margin.left, width - margin.right])
+    let x = d3.scaleLinear([0, xAxisMax], [marginBarGraph.left, width - marginBarGraph.right])
     let y = d3.scaleBand()
     .domain(d3.range(n + 1))
-    .rangeRound([margin.top, margin.top + barSize * (n + 1 + 0.1)])
+    .rangeRound([marginBarGraph.top, marginBarGraph.top + barSize * (n + 1 + 0.1)])
     .padding(0.1) 
 
     const svg = d3.create("svg")
-    .style("height", height)
-    .attr("viewBox", [0, 0, width, height])
+    // .style("height", height)  // this is the line that makes it fucked up
+    .attr("viewBox", [0, 0, width, height+10])
     .attr("class", "dynamic-bar-content dynamic-bar")
     .attr('display', 'block')
     .attr('opacity', 1);
@@ -421,7 +414,7 @@ async function createCarrierRankBarPercentDelayed(data, isCustomizable=false, se
     .attr("y", 25)
     .attr("x", width/2)
     .attr("text-anchor", "middle")
-    .text('Top '+n+' Carriers with highest percentage of delayed flights from 2016 - present')
+    .text(graphTitle())
     .attr("text-anchor", "middle")
 
     document.getElementById("vis").appendChild(svg.node());
@@ -453,21 +446,28 @@ function dateMapper([date, data]){
 }
 
 function textTween(a, b) {
-    formatNumber = d3.format(",d");
+    formatNumber = d3.format(".1f");
 
     const i = d3.interpolateNumber(a, b);
     return function(t) {
         this.textContent = formatNumber(i(t))+"%";
+        if ( this.textContent === "0.0%") {
+            this.textContent = "n/a";
+        }
     };
 }
 
 function textTweenMin(a, b) {
-    formatNumber = d3.format(",d");
+    formatNumber = d3.format(".1f");
 
     const i = d3.interpolateNumber(a, b);
     return function(t) {
-        this.textContent = formatNumber(i(t))+"min";
+            this.textContent = formatNumber(i(t))+"min";
+            if ( this.textContent === "0.0min") {
+                this.textContent = "n/a";
+            }
     };
+
 }
 
 function rank(value) {
@@ -479,8 +479,30 @@ function rank(value) {
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
-  }
+}
 
+function graphTitle(year="") {
+    let title ="";
+    if (IS_CUSTOMIZABLE) {
+        if (IS_PERCENT){
+            title = "Percentage of Flights Delayed of Selected Airlines";
+        } else {
+            title = "Expected duration of delay(min) of Selected Airlines";
+        }
+    } else {
+        if (IS_PERCENT){
+            title = "Top 5 Airlines with Highest Percentage of Flights Delayed";
+        } else {
+            title = "Top 5 Airlines with Longest Expected duration of delay(min)"
+        }
+    }
+
+    if (IS_AUTOPLAY) {
+        return title + " 2016-present";
+    } else {
+        return title + " in " + year;
+    }
+}
 function createDate(year, month) {   
     const newDate = new Date(parseInt(year),1, 1);
     return newDate;
@@ -495,19 +517,31 @@ function nonNaNParseFloat(numberString){
     }
 }
 
-function createFinalGraph(data){
-    const keyframes = processKeyFrames(data,false);
-    createSlider(keyframes);
-    createStaticBarAveMin(keyframes);
+function createAveMinBarGroup(data){
+    DATA = data;
+    IS_PERCENT = false;
+    IS_CUSTOMIZABLE = false;
+    createSlider();
+    createStaticBarAveMin();
+    createAutoplayButton();
     d3.selectAll('.replay-button').on('click', () => autoPlay(data))
 }
 
+function createPercentBarGroup(data){
+    DATA = data;
+    IS_PERCENT = true;
+    IS_CUSTOMIZABLE = false;
+    createSlider();
+    createStaticBarPercent();
+    createAutoplayButton();
+    d3.selectAll('.replay-button').on('click', () => autoPlay(data))
+}
 
 // slider class: dynamic-bar
 // content class: dynamic-bar-content
-function createSlider(keyframes,default_year = 2016){
+function createSlider(default_year = 2016){
     // d3.selectAll(".dynamic-bar").remove();
-    console.log("Calling create slider")
+    const keyframes = processKeyFrames(DATA);
     const dataTime = d3.range(0, 6).map(function(d) {
         return new Date(default_year + d, 10, 3); });
     
@@ -523,11 +557,12 @@ function createSlider(keyframes,default_year = 2016){
         .tickValues(dataTime)
         .default(new Date(default_year, 10, 3))
         .on('onchange', val => {
-            console.log("Detected on change! "+ val);
-            console.log(keyframes);
             d3.select('.dynamic-bar-content').remove();
-
-            createStaticBarAveMin(keyframes, val.getFullYear())
+            if (IS_PERCENT) {
+                createStaticBarPercent(val.getFullYear());
+            } else {
+                createStaticBarAveMin(val.getFullYear());
+            }
         });
 
     let gTime = d3.select("#vis-controller").append('svg')
@@ -542,30 +577,99 @@ function createSlider(keyframes,default_year = 2016){
     gTime.call(sliderTime);
 }
 
+function createAutoplayButton() {
+    d3.select("#replay-button-container")
+    .append('button')
+    .attr("type","button")
+    .attr("class","dynamic-bar replay-button")
+    .append("div")
+    .attr("class","label")
+    .text("autoplay")
+}
+
 function autoPlay(data) {
     IS_AUTOPLAY = true;
     d3.select(".dynamic-bar-content").remove();
-    createCarrierRankBarAveMin(data)
-    console.log("detected click button!")
+    if (IS_PERCENT) {
+        createCarrierRankBarPercentDelayed(data);
+    } else {
+        createCarrierRankBarAveMin(data);
+    }
+}
+
+function updateSelectedCarrier(clickedCarrier){
+    d3.selectAll('.dynamic-bar-content').remove()
+    IS_CUSTOMIZABLE = true;
+    console.log("The carrier just clicked is: "+ clickedCarrier);
+    if (SELECTED_AIRLINES.has(clickedCarrier)){ // mean to remove
+        SELECTED_AIRLINES.delete(clickedCarrier);
+        deselectElement(getClassMapping(clickedCarrier));
+    } else {
+        SELECTED_AIRLINES.add(clickedCarrier);
+        console.log("calling select element!")
+        selectElements(getClassMapping(clickedCarrier));
+        deselectElement(getClassMapping('top-5'));
+    }
+
+    if (IS_PERCENT) {
+        createStaticBarPercent();
+    } else {
+        createStaticBarAveMin();
+    }
+}
+
+function setTop5(){
+    console.log("Top 5 detected");
+    d3.selectAll('.dynamic-bar-content').remove();
+    IS_CUSTOMIZABLE = false;
+    SELECTED_AIRLINES= new Set();
+    selectElements(getClassMapping('top-5'));
+    deselectElement(getClassMapping('carrier'));
+    if (IS_PERCENT) {
+        createStaticBarPercent();
+    } else {
+        createStaticBarAveMin();
+    }
+}
+
+function getClassMapping(nameString){
+    let result = "";
+    if (nameString == "top-5" || nameString == 'carrier'){
+        result = IS_PERCENT?  ".percent-"+nameString : '.min-'+nameString;
+    } else {
+        let suffix = nameString.replaceAll(' ', '-').replaceAll('.', '');
+        result= IS_PERCENT? ".percent-"+suffix : ".min-"+suffix;
+    }
+    console.log(result);
+    return result;
     
+}
+
+function selectElements(elementString) {
+    d3.selectAll(elementString).style('background-color', "grey").style('color', "white");
+}
+
+function deselectElement(elementString) {
+    d3.selectAll(elementString).style('background-color', "white").style('color', "black");
 }
 
 // intake mapData of a certain year
 // key: carrier_name 
-function createStaticBarAveMin(dateMapData, selectedYear=2016,  n =5){
-    console.log(dateMapData);
-    console.log(selectedYear);
+function createStaticBarAveMin(selectedYear=2016){
+    IS_AUTOPLAY = false;
+    let dateMapData = processKeyFrames(DATA)
+
+    const n = IS_CUSTOMIZABLE ? SELECTED_AIRLINES.size : 5;
+
     const xAxisMax = 30;
     // ================== final step drawing the graphs ====================
-    let margin = ({top: 50, right: 6, bottom: 6, left: 0});
-    let barSize = 48;
-    const height = margin.top + barSize * n + margin.bottom;
-    const width = 900;
+    const height = marginBarGraph.top + barSize * n + marginBarGraph.bottom;
+    const width = 700;
 
-    let x = d3.scaleLinear([0, xAxisMax], [margin.left, width - margin.right])
+    let x = d3.scaleLinear([0, xAxisMax], [marginBarGraph.left, width - marginBarGraph.right])
     let y = d3.scaleBand()
     .domain(d3.range(n + 1))
-    .rangeRound([margin.top, margin.top + barSize * (n + 1 + 0.1)])
+    .rangeRound([marginBarGraph.top, marginBarGraph.top + barSize * (n + 1 + 0.1)])
     .padding(0.1) 
 
     const svg = d3.create("svg")
@@ -579,14 +683,12 @@ function createStaticBarAveMin(dateMapData, selectedYear=2016,  n =5){
     .attr("y", 25)
     .attr("x", width/2)
     .attr("text-anchor", "middle")
-    .text('Top 5 Carriers with longest average delays by minutes in '+selectedYear)
+    .text(graphTitle(selectedYear))
     .attr("text-anchor", "middle")
 
     document.getElementById("vis").appendChild(svg.node());
 
     const selectedYearData = dateMapData[selectedYear-2016][1]
-    console.log("Selected year Data: "+ dateMapData[selectedYear-2016]);
-    console.log(selectedYearData);
     svg.append("g")
     .attr("fill-opacity", 0.8)
     .selectAll("rect")
@@ -599,7 +701,7 @@ function createStaticBarAveMin(dateMapData, selectedYear=2016,  n =5){
     .attr("width", d => x(d.value) - x(0))
 
     const g = svg.append("g")
-    .attr("transform", `translate(0,${margin.top})`);
+    .attr("transform", `translate(0,${marginBarGraph.top})`);
 
     const axis = d3.axisTop(x)
         .ticks(width / 160)
@@ -612,6 +714,9 @@ function createStaticBarAveMin(dateMapData, selectedYear=2016,  n =5){
 
     function formatText(t) {
         let formatNumber = d3.format(",d");
+        if (t ==0){
+            return "n/a";
+        }
         return  formatNumber(t)+"min";
     }
 
@@ -630,6 +735,8 @@ function createStaticBarAveMin(dateMapData, selectedYear=2016,  n =5){
         .call(text => text.append("tspan"))
         .attr("fill-opacity", 0.7)
         .attr("font-weight", "normal")
+        .style('font-size', "13px")
+
 
     svg.append("g")
         .style("font", "bold 12px var(--sans-serif)")
@@ -643,6 +750,109 @@ function createStaticBarAveMin(dateMapData, selectedYear=2016,  n =5){
         .text(d => formatText(d.value))
         .attr("fill-opacity", 0.7)
         .attr("font-weight", "normal")
-        .attr("x", 45)
+        .attr("x", 37)
+        .attr("dy", "1.0em")
+        .style('font-size', "13px")
+
+}
+
+// intake mapData of a certain year
+// key: carrier_name 
+function createStaticBarPercent(selectedYear=2016){
+    d3.selectAll('dynamic-bar-content').remove();
+    IS_AUTOPLAY = false;
+    let dateMapData = processKeyFrames(DATA);
+    const n = IS_CUSTOMIZABLE ? SELECTED_AIRLINES.size : 5;
+    const xAxisMax = 30;
+    // ================== final step drawing the graphs ====================
+    const height = marginBarGraph.top + barSize * n + marginBarGraph.bottom;
+    const width = 700;
+
+    let x = d3.scaleLinear([0, xAxisMax], [marginBarGraph.left, width - marginBarGraph.right])
+    let y = d3.scaleBand()
+    .domain(d3.range(n + 1))
+    .rangeRound([marginBarGraph.top, marginBarGraph.top + barSize * (n + 1 + 0.1)])
+    .padding(0.1) 
+
+    const svg = d3.create("svg")
+    .attr("viewBox", [0, 0, width, height + 10]) // changes here 
+    .attr("class", "dynamic-bar-content dynamic-bar dynamic-bar-static")
+    .attr('display', 'block')
+    .attr('opacity', 1);
+
+      // creating title 
+    svg.append('g').attr('class','dynamic-bar-title').append('text')
+    .attr("y", 25)
+    .attr("x", width/2)
+    .attr("text-anchor", "middle")
+    .text(graphTitle(selectedYear))
+    .attr("text-anchor", "middle")
+
+    document.getElementById("vis").appendChild(svg.node());
+
+    const selectedYearData = dateMapData[selectedYear-2016][1]
+    svg.append("g")
+    .attr("fill-opacity", 0.8)
+    .selectAll("rect")
+    .data(selectedYearData.slice(0, n))
+    .enter().append('rect')
+    .attr("fill", d => colorScaleBar(d.name))
+    .attr("x", x(0))
+    .attr("y", d => y(d.rank)) // is this correct?
+    .attr("height", y.bandwidth())
+    .attr("width", d => x(d.value) - x(0))
+
+    const g = svg.append("g")
+    .attr("transform", `translate(0,${marginBarGraph.top})`);
+
+    const axis = d3.axisTop(x)
+        .ticks(width / 160)
+        .tickSizeOuter(0)
+        .tickSizeInner(-barSize * (n + y.padding()));
+    g.call(axis)
+    g.select(".tick:first-of-type text").remove();
+    g.selectAll(".tick:not(:first-of-type) line").attr("stroke", "white");
+    g.select(".domain").remove();
+
+    function formatText(t) {
+        let formatNumber = d3.format(".1f");
+        if (t ==0){
+            return "n/a";
+        }
+        return IS_PERCENT? formatNumber(t)+"%" : formatNumber(t)+"min";
+    }
+
+    svg.append("g")
+        .style("font", "bold 12px var(--sans-serif)")
+        .style("font-variant-numeric", "tabular-nums")
+        .attr("text-anchor", "start")
+        .selectAll("text")
+        .data(selectedYearData.slice(0, n))
+        .enter().append('text')
+        .attr("transform", d => `translate(${x(d.value)},${y(d.rank)})`)
+        .attr("y", y.bandwidth() / 2)
+        .attr("x", 5)
+        .attr("dy", "-0.25em")
+        .text(d => d.name)
+        .style('font-size', "13px")
+        .call(text => text.append("tspan"))
+        .attr("fill-opacity", 0.7)
+        .attr("font-weight", "normal")
+
+
+    svg.append("g")
+        .style("font", "bold 9px var(--sans-serif)")
+        .style("font-variant-numeric", "tabular-nums")
+        .attr("text-anchor", "end")
+        .selectAll("text")
+        .data(selectedYearData.slice(0, n))
+        .enter().append('text')
+        .attr("transform", d => `translate(${x(d.value)},${y(d.rank)})`)
+        .attr("y", y.bandwidth() / 2)
+        .text(d => formatText(d.value))
+        .attr("fill-opacity", 0.7)
+        .attr("font-weight", "normal")
+        .style('font-size', "13px")
+        .attr("x", 38)
         .attr("dy", "1.0em")
 }

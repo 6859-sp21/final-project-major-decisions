@@ -402,7 +402,7 @@ function generateTimeChart(data) {
     svg.select(".hoverTotalLabel").call(getTextBox);
 
     svg.selectAll(".hoverLabelRect").remove();
-    svg.select(".hoverTotalLabel").remove();
+    svg.select(".hoverTotalLabel").remove(); // remove text and add after drawing rectangle so text is on top
 
     // redraw background rectangle behind total delays label
     svg.append("g")
@@ -418,6 +418,8 @@ function generateTimeChart(data) {
       .style("opacity", 0.8)
       .lower();
 
+    // re-add label text on top of background rect
+    // https://brettromero.com/d3-js-adding-a-colored-background-to-a-text-element/
     svg.append('g')
     .append('text')
       .attr("class", "hoverInfo")

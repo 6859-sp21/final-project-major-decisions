@@ -342,7 +342,7 @@ function generateTimeChart(data) {
     selection.each(function(d) {d.bbox = this.getBBox();})
   }
 
-  let labelBackgroundWidth = 60;
+  let labelBackgroundWidth = 90;
 
   for (i = 0; i < delayTypes.length; i++) {
     svg.append('g')
@@ -659,8 +659,8 @@ function generateTimeChart(data) {
     .append("rect")
     .attr("class", "resetButton")
     .attr("x", width + margin.left + labelBackgroundWidth)
-    .attr("y", 10 + 7*(legendSize+5) - legendSize/2)
-    .attr("width", 8.5*legendSize)
+    .attr("y", 10 + 9*(legendSize+5) - legendSize/2)
+    .attr("width", 4.25*legendSize)
     .attr("height", legendSize)
     .attr("rx", 5)
     .style("stroke", "#d3d3d3")
@@ -675,7 +675,7 @@ function generateTimeChart(data) {
     .enter()
     .append("text")
     .attr("x", width + margin.left + labelBackgroundWidth + 0.3*legendSize)
-    .attr("y", 10 + 7*(legendSize+5))
+    .attr("y", 10 + 9*(legendSize+5))
     .style("fill", "#a6a6a6")
     .text(d => d)
     .attr("text-anchor", "left")
@@ -683,6 +683,42 @@ function generateTimeChart(data) {
     .on("mouseover", function(event, d) {d3.select(".resetButton").style("fill", "#f2f2f2");})
     .on("mouseleave", function(event, d) {d3.select(".resetButton").style("fill", "white");})
     .on("click", resetView);
+
+  let hoverTextCaption = svg
+    .selectAll("hoverTextCaption")
+    .data(["# Delays*"])
+    .enter()
+    .append("text")
+    .attr("x", width + margin.left + legendSize)
+    .attr("y", 15)
+    .style("fill", "black")
+    .text(d => d)
+    .attr("text-anchor", "left")
+    .style("alignment-baseline", "middle")
+
+  let hoverTextNote = svg
+    .selectAll("hoverTextNote")
+    .data(["*per 10,000 flights"])
+    .enter()
+    .append("text")
+    .attr("x", width + margin.left + legendSize)
+    .attr("y", 10 + 7*(legendSize+5))
+    .style("fill", "black")
+    .text(d => d)
+    .attr("text-anchor", "left")
+    .style("alignment-baseline", "middle")
+
+  let legendCaption = svg
+    .selectAll("legendCaption")
+    .data(["Delay Types"])
+    .enter()
+    .append("text")
+    .attr("x", width + margin.left + labelBackgroundWidth + 0.3*legendSize)
+    .attr("y", 15)
+    .style("fill", "black")
+    .text(d => d)
+    .attr("text-anchor", "left")
+    .style("alignment-baseline", "middle")
   
 
   // ----- DRAW LEGEND AND LABELS ----- //
@@ -696,7 +732,7 @@ function generateTimeChart(data) {
     .attr("y", function (d, i) {
       return 10 + (5-i)*(legendSize + 5);
     })
-    .attr("width", 8.5*legendSize)
+    .attr("width", 4.25*legendSize)
     .attr("height", legendSize)
     .attr("rx", 5)
     .style("stroke", (d) => highlightColor(d))
@@ -706,11 +742,11 @@ function generateTimeChart(data) {
     .on("click", selectDelayType);
 
   const labelMap = new Map();
-  labelMap.set('carrier_ct', 'Carrier Delays')
-  labelMap.set('weather_ct', 'Weather Delays');    
-  labelMap.set('nas_ct', 'National Air System Delays')
-  labelMap.set('security_ct', 'Security Delays')
-  labelMap.set('late_aircraft_ct', 'Late Aircraft Delays')
+  labelMap.set('carrier_ct', 'Carrier')
+  labelMap.set('weather_ct', 'Weather');    
+  labelMap.set('nas_ct', 'NAS')
+  labelMap.set('security_ct', 'Security')
+  labelMap.set('late_aircraft_ct', 'Late Aircraft')
 
   let labels = svg
     .selectAll("labels")

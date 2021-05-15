@@ -2,6 +2,8 @@ function createTimeChart() {
   d3.csv("https://raw.githubusercontent.com/6859-sp21/final-project-major-decisions/main/data/airlines_time_agg.csv", function (d) {
   // d3.csv("https://raw.githubusercontent.com/6859-sp21/final-project-major-decisions/main/data/airlines_time_total.csv", function (d) {
     return {
+      year: +d.year,
+      month: +d.month-1,
       date: new Date(+d.year, +d.month-1),
       carrier: d.carrier,
       carrier_name: d.carrier_name,
@@ -11,16 +13,149 @@ function createTimeChart() {
       nas_ct: (+d.nas_ct * 10000) / +d.arr_flights,
       security_ct: (+d.security_ct * 10000) / +d.arr_flights,
       late_aircraft_ct: (+d.late_aircraft_ct * 10000) / +d.arr_flights,
+      total_ct: (+d.carrier_ct + +d.weather_ct + +d.nas_ct + +d.security_ct + +d.late_aircraft_ct) * 10000 / +d.arr_flights 
     };
   }).then(function (data) {
     let airData = data;
     generateTimeChart(airData);
     // generateStill(airData);
+    // generateAverages(airData);
   });
 }
 
 function generateAverages(data) {
+  let sortedData = data.sort((x, y) => d3.ascending(x.date, y.date));
+  const dataYears = [2016, 2017, 2018, 2019, 2020];
 
+  // set the dimensions and margins of the graph
+  let fullWidth = 560,
+      fullHeight = 500;
+
+  let margin  = {top: 20, right: 30, bottom: 30, left: 60},
+    width = fullWidth - margin.left - margin.right,
+    height  = fullHeight - margin.top - margin.bottom;
+
+  let previewHeight = 125;
+  let legendSize = 20;
+
+  // append the svg object to the body of the page
+  const svg = d3.select("#vis")
+    .append("svg")
+    .attr("class", "five-step")
+    .attr("id", "time_vis")
+    .attr("width", width + 5*margin.left) // 800
+    .attr("height", height + 2*previewHeight)
+    .append("g")
+      .attr(
+        "transform",
+        `translate(${margin.left},${margin.bottom})`
+      );
+
+
+  // ----- AXES SCALES AND LABELS ----- //
+  let x = d3
+    .scaleLinear()
+    // .domain([new Date().setMonth(0),new Date().setMonth(11)])
+    .domain([0, 11])
+    // .domain(d3.extent(sortedData, (d) => d.month))
+    .range([0, width]);
+
+
+  const tickValues = [0,1,2,3,4,5,6,7,8,9,10,11];
+
+  let xAxis = d3.axisBottom(x)
+    .tickValues(tickValues)
+    .tickFormat(function(d,i) {console.log(i, ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][i]); return ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][i]});
+
+  let xAxisGroup = svg
+    .append("g")
+    .attr("transform", `translate(0,${height})`)
+    .call(xAxis)
+
+  let xAxisLabel = svg.append("text")
+    .attr("text-anchor", "end")
+    .attr("x", width/2 + margin.right)
+    .attr("y", height + 2*margin.top)
+    .text("Month")
+
+  let y = d3
+    .scaleLinear()
+    .domain([0, d3.max(sortedData, d => d.total_ct)])
+    .range([height, 0])
+    .nice();
+
+  let yAxis = d3.axisLeft(y);
+  let yAxisGroup = svg
+    .append("g")
+    .call(yAxis)
+
+  let yAxisLabel = svg.append("text")
+    .attr("x", -height*3/4)
+    .attr("y", -50)
+    .text("No. of Delays per 10,000 Arriving Flights")
+    .attr("transform", "rotate(-90)")
+    .attr("text-anchor", "start")
+
+
+  // ----- COLOR ENCODING ----- //
+  const colors = ["#E9BDD8","#FFB480","#C3E189","#ACC0E5","#FF0000"];
+
+  // ----- DRAW AREAS ----- //
+  // set up clip area so visualization doesn't go past axes
+  let clip = svg
+    .append("defs")
+    .append("clipPath")
+    .attr("id", "clip")
+    .append("rect")
+    .attr("width", width)
+    .attr("height", height)//-margin.top)
+    .attr("x", 0)
+    .attr("y", 0);
+
+  let clipped = svg.append("g").attr("clip-path", "url(#clip)");
+  const line = d3.line()
+    .x(function(d) { return x(d.month); })
+    .y(function(d) { return y(d.total_ct); });
+  
+  for (const year of dataYears) {
+    const yearData = sortedData
+      .filter(function(d) {return d.year === year});
+
+    svg.append("g")
+      .append("path")
+      .attr("class", "line " + year)
+      .attr("fill", "none")
+      .attr("stroke", d => colors[dataYears.indexOf(year)])
+      .attr("d", line(yearData))
+
+  }
+
+
+  // ----- ADD TITLE ----- //
+  let chartTitle = svg
+    .append("text")
+    .attr("id", "timeTitle")
+    .attr("x", width/2)
+    .attr("y", -margin.top)
+    .attr("fill", "black")
+    .attr("text-anchor", "middle")
+    .text((d) => "Total Delayed Flights")
+  
+
+  // ----- DRAW LEGEND AND LABELS ----- //
+  let legend = svg
+    .selectAll("legend")
+    .data(dataYears)
+    .enter()
+    .append("text")
+    .attr("x", width + margin.left)
+    .attr("y", function (d, i) {
+      return 10 +  i*(legendSize + 5) + legendSize / 2;
+    })
+    .style("fill", (d) => colors[dataYears.indexOf(d)])
+    .text((d) => d)
+    .attr("text-anchor", "left")
+    .style("alignment-baseline", "middle");
 }
 
 function generateStill(data) {

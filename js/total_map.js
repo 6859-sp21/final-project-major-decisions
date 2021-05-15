@@ -81,7 +81,32 @@ function generateMapTotal(){
         .attr('fill', 'white')
         .attr('stroke', 'DarkGrey');
         
-  
+        var centers= svg
+          .selectAll("myCenters")
+          .data(sortedData)
+          .enter()
+          .append("circle")
+            .attr("cx", function(d) {
+              if (projection([d.long, d.lat])==null){
+                return territoryPos.get(d.airport);
+              }
+              else {
+                return projection([d.long, d.lat])[0];
+              }
+            })
+            .attr("cy", function(d) {
+              if (projection([d.long, d.lat])==null){
+                return 560;
+              }
+              else {
+                return projection([d.long, d.lat])[1];
+              }
+            })
+            .attr("r", 1)
+            .attr("class", "center")
+            .attr("fill", "#E5E7E9")
+            .attr("fill-opacity", 0)
+
         // Add circles:
         var circles= svg
           .selectAll("myCircles")
@@ -109,7 +134,7 @@ function generateMapTotal(){
             .style("fill", "#e5c494")
             .attr("stroke", "#e5c494")
             .attr("stroke-width", 2)
-            .attr("fill-opacity", .4)
+            .attr("fill-opacity", .3)
           .on("mouseover", (event, d) => {
             Tooltip.style("opacity", 1)
           })
@@ -158,60 +183,10 @@ function generateMapTotal(){
             .style("font-size", 10)
             .attr('alignment-baseline', 'middle')
 
-        // var zoom = d3.zoom()
-        // .scaleExtent([1, 8])
-        // .on('zoom', function(event) {
-        //     svg.selectAll('path')
-        //     .attr('transform', event.transform);
-        //     svg.selectAll('circle')
-        //     .attr('transform', event.transform);
-        //     svg.selectAll('line')
-        //     .attr('transform', event.transform);
-        //     svg.selectAll('text')
-        //     .attr('transform', event.transform);
-        //     svg.selectAll('rect')
-        //     .attr('transform', event.transform);
-        //     svg.selectAll('div')
-        //     .attr('transform', event.transform);
-        // });
-
-        //////////////////////////////////////////////
 
         const zoom = d3.zoom()
           .scaleExtent([1, 8])
           .on("zoom", zoomed);
-
-        // function zoomed({transform}) {
-        //   svg.select('.states').attr("transform", transform);
-        //   svg.selectAll('circle').attr('transform', transform);
-        //   svg.selectAll('line').attr('transform', transform);
-        //   svg.selectAll('text').attr('transform', transform);
-        //   svg.selectAll('rect').attr('transform', transform);
-        //   svg.selectAll('div').attr('transform', transform);
-        // }
-
-        svg.call(zoom);
-
-        // var sliderSimple = d3
-        // .sliderBottom()
-        // .width(300)
-        // .min(1)
-        // .max(8)
-        // .default(1)
-        // .ticks(0)
-        // .on('onchange', val => {
-        //   svg.transition().call(zoom.scaleBy, val)
-        // });
-    
-        // let gSimple = svg.append('svg')
-        // .attr('x',30).attr('y', 800)
-        // .attr("viewBox", [0, 0, width+width/10, height]) // changes here 
-        // .style('width', width+width/10)
-        // .style('height', height)
-        // .append('g')
-        // .attr('transform', 'translate(30,30)');
-      
-        // gSimple.call(sliderSimple);
 
         function reset() {
           states.transition().style("fill", null);
@@ -220,10 +195,14 @@ function generateMapTotal(){
             d3.zoomIdentity,
             d3.zoomTransform(svg.node()).invert([width / 2, height / 2])
           );
+          svg.selectAll('circle').attr('stroke-width', 2)
+          centers.attr('fill-opacity', 0)
         }
       
         function clicked(event, d) {
           const [[x0, y0], [x1, y1]] = path.bounds(d);
+          centers.attr('fill-opacity', 1.0)
+          svg.selectAll('circle').attr('stroke-width', 0.5)
           event.stopPropagation();
           states.transition().style("fill", null);
           d3.select(this).transition().style("fill", "DarkGrey");
@@ -235,6 +214,7 @@ function generateMapTotal(){
               .translate(-(x0 + x1) / 2, -(y0 + y1) / 2),
             d3.pointer(event, svg.node())
           );
+          
         }
       
         function zoomed(event) {

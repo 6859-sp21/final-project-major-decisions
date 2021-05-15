@@ -139,10 +139,11 @@ function generateTimeChart(data) {
   // ----- COLOR ENCODING ----- //
   const delayColors = ["#CFEBDE","#FFD7BB","#e6f5c9","#cbd5e8","#F5E3EE"];
   const highlightColors = ["#82D9B2","#FFB480","#C3E189","#ACC0E5","#E9BDD8"];
+  const legendColors = ["#E7F6F0", "#FFEFE4", "#EBF3DD", "#E7EBF1", "#F6ECF2"];
 
   const color = d3.scaleOrdinal().domain(delayTypes).range(delayColors);
   const highlightColor = d3.scaleOrdinal().domain(delayTypes).range(highlightColors);
-
+  const legendColor = d3.scaleOrdinal().domain(delayTypes).range(legendColors);
 
 
   // https://stackoverflow.com/questions/38670322/d3-brushing-and-mouse-move-coexist 
@@ -326,7 +327,6 @@ function generateTimeChart(data) {
 
   // ----- DRAW VERTICAL LINE AND TOOLTIPS TO SHOW VALUE ON MOUSEOVER ----- //
   let hoverLine = eventsRect.append("line")
-    .attr("class", "hoverInfo")
     .attr("class", "x")
     .attr("y1", 0)
     .attr("y2", height)
@@ -336,7 +336,6 @@ function generateTimeChart(data) {
 
   let hoverTotalLabel = svg.append('g')
     .append('text')
-      .attr("class", "hoverInfo")
       .attr("class", "hoverTotalLabel")
 
   function getTextBox(selection) {
@@ -348,7 +347,6 @@ function generateTimeChart(data) {
   for (i = 0; i < delayTypes.length; i++) {
     svg.append('g')
       .append('circle')
-      .attr('class', "hoverInfo")
       .attr('class', "hoverCircle " + delayTypes[i])
       .attr("fill", highlightColors[i])
       .attr('r', 4)
@@ -365,6 +363,13 @@ function generateTimeChart(data) {
       })
       .style('font-size',15)
       .style('opacity', 0)
+
+    svg.append('g')
+      .append('circle')
+      .attr('class', "hoverSoloCircle " + delayTypes[i])
+      .attr("fill", highlightColors[i])
+      .attr('r', 4)
+      .style('opacity', 0);
   }
 
   // ----- ADD HOVER LINE ----- //
@@ -409,8 +414,13 @@ function generateTimeChart(data) {
       .raise();
       
     svg.select(".hoverTotalLabel")
-      .attr("transform",
-        `translate(${x(datum.date)}, ${y(total_ct)-15})`)
+      .attr("transform", function(d) {
+        if (individualView) {
+          return `translate(${x(datum.date)}, ${y(datumValues.get(selectedDelay))-15})`
+        } else {
+          return `translate(${x(datum.date)}, ${y(total_ct)-15})`
+        }
+      })
       .attr("dx", "0.5em")
       .text(currentTime)
       .style("opacity",1)
@@ -418,7 +428,11 @@ function generateTimeChart(data) {
         .attr("x",0)
         .attr("dx", "0.5em")
         .attr("dy","1.2em")
-        .text(total_ct.toFixed(2) + " Delays")
+        .text(function(d) {
+          if (individualView) {
+            return datumValues.get(selectedDelay).toFixed(2) + " Delays"
+          } else { return total_ct.toFixed(2) + " Delays"}
+        })
         .style("opacity",1)
       
     svg.select(".hoverTotalLabel").call(getTextBox);
@@ -432,8 +446,13 @@ function generateTimeChart(data) {
       .attr("class", "hoverLabelRect")
       .attr("x", function(d){return d.bbox.x})
       .attr("y", function(d){return d.bbox.y})
-      .attr("transform",
-          `translate(${x(datum.date)}, ${y(total_ct)-15})`)
+      .attr("transform", function(d) {
+        if (individualView) {
+          return `translate(${x(datum.date)}, ${y(datumValues.get(selectedDelay))-15})`
+        } else {
+          return `translate(${x(datum.date)}, ${y(total_ct)-15})`
+        }
+      })
       .attr("width", function(d){return d.bbox.width})
       .attr("height", function(d){return d.bbox.height})
       .style("fill", "#B2C8EE")
@@ -444,10 +463,14 @@ function generateTimeChart(data) {
     // https://brettromero.com/d3-js-adding-a-colored-background-to-a-text-element/
     svg.append('g')
     .append('text')
-      .attr("class", "hoverInfo")
       .attr("class", "hoverTotalLabel")
-      .attr("transform",
-        `translate(${x(datum.date)}, ${y(total_ct)-15})`)
+      .attr("transform", function(d) {
+        if (individualView) {
+          return `translate(${x(datum.date)}, ${y(datumValues.get(selectedDelay))-15})`
+        } else {
+          return `translate(${x(datum.date)}, ${y(total_ct)-15})`
+        }
+      })
       .attr("dx", "0.5em")
       .text(currentTime)
       .style("opacity",1)
@@ -455,18 +478,29 @@ function generateTimeChart(data) {
         .attr("x",0)
         .attr("dx", "0.5em")
         .attr("dy","1.2em")
-        .text(total_ct.toFixed(2) + " Delays")
+        .text(function(d) {
+          if (individualView) {
+            return datumValues.get(selectedDelay).toFixed(2) + " Delays"
+          } else { return total_ct.toFixed(2) + " Delays"}
+        })
         .style("opacity",1)
 
     for (const delayType of delayTypes) {
-      svg.select(".hoverCircle." + delayType)
-        .attr("transform",
-          `translate(${x(datum.date)}, ${y(datumDelays.get(delayType))})`)
-        .style("opacity",1)
+      if (individualView) {
+        svg.select(".hoverSoloCircle." + selectedDelay)
+          .attr("transform",
+            `translate(${x(datum.date)}, ${y(datumValues.get(selectedDelay))})`)
+          .style("opacity",1)
+      } else {
+        svg.select(".hoverCircle." + delayType)
+          .attr("transform",
+            `translate(${x(datum.date)}, ${y(datumDelays.get(delayType))})`)
+          .style("opacity",1)
 
-      svg.select(".hoverText."+delayType)
-        .style("opacity", 1)
-        .text(datumValues.get(delayType).toFixed(2))
+        svg.select(".hoverText."+delayType)
+          .style("opacity", 1)
+          .text(datumValues.get(delayType).toFixed(2))
+      }
     }
   }
 
@@ -476,8 +510,9 @@ function generateTimeChart(data) {
     svg.select(".hoverTotalLabel").style("opacity", 0);
     svg.selectAll(".hoverLabelRect").remove();
     for (const delayType of delayTypes) {
-      svg.select(".hoverCircle." + delayType).style("opacity",0)
+      svg.select(".hoverCircle." + delayType).style("opacity",0);
       svg.select(".hoverText." + delayType).style("opacity", 0);
+      svg.select(".hoverSoloCircle." + delayType).style("opacity",0)
     }
   }
 
@@ -571,11 +606,13 @@ function generateTimeChart(data) {
       d3.selectAll("path.delayLayers")
         // .attr("fill", function(d) {return color(d.key)})
         .style("opacity", 1);
+      d3.selectAll(".delayLegend").style("fill", "white");
     } else {
       d3.selectAll("path.delayLayers").style("opacity", 0);
       d3.select(".soloLayers."+selectedDelay).style("opacity", 1);
+      d3.selectAll(".delayLegend").style("fill", "white");
+      d3.select(".delayLegend."+selectedDelay).style("fill", legendColor(selectedDelay));
     }
-    d3.selectAll(".delayLegend").style("fill", "white");
   };
 
 
@@ -590,6 +627,8 @@ function generateTimeChart(data) {
     selectedDelay = d;
     individualView = true;
     syncSoloDelays(selectedDelay);
+    d3.selectAll(".delayLegend").style("fill", "white");
+    d3.select(".delayLegend."+selectedDelay).style("fill", legendColor(selectedDelay));
   }
 
 
@@ -607,6 +646,8 @@ function generateTimeChart(data) {
     svg.selectAll(".contextRect").transition().duration(1000)
       .attr("x", 0)
       .attr("width", width);
+
+    d3.selectAll(".delayLegend").style("fill", "white");
     
     individualView = false;
   }

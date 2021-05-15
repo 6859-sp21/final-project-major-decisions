@@ -219,6 +219,8 @@ function generateTimeChart(data) {
 
   function brushed(event) {
     let s = event.selection;
+    // console.log("SELECTION:",s);
+    // console.log("events rect:",eventsRect);
     if (!s) {
       if (!idleTimeout) return (idleTimeout = setTimeout(idled, 350));
       x.domain([0, 0]);
@@ -227,17 +229,20 @@ function generateTimeChart(data) {
           newX1 = xContext(x.invert(s[1]));
 
       x.domain([x.invert(s[0]), x.invert(s[1])]);
-      console.log(x.domain(), svg.selectAll(".soloLayers"));
 
       svg.select(".brush").call(brush.move, null);
 
       xAxisGroup.call(xAxis.scale(x));
-      svg.selectAll(".soloLayers").remove();
-      drawIndividualArea(currentData);
+      // svg.selectAll(".soloLayers").remove();
+      // drawIndividualArea(currentData);
+
+      if (individualView) {
+        syncSoloDelays(selectedDelay);
+      }
 
       svg.selectAll(".delayLayers").transition().duration(1000).attr("d", area);
+      svg.selectAll(".soloLayers").transition().duration(1000).attr("d", individualArea);
 
-      // svg.selectAll(".soloLayers").transition().duration(1000).attr("d", individualArea);
       svg.selectAll(".contextRect").transition().duration(1000)
         .attr("x", newX0)
         .attr("width", newX1 - newX0);
@@ -255,7 +260,8 @@ function generateTimeChart(data) {
     x.domain(d3.extent([new Date(2015,12), d3.max(sortedData, d => d.date)]));
     xAxisGroup.call(xAxis);
     svg.selectAll(".delayLayers").transition().duration(1000).attr("d", area);
-    svg.selectAll(".soloLayers").transition().duration(1000).attr("d", individualArea).style("opacity", 0);
+    // svg.selectAll(".soloLayers").attr("d", individualArea);
+    svg.selectAll(".soloLayers").transition().duration(1000).attr("d", individualArea);//.style("opacity", 0);
     svg.selectAll(".contextRect").transition().duration(1000)
       .attr("x", 0)
       .attr("width", width);
@@ -284,26 +290,17 @@ function generateTimeChart(data) {
 
   const area = d3
     .area()
-    // .x(function(d) {
-      // console.log(d);
-      // return x(d.data.date);
-    // })
     .x((d) => x(d.data.date))
     .y0((d) => y(d[0]))
     .y1((d) => y(d[1]));
     
   const individualArea = d3
     .area()
-    // .x(function(d) {
-      // console.log("SOLO:",d.data);
-      // return x(d.data.date)
-    // })
     .x((d) => x(d.data.date))
     .y0((d) => y(0))
     .y1((d) => y(d[1]-d[0]));
 
   function drawStackedArea(layerData) {
-    // console.log(layerData);
     clipped
       .selectAll("layers")
       .data(layerData)
@@ -314,7 +311,6 @@ function generateTimeChart(data) {
   }
 
   function drawIndividualArea(layerData) {
-    console.log(layerData);
     clipped
       .selectAll("soloLayers")
       .data(layerData)
@@ -506,19 +502,22 @@ function generateTimeChart(data) {
 
   // ----- FILTER BY AIRLINE ----- // 
   function updateChart(selectedCarrier, svg) {
+    individualView = false;
+
     x.domain(d3.extent([new Date(2015,12), d3.max(sortedData, d => d.date)]));
     xAxisGroup.call(xAxis);
 
     let filteredData = sortedData.filter(
       (d) => d.carrier_name === selectedCarrier
     );
-    currentData = stackGen(filteredData);
-    let filteredStack = currentData;
+    currentData = filteredData;
+    let filteredStack = stackGen(currentData);
+
     svg.selectAll(".delayLayers").remove();
     drawStackedArea(filteredStack);
 
     svg.selectAll(".soloLayers").remove();
-    drawIndividualArea(currentData);
+    drawIndividualArea(filteredStack);
     
     // https://stackoverflow.com/questions/47828945/shorten-months-ticks-on-x-axis
     xAxisGroup.selectAll(".tick").each(function(d) {
@@ -580,47 +579,17 @@ function generateTimeChart(data) {
   };
 
 
+  function syncSoloDelays (selectedDelay) {
+    d3.selectAll(".soloLayers").style("opacity", 0);
+    d3.select(".soloLayers." + selectedDelay).style("opacity", 1);
+  }
 
-  let onClick = function (event, d) {
-    console.log("in click!", d)
-    individualView = true;
+
+  function selectDelayType (event, d) {
+    updateChart(selectedCarrier, svg);
     selectedDelay = d;
-
-    let filteredData = sortedData.filter(
-      (d) => d.carrier_name === selectedCarrier
-    );
-    let filteredStack = stackGen(filteredData);
-
-    svg.selectAll(".delayLayers").transition().duration(500).style("opacity", 0);
-
-    svg.select(".soloLayers." + d).transition().duration(500).style("opacity", 1);
-
-    // now hide areas of all that currently exist
-
-    x.domain(d3.extent(data, (d) => d.date))
-    xAxisGroup.call(xAxis);
-    
-    // https://stackoverflow.com/questions/47828945/shorten-months-ticks-on-x-axis
-    xAxisGroup.selectAll(".tick").each(function(d) {
-      if (this.textContent === d3.timeFormat("%B")(d)) {
-        d3.select(this).select("text").text(d3.timeFormat("%b"))
-      }
-    })
-
-    // svg.selectAll(".contextLayers").remove();
-    // drawContextArea(filteredStack);
-
-    // svg.select(".contextRect")
-    //   .attr("x", 0)
-    //   .attr("width", width)
-    //   .raise();
-
-    // change data for hover line with tooltip
-    eventsRect
-      .on("mousemove", function(event, d) {
-        handleMouseMove(event, d, filteredData);
-      })
-      .on("mouseout", handleMouseOut)
+    individualView = true;
+    syncSoloDelays(selectedDelay);
   }
 
 
@@ -693,7 +662,7 @@ function generateTimeChart(data) {
     .style("fill", "white")
     .on("mouseover", highlight)
     .on("mouseleave", noHighlight)
-    .on("click", onClick);
+    .on("click", selectDelayType);
 
   const labelMap = new Map();
   labelMap.set('carrier_ct', 'Carrier Delays')
@@ -717,5 +686,5 @@ function generateTimeChart(data) {
     .style("alignment-baseline", "middle")
     .on("mouseover", highlight)
     .on("mouseleave", noHighlight)
-    .on("click", onClick);
+    .on("click", selectDelayType);
 }

@@ -210,7 +210,7 @@
       // .duration(transitionTime)
       // .attr('opacity', 1)
       // .attr('display', 'block');
-      createOverviewBarMin(data);
+      overviewBar(data);
 
 
       d3.select('.three-step')

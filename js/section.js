@@ -84,10 +84,12 @@
       activateFunctions[0] = showTitle;
       activateFunctions[1] = showDataIntro;
       activateFunctions[2] = showDynamicBarChart;
-      activateFunctions[3] = showMapOne;
-      activateFunctions[4] = showDonut;
-      activateFunctions[5] = showMapTwo;
-      activateFunctions[6] = showTimeChart;
+      activateFunctions[3] = showDynamicBarChartMin;
+      activateFunctions[4]= showOverviewBarChart;
+      activateFunctions[5] = showMapOne;
+      activateFunctions[6] = showDonut;
+      activateFunctions[7] = showMapTwo;
+      activateFunctions[8] = showTimeChart;
 
 
       
@@ -151,11 +153,30 @@
     }
   
     async function showDynamicBarChart() {
+      d3.selectAll('.dynamic-bar').remove();
+
       d3.select('.data-intro')
       .transition() // this need to bcreateCarrierRankBarAveMine left in as a hack for fast scrolling
       .duration(0)
       .attr('opacity', 0)
       .attr('display', 'none');
+
+      // d3.select(".three-step").remove();
+      //await createCarrierRankBarPercentDelayed(data);
+      //createCarrierRankBarAveMin(data);
+      //catch(e) {/* we don't plan to do additional promise chaining, swallow the error for now*/}
+
+      d3.selectAll('.dynamic-bar')
+      .transition()
+      .duration(transitionTime)
+      .attr('opacity', 1)
+      .attr('display', 'block');
+      //createPercentBarGroup(data);
+      createPercentBarGroup(data);
+    }
+
+    function showDynamicBarChartMin(){
+      d3.selectAll('.dynamic-bar').remove();
 
       d3.select(".three-step").remove();
       //await createCarrierRankBarPercentDelayed(data);
@@ -167,7 +188,29 @@
       .duration(transitionTime)
       .attr('opacity', 1)
       .attr('display', 'block');
-      createPercentBarGroup(data);
+      createAveMinBarGroup(data);
+
+
+      // d3.select('.three-step')
+      // .transition()
+      // .duration(0)
+      // .attr('opacity', 0)
+      // .attr('display', 'none');
+    }
+
+    function showOverviewBarChart(){
+      d3.selectAll('.dynamic-bar').remove();
+      d3.select(".three-step").remove();
+      //await createCarrierRankBarPercentDelayed(data);
+      //createCarrierRankBarAveMin(data);
+      //catch(e) {/* we don't plan to do additional promise chaining, swallow the error for now*/}
+
+      // d3.selectAll('.dynamic-bar')
+      // .transition()
+      // .duration(transitionTime)
+      // .attr('opacity', 1)
+      // .attr('display', 'block');
+      createOverviewBarMin(data);
 
 
       d3.select('.three-step')
@@ -175,13 +218,12 @@
       .duration(0)
       .attr('opacity', 0)
       .attr('display', 'none');
-     
     }
 
        // STEP 3
     function showMapOne() {
       d3.select("#donut-map").remove();
-      d3.selectAll('.dynamic-bar').remove();
+      d3.selectAll('.overview-bar').remove();
       generateMapTotal()
 
       d3.select('.dynamic-bar')
@@ -253,6 +295,7 @@
 
     // STEP 5 OR 6
     function showTimeChart() {
+      console.log("Is show time chart called?");
       d3.select("#delay_map").remove();
       d3.select("#delay_tooltip").remove();
       d3.select("#total_map").remove();

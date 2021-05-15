@@ -17,7 +17,7 @@ const names = ["Envoy Air", "Spirit Air Lines","PSA Airlines Inc."
 , "ExpressJet Airlines LLC"
 , "Horizon Air", "Virgin America"] // 20 names in total, some has nun 
 const colorScaleBar = d3.scaleOrdinal(d3v4.schemeCategory20).domain(names);
-const marginBarGraph = ({top: 50, right: 50, bottom: 6, left: 0});
+const marginBarGraph = ({top: 50, right: 60, bottom: 6, left: 0});
 const barSize = 36;
 
 let SELECTED_YEAR = 2016
@@ -424,7 +424,8 @@ async function createCarrierRankBarPercentDelayed(data) {
     const updateLabels = labels(svg);
     const updateTicker = ticker(svg);
 
-    for (const keyframe of keyframes) {
+    for (let i =0; i<keyframes.length; i++) {
+        const keyframe = keyframes[i];
         const transition = svg.transition()
         .duration(duration)
         .ease(d3.easeLinear);
@@ -433,6 +434,7 @@ async function createCarrierRankBarPercentDelayed(data) {
         updateBars(keyframe, transition);
         updateAxis(keyframe, transition);
         updateTicker(keyframe, transition);
+        createSlider(2016+i);
         // updateLabels(keyframe, transition);
 
         await transition.end();
@@ -518,32 +520,56 @@ function nonNaNParseFloat(numberString){
 }
 
 function createAveMinBarGroup(data){
+    SELECTED_AIRLINES = new Set();
     DATA = data;
     IS_PERCENT = false;
     IS_CUSTOMIZABLE = false;
     createSlider();
     createStaticBarAveMin();
     createAutoplayButton();
-    d3.selectAll('.replay-button').on('click', () => autoPlay(data))
+    d3.selectAll('.replay-button').on('click', () => autoPlay(data));
+    for (const carrier of names) {
+        d3.select(getClassMapping(carrier)).style('border-color', colorScaleBar(carrier)).style("background", "white").style("color", "black");
+
+            d3.select(getClassMapping(carrier)).on('mouseover', function (){
+                d3.select(getClassMapping(carrier)).style('background-color', colorScaleBar(carrier)).style('color', 'white');
+            }).on('mouseout', function (d, i) {
+                if (!SELECTED_AIRLINES.has(carrier)){
+                d3.select(getClassMapping(carrier)).style('background-color', "white").style('color', 'black');
+            }
+            });
+    }
 }
 
 function createPercentBarGroup(data){
+    SELECTED_AIRLINES = new Set();
     DATA = data;
     IS_PERCENT = true;
     IS_CUSTOMIZABLE = false;
     createSlider();
     createStaticBarPercent();
     createAutoplayButton();
-    d3.selectAll('.replay-button').on('click', () => autoPlay(data))
+    d3.selectAll('.replay-button').on('click', () => autoPlay(data));
+    for (const carrier of names) {
+        d3.select(getClassMapping(carrier)).style('border-color', colorScaleBar(carrier)).style("background", "white").style("color", "black");
+
+            d3.select(getClassMapping(carrier)).on('mouseover', function (){
+                d3.select(getClassMapping(carrier)).style('background-color', colorScaleBar(carrier)).style('color', 'white');
+            }).on('mouseout', function (d, i) {
+                if (!SELECTED_AIRLINES.has(carrier)){
+                d3.select(getClassMapping(carrier)).style('background-color', "white").style('color', 'black');
+            }
+            });
+    }
 }
 
 // slider class: dynamic-bar
 // content class: dynamic-bar-content
 function createSlider(default_year = 2016){
-    // d3.selectAll(".dynamic-bar").remove();
+    d3.selectAll(".dynamic-bar-slider").remove();
     const keyframes = processKeyFrames(DATA);
     const dataTime = d3.range(0, 6).map(function(d) {
-        return new Date(default_year + d, 10, 3); });
+        return new Date(2016 + d, 10, 3); });
     
     const width = 800;
     const height = 100;
@@ -600,15 +626,13 @@ function autoPlay(data) {
 function updateSelectedCarrier(clickedCarrier){
     d3.selectAll('.dynamic-bar-content').remove()
     IS_CUSTOMIZABLE = true;
-    console.log("The carrier just clicked is: "+ clickedCarrier);
     if (SELECTED_AIRLINES.has(clickedCarrier)){ // mean to remove
+        deselectElement((clickedCarrier));
         SELECTED_AIRLINES.delete(clickedCarrier);
-        deselectElement(getClassMapping(clickedCarrier));
     } else {
+        selectElements((clickedCarrier));
+        deselectElement(('top-5'));
         SELECTED_AIRLINES.add(clickedCarrier);
-        console.log("calling select element!")
-        selectElements(getClassMapping(clickedCarrier));
-        deselectElement(getClassMapping('top-5'));
     }
 
     if (IS_PERCENT) {
@@ -616,6 +640,7 @@ function updateSelectedCarrier(clickedCarrier){
     } else {
         createStaticBarAveMin();
     }
+    createSlider(2016);
 }
 
 function setTop5(){
@@ -623,13 +648,14 @@ function setTop5(){
     d3.selectAll('.dynamic-bar-content').remove();
     IS_CUSTOMIZABLE = false;
     SELECTED_AIRLINES= new Set();
-    selectElements(getClassMapping('top-5'));
-    deselectElement(getClassMapping('carrier'));
+    selectElements(('top-5'));
+    deselectElement(('carrier'));
     if (IS_PERCENT) {
         createStaticBarPercent();
     } else {
         createStaticBarAveMin();
     }
+    createSlider(2016);
 }
 
 function getClassMapping(nameString){
@@ -640,17 +666,21 @@ function getClassMapping(nameString){
         let suffix = nameString.replaceAll(' ', '-').replaceAll('.', '');
         result= IS_PERCENT? ".percent-"+suffix : ".min-"+suffix;
     }
-    console.log(result);
     return result;
     
 }
 
-function selectElements(elementString) {
-    d3.selectAll(elementString).style('background-color', "grey").style('color', "white");
+function selectElements(elementOriginalString) {
+    let element = d3.selectAll(getClassMapping(elementOriginalString));
+    if (elementOriginalString == 'top-5') {
+        element.style('background-color', "grey").style('color', "white");
+    } else {
+        element.style('background-color', colorScaleBar(elementOriginalString)).style('color', "white");
+    }
 }
 
-function deselectElement(elementString) {
-    d3.selectAll(elementString).style('background-color', "white").style('color', "black");
+function deselectElement(elementOriginalString) {
+    d3.selectAll(getClassMapping(elementOriginalString)).style('background-color', "white").style('color', "black");
 }
 
 // intake mapData of a certain year

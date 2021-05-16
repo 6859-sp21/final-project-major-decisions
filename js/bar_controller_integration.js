@@ -261,7 +261,6 @@ async function createCarrierRankBarAveMin(data) {
     .attr("x", width/2)
     .attr("text-anchor", "middle")
     .text(graphTitle())
-    .attr("text-anchor", "middle")
 
     document.getElementById("vis").appendChild(svg.node());
 

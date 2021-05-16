@@ -176,6 +176,7 @@
     }
 
     function showDynamicBarChartMin(){
+      d3.selectAll('.overview-bar').remove();
       d3.selectAll('.dynamic-bar').remove();
 
       d3.select(".three-step").remove();
@@ -226,7 +227,7 @@
       d3.selectAll('.overview-bar').remove();
       generateMapTotal()
 
-      d3.select('.dynamic-bar')
+      d3.select('.overview-bar')
       .transition()
       .duration(0)
       .attr('opacity', 0)

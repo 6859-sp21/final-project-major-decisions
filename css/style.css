@@ -99,6 +99,10 @@
   cursor: pointer;
 }
 
+.overview-bar-percent {
+  margin-bottom: 50px;
+}
+
 .min-top-5:hover {
   background-color: grey; /* Green */
   color: white;

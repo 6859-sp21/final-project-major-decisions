@@ -41,22 +41,49 @@
           <button class='percent-carrier percent-Endeavor-Air-Inc' onclick="updateSelectedCarrier('Endeavor Air Inc.')">Endeavor Air Inc.</button>
           <button class='percent-carrier percent-Envoy-Air' onclick="updateSelectedCarrier('Envoy Air')">Envoy Air</button>
           <button class='percent-carrier percent-ExpressJet-Airlines-Inc' onclick="updateSelectedCarrier('ExpressJet Airlines Inc.')">ExpressJet Airlines Inc.</button>
-          <button class='percent-carrier' onclick="updateSelectedCarrier('ExpressJet Airlines LLC')">ExpressJet Airlines LLC</button>
-          <button class='percent-carrier' onclick="updateSelectedCarrier('Frontier Airlines Inc.')">Frontier Airlines Inc.</button>
-          <button class='percent-carrier' onclick="updateSelectedCarrier('Hawaiian Airlines Inc.')">Hawaiian Airlines Inc.</button>
-          <button class='percent-carrier' onclick="updateSelectedCarrier('Horizon Air')">Horizon Air</button>
-          <button class='percent-carrier' onclick="updateSelectedCarrier('JetBlue Airways')">JetBlue Airways</button>
-          <button class='percent-carrier' onclick="updateSelectedCarrier('Mesa Airlines Inc.')">Mesa Airlines Inc.</button>
-          <button class='percent-carrier' onclick="updateSelectedCarrier('PSA Airlines Inc.')">PSA Airlines Inc.</button>
-          <button class='percent-carrier' onclick="updateSelectedCarrier('Republic Airline')">Republic Airline</button>
-          <button class='percent-carrier' onclick="updateSelectedCarrier('SkyWest Airlines Inc.')">SkyWest Airlines Inc.</button>
-          <button class='percent-carrier' onclick="updateSelectedCarrier('Spirit Air Lines')">Spirit Air Lines.</button>
-          <button class='percent-carrier' onclick="updateSelectedCarrier('Southwest Airlines Co.')">Southwest Airlines Co.</button>
-          <button class='percent-carrier' onclick="updateSelectedCarrier('United Air Lines Inc.')">United Air Lines Inc.</button>
-          <button class='percent-carrier' onclick="updateSelectedCarrier('Virgin America')">Virgin America</button>
+          <button class='percent-carrier percent-ExpressJet-Airlines-LLC' onclick="updateSelectedCarrier('ExpressJet Airlines LLC')">ExpressJet Airlines LLC</button>
+          <button class='percent-carrier percent-Frontier-Airlines-Inc' onclick="updateSelectedCarrier('Frontier Airlines Inc.')">Frontier Airlines Inc.</button>
+          <button class='percent-carrier percent-Hawaiian-Airlines-Inc' onclick="updateSelectedCarrier('Hawaiian Airlines Inc.')">Hawaiian Airlines Inc.</button>
+          <button class='percent-carrier percent-Horizon-Air' onclick="updateSelectedCarrier('Horizon Air')">Horizon Air</button>
+          <button class='percent-carrier percent-JetBlue-Airways' onclick="updateSelectedCarrier('JetBlue Airways')">JetBlue Airways</button>
+          <button class='percent-carrier percent-Mesa-Airlines-Inc' onclick="updateSelectedCarrier('Mesa Airlines Inc.')">Mesa Airlines Inc.</button>
+          <button class='percent-carrier percent-PSA-Airlines-Inc' onclick="updateSelectedCarrier('PSA Airlines Inc.')">PSA Airlines Inc.</button>
+          <button class='percent-carrier percent-Republic-Airline' onclick="updateSelectedCarrier('Republic Airline')">Republic Airline</button>
+          <button class='percent-carrier percent-SkyWest-Airlines-Inc' onclick="updateSelectedCarrier('SkyWest Airlines Inc.')">SkyWest Airlines Inc.</button>
+          <button class='percent-carrier percent-Spirit-Air-Lines' onclick="updateSelectedCarrier('Spirit Air Lines')">Spirit Air Lines.</button>
+          <button class='percent-carrier percent-Southwest-Airlines-Co' onclick="updateSelectedCarrier('Southwest Airlines Co.')">Southwest Airlines Co.</button>
+          <button class='percent-carrier percent-United-Air-Lines-Inc' onclick="updateSelectedCarrier('United Air Lines Inc.')">United Air Lines Inc.</button>
+          <button class='percent-carrier percent-Virgin-America' onclick="updateSelectedCarrier('Virgin America')">Virgin America</button>
         </div>
-
-
+      </section>
+      <section class="step">
+        We calculated the percentage of delayed flights per flight carrier per year. So which are the <b>worst</b> airlines?
+        <button class='min-top-5' onclick="setTop5()">Top 5</button>
+        <div class='airline-buttons-container'>
+          <button class='min-carrier min-Alaska-Airlines-Inc' onclick="updateSelectedCarrier('Alaska Airlines Inc.')">Alaska Airlines Inc.</button>
+          <button class='min-carrier min-Allegiant-Air' onclick="updateSelectedCarrier('Allegiant Air')">Allegiant Air</button>
+          <button class='min-carrier min-American-Airlines-Inc' onclick="updateSelectedCarrier('American Airlines Inc.')">American Airlines Inc.</button>
+          <button class='min-carrier min-Delta-Air-Lines-Inc' onclick="updateSelectedCarrier('Delta Air Lines Inc.')">Delta Air Lines Inc.</button>
+          <button class='min-carrier min-Endeavor-Air-Inc' onclick="updateSelectedCarrier('Endeavor Air Inc.')">Endeavor Air Inc.</button>
+          <button class='min-carrier min-Envoy-Air' onclick="updateSelectedCarrier('Envoy Air')">Envoy Air</button>
+          <button class='min-carrier min-ExpressJet-Airlines-Inc' onclick="updateSelectedCarrier('ExpressJet Airlines Inc.')">ExpressJet Airlines Inc.</button>
+          <button class='min-carrier min-ExpressJet-Airlines-LLC' onclick="updateSelectedCarrier('ExpressJet Airlines LLC')">ExpressJet Airlines LLC</button>
+          <button class='min-carrier min-Frontier-Airlines-Inc' onclick="updateSelectedCarrier('Frontier Airlines Inc.')">Frontier Airlines Inc.</button>
+          <button class='min-carrier min-Hawaiian-Airlines-Inc' onclick="updateSelectedCarrier('Hawaiian Airlines Inc.')">Hawaiian Airlines Inc.</button>
+          <button class='min-carrier min-Horizon-Air' onclick="updateSelectedCarrier('Horizon Air')">Horizon Air</button>
+          <button class='min-carrier min-JetBlue-Airways' onclick="updateSelectedCarrier('JetBlue Airways')">JetBlue Airways</button>
+          <button class='min-carrier min-Mesa-Airlines-Inc' onclick="updateSelectedCarrier('Mesa Airlines Inc.')">Mesa Airlines Inc.</button>
+          <button class='min-carrier min-PSA-Airlines-Inc' onclick="updateSelectedCarrier('PSA Airlines Inc.')">PSA Airlines Inc.</button>
+          <button class='min-carrier min-Republic-Airline' onclick="updateSelectedCarrier('Republic Airline')">Republic Airline</button>
+          <button class='min-carrier min-SkyWest-Airlines-Inc' onclick="updateSelectedCarrier('SkyWest Airlines Inc.')">SkyWest Airlines Inc.</button>
+          <button class='min-carrier min-Spirit-Air-Lines' onclick="updateSelectedCarrier('Spirit Air Lines')">Spirit Air Lines.</button>
+          <button class='min-carrier min-Southwest-Airlines-Co' onclick="updateSelectedCarrier('Southwest Airlines Co.')">Southwest Airlines Co.</button>
+          <button class='min-carrier min-United-Air-Lines-Inc' onclick="updateSelectedCarrier('United Air Lines Inc.')">United Air Lines Inc.</button>
+          <button class='min-carrier min-Virgin-America' onclick="updateSelectedCarrier('Virgin America')">Virgin America</button>
+        </div>
+      </section>
+      <section class="step">
+        This is Seara's overview section
       </section>
       <section class="step">
         Where are airports around the United States and how many arrivals does each get? This visualization shows the total number of arrivals at each airport since 2016. Hover over different bubbles to see details and zoom and pan to focus in on smaller areas. 
@@ -90,15 +117,17 @@
         <select id="selectButton"></select>
       </section>
     </div>
-    <div id='vis-container'>
-      <div id='vis-controller'>
-        <div id='replay-button-container'>
-        </div>
-      </div>
-      <div id='vis'>
+  </div>
+
+  <div id='vis-container'>
+    <div id='vis-controller'>
+      <div id='replay-button-container'>
       </div>
     </div>
+    <div id='vis'>
+    </div>
   </div>
+
   <script src="https://d3js.org/d3.v4.js"></script>
   <script>
     d3v4 = d3
@@ -109,6 +138,7 @@
     d3 = d3
   </script>
   <script src="https://unpkg.com/d3-simple-slider"></script>
+  <script src="js/bar_overview_graph.js"></script>
   <script src="js/scroller.js"></script>
   <script src="js/section.js"></script>
   <script src="js/bar_controller_integration.js"></script>

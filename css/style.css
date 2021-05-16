@@ -83,7 +83,35 @@
 .percent-carrier {
   height: 40px;
   font-size: 16px;
+  border-width: medium;
+  border-radius: 15px;
+  cursor:pointer;
 }
+
+.min-top-5 {
+  margin-top: 10px;
+  width: 80px;
+  height: 40px;
+  font-size: 16px;
+  font-weight:bold;
+  background-color:white;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.min-top-5:hover {
+  background-color: grey; /* Green */
+  color: white;
+}
+
+.min-carrier {
+  height: 40px;
+  font-size: 16px;
+  border-width: medium;
+  border-radius: 15px;
+  cursor:pointer;
+}
+
 
 .replay-button {
   text-align: center;

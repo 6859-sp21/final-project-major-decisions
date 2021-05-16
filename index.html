@@ -5,8 +5,13 @@
     <link rel="stylesheet" type="text/css" href="css/style.css" />
   </head>
   <body id='wholeBody'>
-  <div class="container">
+  <div class="page-container">
     <div id='sections'>
+      <!-- STEP 1: Title --> 
+      <div class="title-banner"> </div>
+      <section class="step">
+      </section>
+      <!-- STEP 2: BTS --> 
       <section class="step">
         <div class="title">
           <h3> Analyzing US airport and airline data </h3>
@@ -14,6 +19,7 @@
           <a href="https://www.transtats.bts.gov/OT_Delay/OT_DelayCause1.asp?pn=1">Bureau of Transportation Statistics website.</a>   
         </div>
       </section>
+      <!-- STEP 3: Data itself --> 
       <section class="step">
         We collected data spanned from January 2016 to March 2021. The data includes information on total number and delayed number of flights
         per airline per airport per months.
@@ -28,7 +34,17 @@
         </ul>
         <br>
         We performed the following analysis.
+      </section>
+      <!-- STEP 4: overview of the process --> 
+      <section class = "step">
+        This is overview of the process
+      </section>
+      <!-- STEP 5: part 1 banner --> 
+      <div class = "part-1-banner">
+        This is the banner
       </div>
+      <section class = "step">
+        This is overview of the process
       </section>
       <section class="step">
         We calculated the percentage of delayed flights per flight carrier per year. So which are the <b>worst</b> airlines?
@@ -117,15 +133,20 @@
         <select id="selectButton"></select>
       </section>
     </div>
-  </div>
 
-  <div id='vis-container'>
-    <div id='vis-controller'>
-      <div id='replay-button-container'>
+
+    <!-- <div id='vis-container'> -->
+      <div id='vis-controller'>
+        <div id='replay-button-container'>
+        </div>
+        <div id= 'vis-bar-slider'>
+        </div>
       </div>
-    </div>
-    <div id='vis'>
-    </div>
+
+      <div id='vis'>
+      </div>
+    <!-- </div> -->
+
   </div>
 
   <script src="https://d3js.org/d3.v4.js"></script>
@@ -139,6 +160,7 @@
   </script>
   <script src="https://unpkg.com/d3-simple-slider"></script>
   <script src="js/bar_overview_graph.js"></script>
+  <script src="js/general.js"></script>
   <script src="js/scroller.js"></script>
   <script src="js/section.js"></script>
   <script src="js/bar_controller_integration.js"></script>

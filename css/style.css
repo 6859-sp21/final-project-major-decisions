@@ -8,48 +8,71 @@
 }
 
 #sections {
-    position: relative;
+    /* This not being relative is critical */
+    position: static; 
     display: inline-block;
-    width: 250px;
+    width: fit-content;
     top: 60px;
     z-index: 90;
     padding-bottom: 200px;
-    margin-right: 20px;
+    margin-right: 30px;
+}
+
+.title-banner {
+  position:absolute;
+  left:0;
+  right:0;
+  height:400px;
+  background:red;
+  color:white;
+}
+
+.part-1-banner {
+    position:absolute;
+    left:0;
+    right:0;
+    height:150px;
+    background:red;
+    color:white;
+}
+
+#wholeBody {
+  overflow-x: scroll;
 }
 
 #vis {
     display: inline-block;
     position: fixed;
-    top: 200;
     z-index: 1;
-    margin-left: 0;
-    left: 40%;
-    width: 1200px;
+    /* top: 100;
+    left: 40%; */
+    margin-left: 450px;
+    margin-top: 100px;
+    width: 960px;
     height: 600px;
-}
-
-#replay-button-container {
-  width: 100px;
-  height:30px;
 }
 
 #vis-controller {
   display: flex;
   position: fixed;
-  top: 100px;
+  
+  top: 20px;
   z-index: 1;
-  margin-left: 0;
-  left: 40%;
-  width: 900px;
+  margin-left: 450px;
+  width: 960;
   height: 120px;
 }
 
-.replay-button-container {
+#replay-button-container {
+  width: 100px;
+  height: 50px;
   flex: 0 0 100px;
+  /* display: inline-block; */
+
 }
 
-.dynamic-bar-slider {
-  display: inline-block;
+.title {
+  padding-top: 150px;
 }
 
 .replay-button-container button{
@@ -100,7 +123,7 @@
 }
 
 .overview-bar-percent {
-  margin-bottom: 50px;
+  margin-bottom: 20px;
 }
 
 .min-top-5:hover {
@@ -126,7 +149,7 @@
 }
   
 .step {
-    margin-bottom: 200px;
+    margin-bottom: 300px;
     font-family: "TiemposTextWeb-Regular","Georgia";
     font-size: 16px;
     line-height: 23px;

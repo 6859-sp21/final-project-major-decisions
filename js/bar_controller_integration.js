@@ -570,7 +570,7 @@ function createSlider(default_year = 2016){
     const dataTime = d3.range(0, 6).map(function(d) {
         return new Date(2016 + d, 10, 3); });
     
-    const width = 800;
+    const width = 750;
     const height = 100;
     const sliderTime = d3
         .sliderBottom()
@@ -590,9 +590,9 @@ function createSlider(default_year = 2016){
             }
         });
 
-    let gTime = d3.select("#vis-controller").append('svg')
+    let gTime = d3.select("#vis-bar-slider").append('svg')
         .attr("class", 'dynamic-bar-slider dynamic-bar')
-        .attr('x',30).attr('y', 800)
+        .attr('x',30).attr('y', width)
         .attr("viewBox", [0, 0, width+width/10, height]) // changes here 
         .style('width', width+width/10)
         .style('height', height)

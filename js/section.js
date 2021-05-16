@@ -53,7 +53,7 @@
         const vis = d3.select("#vis")
 
         // step 1 Title image
-        vis.append("svg").attr('class', 'vis-title').attr('width', width).attr('height', height)
+        vis.append("svg").attr('class', 'bts-intro').attr('width', width).attr('height', height)
         .attr('opacity', 0)
         .append("svg:image")
         .attr('x', -9)
@@ -82,14 +82,17 @@
       // activateFunctions are called each
       // time the active section changes
       activateFunctions[0] = showTitle;
-      activateFunctions[1] = showDataIntro;
-      activateFunctions[2] = showDynamicBarChart;
-      activateFunctions[3] = showDynamicBarChartMin;
-      activateFunctions[4]= showOverviewBarChart;
-      activateFunctions[5] = showMapOne;
-      activateFunctions[6] = showDonut;
-      activateFunctions[7] = showMapTwo;
-      activateFunctions[8] = showTimeChart;
+      activateFunctions[1] = showBTSIntro;
+      activateFunctions[2] = showDataIntro;
+      activateFunctions[3] = showProcess;
+      activateFunctions[4] = showPart1Banner;
+      activateFunctions[5] = showDynamicBarChart;
+      activateFunctions[6] = showDynamicBarChartMin;
+      activateFunctions[7]= showOverviewBarChart;
+      activateFunctions[8] = showMapOne;
+      activateFunctions[9] = showDonut;
+      activateFunctions[10] = showMapTwo;
+      activateFunctions[11] = showTimeChart;
 
 
       
@@ -108,14 +111,22 @@
       ACTIVATE FUNCTIONS
      */
     const transitionTime = 600;
-    // STEP 1
+    // step 1 Title banner
     function showTitle() {
+      d3.select(".bts-intro")
+      .transition()
+      .duration(0)
+      .attr('opacity', 0)
+      .attr('display', 'none');
+
+    }
+
+    // STEP 2: BTS instro
+    function showBTSIntro() {
       d3.select("#total_map").remove();
       d3.select("#total_tooltip").remove();
-      // d3.select("#delay_map").remove();
-      // d3.select("#delay_tooltip").remove();
 
-      d3.select(".vis-title")
+      d3.select(".bts-intro")
       .transition()
       .duration(transitionTime)
       .attr('opacity', 1)
@@ -129,10 +140,11 @@
       .attr('display', 'none');
     }
 
+    // STEP 3: Data Intro
     function showDataIntro() {
       d3.selectAll('.dynamic-bar').remove();
 
-      d3.select('.vis-title')
+      d3.select('.bts-intro')
       .transition() // this need to be left in as a hack for fast scrolling
       .duration(0)
       .attr('opacity', 0)
@@ -145,26 +157,32 @@
       .attr('opacity', 1)
       .attr('display', 'block');
 
-      d3.selectAll('.dynamic-bar')
-      .transition() // this need to be left in as a hack for fast scrolling
+      // TODO: remove process's worK
+    }
+
+    // STEP 4: process
+    function showProcess(){
+      // TODO: introduce process' work
+      d3.select('.data-intro')
+      .transition() 
       .duration(0)
       .attr('opacity', 0)
       .attr('display', 'none');
+    }
+
+    // STEP 5: part 1 banner
+    function showPart1Banner() {
+      // TODO: remove process' work 
+
+      d3.selectAll('.dynamic-bar').remove();
     }
   
     async function showDynamicBarChart() {
       d3.selectAll('.dynamic-bar').remove();
 
-      d3.select('.data-intro')
-      .transition() // this need to bcreateCarrierRankBarAveMine left in as a hack for fast scrolling
-      .duration(0)
-      .attr('opacity', 0)
-      .attr('display', 'none');
+      // TODO: remove previous STUFF
 
       // d3.select(".three-step").remove();
-      //await createCarrierRankBarPercentDelayed(data);
-      //createCarrierRankBarAveMin(data);
-      //catch(e) {/* we don't plan to do additional promise chaining, swallow the error for now*/}
 
       d3.selectAll('.dynamic-bar')
       .transition()

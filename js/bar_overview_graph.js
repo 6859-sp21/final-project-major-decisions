@@ -1,5 +1,5 @@
-const barIndividualWidth = 1000;
-const barIndividualHeight = 400;
+const barIndividualWidth = 900;
+const barIndividualHeight = 300;
 
 function overviewBar(data) {
     const minPromise = d3.csv("https://raw.githubusercontent.com/6859-sp21/final-project-major-decisions/main/data/rank_ave_min.csv");
@@ -9,7 +9,7 @@ function overviewBar(data) {
       });
 }
 
-const individualBarGraphMargin = ({top: 50, right: 30, bottom: 70, left: 10});
+const individualBarGraphMargin = ({top: 4, right: 40, bottom: 70, left: 10});
 
 function createOverviewChart(data, percentData, minData){
     createOverviewBarPercent(data, percentData);

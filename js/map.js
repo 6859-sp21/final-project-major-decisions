@@ -123,7 +123,7 @@ function generateMap(selectedAttribute){
                 return projection([d.long, d.lat])[1];
               }
             })
-            .attr("r", 1)
+            .attr("r", 0.5)
             .attr("class", "center")
             .attr("fill", "#E5E7E9")
             .attr("fill-opacity", 0)
@@ -158,6 +158,7 @@ function generateMap(selectedAttribute){
             .attr("fill-opacity", .3)
           .on("mouseover", (event, d) => {
             Tooltip.style("opacity", 1)
+            d3.select(event.currentTarget).attr("stroke-width", 4);  
           })
           .on("mousemove", (event, d) => {
             Tooltip
@@ -167,6 +168,7 @@ function generateMap(selectedAttribute){
           })
           .on("mouseleave", (event, d) => {
             Tooltip.style("opacity", 0)
+            d3.select(event.currentTarget).attr("stroke-width", 2); 
           })
 
         svg
@@ -214,12 +216,24 @@ function generateMap(selectedAttribute){
             d3.zoomTransform(svg.node()).invert([width / 2, height / 2])
           );
           svg.selectAll('circle').attr('stroke-width', 2)
+          circles.on("mouseover", function(event, d) {
+            d3.select(event.currentTarget).attr("stroke-width", 4);
+          })                  
+          circles.on("mouseleave", function(event, d) {
+            d3.select(event.currentTarget).attr("stroke-width", 2);
+          });
           centers.attr('fill-opacity', 0)
         }
       
         function clicked(event, d) {
           const [[x0, y0], [x1, y1]] = path.bounds(d);
           centers.attr('fill-opacity', 1.0)
+          circles.on("mouseover", function(event, d) {
+            d3.select(event.currentTarget).attr("stroke-width", 1);
+          })                  
+          circles.on("mouseleave", function(event, d) {
+            d3.select(event.currentTarget).attr("stroke-width", 0.5);
+          });
           svg.selectAll('circle').attr('stroke-width', 0.5)
           event.stopPropagation();
           states.transition().style("fill", null);

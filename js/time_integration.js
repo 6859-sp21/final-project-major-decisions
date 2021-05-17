@@ -8,12 +8,6 @@ function createTimeChart() {
       carrier: d.carrier,
       carrier_name: d.carrier_name,
       arr_flights: +d.arr_flights,
-      // carrier_ct: +d.carrier_ct,
-      // weather_ct: +d.weather_ct,
-      // nas_ct: +d.nas_ct,
-      // security_ct: +d.security_ct,
-      // late_aircraft_ct: +d.late_aircraft_ct,
-      // total_ct: +d.carrier_ct + +d.weather_ct + +d.nas_ct + +d.security_ct + +d.late_aircraft_ct
       carrier_ct: (+d.carrier_ct * 10000) / +d.arr_flights,
       weather_ct: (+d.weather_ct * 10000) / +d.arr_flights,
       nas_ct: (+d.nas_ct * 10000) / +d.arr_flights,
@@ -23,13 +17,7 @@ function createTimeChart() {
     };
   }).then(function (data) {
     let airData = data;
-    console.log(airData);
-    // const columnsToSum = ["arr_flights", "carrier_ct", "weather_ct", "nas_ct", "security_ct", "late_aircraft_ct", "total_ct"];
-    // let dataRolled = d3.rollups(airData, 
-    //     v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])),
-    //     d => d.date);
-    // console.log(dataRolled);
-    // console.log(dataRolled[0][0], dataRolled[0][1])
+
     generateTimeChart(airData);
     // generateAverages(airData);
   });
@@ -173,8 +161,9 @@ function generateTimeChart(data) {
   let sortedData = data.sort((x, y) => d3.ascending(x.date, y.date));
 
   // need to set up
-  let aggData = sortedData.filter((d) => d.carrier === "AS");
-  let selectedCarrier = "Alaska Airlines Inc.";
+  let aggData = sortedData.filter((d) => d.carrier === "T");
+  // let selectedCarrier = "Alaska Airlines Inc.";
+  let selectedCarrier = "Total";
 
   let airlineCarriers = new Set(data.map((d) => d.carrier_name));
 
@@ -277,10 +266,12 @@ function generateTimeChart(data) {
     .call(yAxis)
 
 
-  let yAxisLabel = svg.append("text")
-    .attr("x", -height*3/4)
+  let yAxisLabel = svg.append("g")
+    .attr("class", "yAxisLabel")
+    .append("text")
+    .attr("x", -height)
     .attr("y", -50)
-    .text("No. of Delays per 10,000 Arriving Flights")
+    .text(d => "No. of Delays per 10,000 Arriving " + selectedCarrier + " Flights")
     .attr("transform", "rotate(-90)")
     .attr("text-anchor", "start")
 
@@ -683,7 +674,7 @@ function generateTimeChart(data) {
     .attr("y", -margin.top)
     .attr("fill", "black")
     .attr("text-anchor", "middle")
-    .text((d) => "Delayed " + selectedCarrier + " Flights")
+    .text((d) => selectedCarrier + " Delayed Flights")
 
 
   // ----- FILTER BY AIRLINE ----- // 
@@ -691,6 +682,8 @@ function generateTimeChart(data) {
     individualView = false;
     selectedDelay = "";
     d3.selectAll(".delayLegend").style("fill", "white");
+    console.log(d3.select(".yAxisLabel"), d3.select(".yAxisLabel").select("text"));
+    d3.select(".yAxisLabel").select("text").text("No. of Delays per 10,000 Arriving " + selectedCarrier + " Flights");
 
     let filteredData = sortedData.filter(
       (d) => d.carrier_name === selectedCarrier
@@ -725,7 +718,7 @@ function generateTimeChart(data) {
   }
 
   function updateTitle(selectedCarrier) {
-    document.getElementById("timeTitle").innerHTML = "Delayed " + selectedCarrier + " Flights";
+    document.getElementById("timeTitle").innerHTML = selectedCarrier + " Delayed Flights";
   }
 
   d3.select("#selectButton").on("change", function (d) {

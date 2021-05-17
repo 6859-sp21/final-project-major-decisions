@@ -252,20 +252,10 @@ function generateTimeChart(data) {
     .attr("y", height + 2*margin.top)
     .text("Date")
 
+
   let y = d3
     .scaleLinear()
-    .domain([
-      0,
-      d3.max(sortedData, function (d) {
-        return (
-          d.carrier_ct +
-          d.weather_ct +
-          d.nas_ct +
-          d.security_ct +
-          d.late_aircraft_ct
-        );
-      }),
-    ])
+    .domain([0, d3.max(sortedData, d => d.total_ct)])
     .range([height, 0])
     .nice();
 
@@ -275,7 +265,6 @@ function generateTimeChart(data) {
     .attr("class", "yAxisGroup")
     .call(yAxis)
 
-
   let yAxisLabel = svg.append("g")
     .attr("class", "yAxisLabel")
     .append("text")
@@ -284,6 +273,14 @@ function generateTimeChart(data) {
     .text(d => "No. of Delays per 10,000 Arriving " + selectedCarrier + " Flights")
     .attr("transform", "rotate(-90)")
     .attr("text-anchor", "start")
+
+  function resetAxes() {
+    x.domain(d3.extent([new Date(2015,12), d3.max(sortedData, d => d.date)]));
+    xAxisGroup.call(xAxis);
+
+    y.domain([0, d3.max(sortedData, d => d.total_ct)]).nice();
+    yAxisGroup.call(yAxis);
+  }
 
 
   // ----- COLOR ENCODING ----- //
@@ -382,15 +379,13 @@ function generateTimeChart(data) {
       svg.select(".brush").call(brush.move, null);
 
       xAxisGroup.call(xAxis.scale(x));
-      // svg.selectAll(".soloLayers").remove();
-      // drawIndividualArea(currentData);
-
-      if (individualView) {
-        syncSoloDelays(selectedDelay);
-      }
 
       svg.selectAll(".delayLayers").transition().duration(1000).attr("d", area);
       svg.selectAll(".soloLayers").transition().duration(1000).attr("d", individualArea);
+      
+      if (individualView) {
+        syncSoloDelays(selectedDelay);
+      }
 
       svg.selectAll(".contextRect").transition().duration(1000)
         .attr("x", newX0)
@@ -406,8 +401,7 @@ function generateTimeChart(data) {
   }
 
   function resetZoom () {
-    x.domain(d3.extent([new Date(2015,12), d3.max(sortedData, d => d.date)]));
-    xAxisGroup.call(xAxis);
+    resetAxes();
     svg.selectAll(".delayLayers").transition().duration(1000).attr("d", area);
     // svg.selectAll(".soloLayers").attr("d", individualArea);
     svg.selectAll(".soloLayers").transition().duration(1000).attr("d", individualArea);//.style("opacity", 0);
@@ -767,8 +761,8 @@ function generateTimeChart(data) {
 
 
   function syncSoloDelays (selectedDelay) {
-    d3.selectAll(".soloLayers").style("opacity", 0);
-    d3.select(".soloLayers." + selectedDelay).style("opacity", 1);
+    d3.selectAll(".soloLayers").transition().duration(250).style("opacity", 0);
+    d3.select(".soloLayers." + selectedDelay).transition().duration(250).style("opacity", 1);
   }
 
 
@@ -776,6 +770,18 @@ function generateTimeChart(data) {
     updateChart(selectedCarrier, svg);
     selectedDelay = d;
     individualView = true;
+
+    let rescaleMap = d3.map(currentData, d => d[selectedDelay] < 50);
+    
+    if (rescaleMap.includes(true) && d3.max(currentData, d => d[selectedDelay]) < 400) {
+      y.domain([0, 400]);
+      yAxisGroup.call(yAxis.scale(y));
+    } else {
+      y.domain([0, d3.max(sortedData, d => d.total_ct)]).nice();
+      yAxisGroup.call(yAxis);
+    }
+
+    svg.selectAll(".soloLayers").attr("d", individualArea);
     syncSoloDelays(selectedDelay);
     d3.selectAll(".delayLegend").style("fill", "white");
     d3.select(".delayLegend."+selectedDelay).style("fill", legendColor(selectedDelay));
@@ -785,12 +791,11 @@ function generateTimeChart(data) {
 
   // ----- DEFINE RESET VIEW AND DRAW RESET BUTTON ----- //
   function resetView () { 
-    x.domain(d3.extent([new Date(2015,12), d3.max(sortedData, d => d.date)]));
-    xAxisGroup.call(xAxis);
+    resetAxes();
     d3.selectAll(".soloLayers").transition().duration(500).style("opacity",0)
-    d3.selectAll(".delayLayers").transition().duration(500).attr("d", area).style("opacity", 1);
+    d3.selectAll(".delayLayers").transition().duration(1000).attr("d", area).style("opacity", 1);
     // svg.selectAll(".soloLayers").transition().duration(1000).attr("d", individualArea).style("opacity", 0);
-    
+
     svg.selectAll(".soloLayers").remove();
     drawIndividualArea(currentData);
 

@@ -1,4 +1,4 @@
-function generateMapTotal(){  
+ function generateMapTotal(){  
     // Size ?
     const width = 960
     const height = 650
@@ -35,7 +35,7 @@ function generateMapTotal(){
     })
     
     // Load external data and boot
-    d3v4.json("https://raw.githubusercontent.com/6859-sp21/final-project-major-decisions/main/data/us.json", function(data){
+   d3v4.json("https://raw.githubusercontent.com/6859-sp21/final-project-major-decisions/main/data/us.json", function(data){
   
             // The svg
         const svg = d3.select("#vis")
@@ -44,6 +44,7 @@ function generateMapTotal(){
         .attr("height", height)
         .on("click", reset)
         .attr("id", "total_map")
+        .attr('opacity', '0')
         .attr('class', 'three-step');
 
         const g = svg.append("g");

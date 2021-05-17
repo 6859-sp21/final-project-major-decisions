@@ -67,6 +67,7 @@ function generateMap(selectedAttribute){
           .attr("height", height)
           .on("click", reset)
           .attr("id", "delay_map")
+          .attr("opacity", "0")
           .attr('class', 'four-step');
 
         const g = svg.append("g");

@@ -85,16 +85,23 @@
       activateFunctions[1] = showBTSIntro;
       activateFunctions[2] = showDataIntro;
       activateFunctions[3] = showProcess;
+
       activateFunctions[4] = showPart1Banner;
-      activateFunctions[5] = showDynamicBarChart;
-      activateFunctions[6] = showDynamicBarChartMin;
-      activateFunctions[7]= showOverviewBarChart;
-      activateFunctions[8] = showMapOne;
-      activateFunctions[9] = showDonut;
-      activateFunctions[10] = showMapTwo;
-      activateFunctions[11] = showTimeChart;
+      activateFunctions[5] = showMapOne;
+      activateFunctions[6] = showDonut;
+      activateFunctions[7]= showMapTwo;
 
+      activateFunctions[8] = showPart2Banner;
+      activateFunctions[9] = showTimeChart;
+      activateFunctions[10] = showTimeGif;
+      activateFunctions[11] = showTimeMonthlyChart;
 
+      activateFunctions[12] = showPart3Banner;
+      activateFunctions[13] = showDynamicBarChart;
+      activateFunctions[14] = showDynamicBarChartMin;
+      activateFunctions[15] = showOverviewBarChart;
+
+      activateFunctions[16] = showConclusion;
       
       // updateFunctions are called while
       // in a particular section to update
@@ -102,9 +109,9 @@
       // Most sections do not need to be updated
       // for all scrolling and so are set to
       // no-op functions.
-      for (var i = 0; i < 9; i++) {
-        updateFunctions[i] = function () {}; // insert appropriate update functions
-      }
+      // for (var i = 0; i < 9; i++) {
+      //   updateFunctions[i] = function () {}; // insert appropriate update functions
+      // }
     };
   
     /**
@@ -168,39 +175,126 @@
       .duration(0)
       .attr('opacity', 0)
       .attr('display', 'none');
+    
+      d3.selectAll("#total_map").remove();
+      d3.selectAll("#total_tooltip").remove();
     }
 
     // STEP 5: part 1 banner
     function showPart1Banner() {
       // TODO: remove process' work 
 
-      d3.selectAll('.dynamic-bar').remove();
+      d3.selectAll("#total_map").remove();
+      d3.selectAll("#total_tooltip").remove();
+      generateMapTotal(); // originally set to transparent for next step
+
+    }
+
+    // STEP 6: Map one
+    function showMapOne() {
+      d3.select("#donut-map").remove();
+      d3.selectAll('.four-step').remove();
+
+
+      d3.select("#total_map")
+      .transition()
+      .duration(transitionTime)
+      .attr('opacity', 1);
+
+      d3.select("#donut-map").remove();
+    }
+    
+    // STEP 7: map still
+    function showDonut() {
+
+      generateDonut()
+      d3.select('.donut-step')
+      .transition()
+      .duration(transitionTime)
+      .attr('opacity', 1);
+
+      // remove previous
+      d3.selectAll("#total_map").remove();
+      d3.selectAll("#total_tooltip").remove();
+      generateMapTotal(); 
+
+      // remove after
+      d3.selectAll("#delay_map").remove();
+      d3.selectAll("#delay_tooltip").remove();
+      generateMap('arr_del15')
+    }
+    
+    // STEP 9: map 2
+    function showMapTwo() {
+      d3.select("#donut-map").remove();
+      d3.selectAll("#total_map").remove();
+      d3.selectAll("#total_tooltip").remove();
+
+      document.getElementById("selectButton").innerHTML = null;
+
+      d3.select('.four-step')
+      .transition()
+      .duration(transitionTime)
+      .attr('opacity', 1);
+
+      d3.selectAll('.five-step').remove();
     }
   
+    // step 10: part2 banner
+    function showPart2Banner(){
+      d3.selectAll("#delay_map").remove();
+      d3.selectAll("#delay_tooltip").remove();
+      
+      d3.selectAll('.five-step').remove();
+
+      generateMap('arr_del15');
+    }
+
+    // step 10: show time chart
+    function showTimeChart(){
+      d3.selectAll("#delay_map").remove();
+      d3.selectAll("#delay_tooltip").remove();
+      
+      createTimeChart();
+
+      d3.selectAll('.five-step')
+      .transition()
+      .duration(transitionTime)
+      .attr('opacity', 1)
+      .attr('display', 'block');
+
+      d3.selectAll('.four-step').remove();
+    }
+
+    function showTimeGif(){
+      d3.selectAll("#delay_map").remove();
+      d3.selectAll("#delay_tooltip").remove();
+      d3.selectAll('.five-step').remove();
+    }
+
+    function showTimeMonthlyChart(){
+      d3.selectAll('.five-step').remove();
+    }
+
+    function showPart3Banner(){
+      d3.selectAll('.dynamic-bar').remove();
+    }
+
     async function showDynamicBarChart() {
       d3.selectAll('.dynamic-bar').remove();
-
-      // TODO: remove previous STUFF
-
-      // d3.select(".three-step").remove();
 
       d3.selectAll('.dynamic-bar')
       .transition()
       .duration(transitionTime)
       .attr('opacity', 1)
       .attr('display', 'block');
-      //createPercentBarGroup(data);
       createPercentBarGroup(data);
     }
 
     function showDynamicBarChartMin(){
       d3.selectAll('.overview-bar').remove();
       d3.selectAll('.dynamic-bar').remove();
-
       d3.select(".three-step").remove();
-      //await createCarrierRankBarPercentDelayed(data);
-      //createCarrierRankBarAveMin(data);
-      //catch(e) {/* we don't plan to do additional promise chaining, swallow the error for now*/}
 
       d3.selectAll('.dynamic-bar')
       .transition()
@@ -208,30 +302,14 @@
       .attr('opacity', 1)
       .attr('display', 'block');
       createAveMinBarGroup(data);
-
-
-      // d3.select('.three-step')
-      // .transition()
-      // .duration(0)
-      // .attr('opacity', 0)
-      // .attr('display', 'none');
     }
 
     function showOverviewBarChart(){
       d3.selectAll('.dynamic-bar').remove();
       d3.select(".three-step").remove();
-      //await createCarrierRankBarPercentDelayed(data);
-      //createCarrierRankBarAveMin(data);
-      //catch(e) {/* we don't plan to do additional promise chaining, swallow the error for now*/}
 
-      // d3.selectAll('.dynamic-bar')
-      // .transition()
-      // .duration(transitionTime)
-      // .attr('opacity', 1)
-      // .attr('display', 'block');
       overviewBar(data);
 
-
       d3.select('.three-step')
       .transition()
       .duration(0)
@@ -239,102 +317,11 @@
       .attr('display', 'none');
     }
 
-       // STEP 3
-    function showMapOne() {
-      d3.select("#donut-map").remove();
+    function showConclusion(){
       d3.selectAll('.overview-bar').remove();
-      generateMapTotal()
-
-      d3.select('.overview-bar')
-      .transition()
-      .duration(0)
-      .attr('opacity', 0)
-      .attr('display', 'none');
-
-      d3.select('.three-step')
-      .attr('opacity', 1)
-      .attr('display', 'block');
-
-      d3.select('.donut-step')
-      .transition()
-      .duration(0)
-      .attr('opacity', 0)
-      .attr('display', 'none');
     }
 
-    // STEP 3.5
-    function showDonut() {
 
-      d3.select("#total_map").remove();
-      d3.select("#total_tooltip").remove();
-      d3.select("#delay_map").remove();
-      d3.select("#delay_tooltip").remove();
-
-      generateDonut()
-
-      d3.select('.three-step')
-      .transition()
-      .duration(0)
-      .attr('opacity', 0);
-
-      d3.select('.donut-step')
-      .transition()
-      .duration(transitionTime)
-      .attr('opacity', 1);
-
-      d3.select('.four-step')
-      .transition()
-      .duration(0)
-      .attr('opacity', 0);
-    }
-
-    // STEP 4
-    function showMapTwo() {
-      generateMap('arr_del15')
-
-      d3.select("#donut-map").remove();
-      d3.select("#time_vis").remove();
-      document.getElementById("selectButton").innerHTML = null;
-
-      d3.select('.donut-step')
-      .transition()
-      .duration(0)
-      .attr('opacity', 0);
-
-      d3.select('.four-step')
-      .transition()
-      .duration(transitionTime)
-      .attr('opacity', 1);
-
-      d3.select('.five-step')
-      .transition()
-      .duration(0)
-      .attr('opacity', 0);
-    }
-
-    // STEP 5 OR 6
-    function showTimeChart() {
-      console.log("Is show time chart called?");
-      d3.select("#delay_map").remove();
-      d3.select("#delay_tooltip").remove();
-      d3.select("#total_map").remove();
-      d3.select("#total_tooltip").remove();
-
-      createTimeChart();
-
-      d3.select('.five-step')
-      .transition()
-      .duration(transitionTime)
-      .attr('opacity', 1)
-      .attr('display', 'block');
-
-      d3.select('.four-step')
-      .transition()
-      .duration(0)
-      .attr('opacity', 0)
-      .attr('display', 'none');
-    }  
-  
     /**
      * activate 
      *
@@ -350,15 +337,15 @@
       lastIndex = activeIndex;
     };
   
-    /**
-     * update
-     *
-     * @param index
-     * @param progress
-     */
-    chart.update = function (index, progress) {
-      updateFunctions[index](progress);
-    };
+    // /**
+    //  * update
+    //  *
+    //  * @param index
+    //  * @param progress
+    //  */
+    // chart.update = function (index, progress) {
+    //   updateFunctions[index](progress);
+    // };
   
     // return chart function
     return chart;
@@ -398,9 +385,9 @@
       plot.activate(index);
     });
   
-    scroll.on('progress', function (index, progress) {
-      plot.update(index, progress);
-    });
+    // scroll.on('progress', function (index, progress) {
+    //   plot.update(index, progress);
+    // });
   }
   
   // load data and display, the entrance point to the whole flow

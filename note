@@ -1,0 +1,7 @@
+      d3.selectAll('.overview-bar').remove();
+
+
+
+// get proper banner styling 
+// conclude the section on my part
+change vis on the right formatting 

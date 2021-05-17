@@ -7,11 +7,11 @@
   <body id='wholeBody'>
   <div class="page-container">
     <div id='sections'>
-      <!-- STEP 1: Title --> 
+      <!-- STEP 0: Title --> 
       <div class="title-banner"> </div>
       <section class="step">
       </section>
-      <!-- STEP 2: BTS --> 
+      <!-- STEP 1: BTS --> 
       <section class="step">
         <div class="title">
           <h3> Analyzing US airport and airline data </h3>
@@ -19,7 +19,7 @@
           <a href="https://www.transtats.bts.gov/OT_Delay/OT_DelayCause1.asp?pn=1">Bureau of Transportation Statistics website.</a>   
         </div>
       </section>
-      <!-- STEP 3: Data itself --> 
+      <!-- STEP 2: Data itself --> 
       <section class="step">
         We collected data spanned from January 2016 to March 2021. The data includes information on total number and delayed number of flights
         per airline per airport per months.
@@ -32,20 +32,72 @@
           <li><strong>Late-arriving aircraft:</strong> A previous flight with same aircraft arrived late, causing the present flight to depart late.
           <li><strong>Security:</strong> Delays or cancellations caused by terminal/concourse evacuation, re-boarding of aircraft because of security breach, inoperative screening equipment and/or long lines in excess of 29 minutes at screening areas.
         </ul>
-        <br>
-        We performed the following analysis.
       </section>
-      <!-- STEP 4: overview of the process --> 
+      <!-- STEP 3: process --> 
       <section class = "step">
         This is overview of the process
       </section>
-      <!-- STEP 5: part 1 banner --> 
+      <!-- STEP 4: part 1 banner --> 
       <div class = "part-1-banner">
         This is the banner
       </div>
       <section class = "step">
-        This is overview of the process
       </section>
+      <!-- STEP 5: map total --> 
+      <section class="step">
+        Where are airports around the United States and how many arrivals does each get? This visualization shows the total number of arrivals at each airport since 2016. Hover over different bubbles to see details and zoom and pan to focus in on smaller areas. 
+      </section>     
+      <!-- STEP 6: map donut --> 
+      <section class="step">
+        We listed several delay types earlier, but whats the breakdown? What's slowing down flights the most around the country?
+      </section>
+      <!-- STEP 7: map catogory --> 
+      <section class="step">
+        And how are these delays distributed around different airports? Click on a cause to explore the distribution around the country. 
+        <br>
+        <br>
+        <div class="buttonContainer">
+          <button class="button" type="button" id="arr_del15_selector" onclick="choose('arr_del15')">Total Delayed</button>
+          <button class="button1" type="button" id="carrier_ct_selector" onclick="choose('carrier_ct')">Air Carrier</button>
+          <button class="button2" type="button" id="weather_ct_selector" onclick="choose(' weather_ct')">Extreme Weather</button>
+          <button class="button3" type="button" id="nas_ct_selector" onclick="choose('nas_ct')">National Aviation System (NAS)</button>
+          <button class="button4" type="button" id="security_ct_selector" onclick="choose('security_ct')">Security</button>
+          <button class="button5" type="button" id="late_aircraft_ct_selector" onclick="choose('late_aircraft_ct')">Late-arriving aircraft</button>
+        </div>
+        <div id="delayDefinition">
+        </div>
+      </section>
+       <!-- STEP 8: part 2 banner --> 
+      <div class = "part-2-banner">
+        This is the 2 banner
+      </div>
+      <section class = "step">
+      </section>
+      <!-- STEP 9: main time graph --> 
+      <section class="step">
+        We examined each airline's monthly reported number of delayed flights between January 2016 and March 2021. To better compare the proportion of delayed flights across airlines, we normalized the delay counts by the total number of arriving flights per airline.
+        <br>
+        This visualization shows the number of delays per 10,000 arriving flights. To explore changes in delay counts and types over time, select an airline from the dropdown. You can also brush to zoom into a time period or double-click to reset the time scale. You can also hover over the legend to highlight a delay type.
+        <br>
+        <br>
+        <select id="selectButton"></select>
+      </section>
+      <!-- STEP 10: time graph gif --> 
+      <section class = "step">
+        time graph gif
+      </section>
+      <!-- STEP 11: time graph montly --> 
+      <section class = "step">
+        time graph monthly
+      </section>
+      <!-- STEP 12: part 3 banner --> 
+      <div class = "part-3-banner">
+      This is the 3 banner
+      </div>
+      <section class = "step">
+        part3
+      </section>
+      <!-- STEP 13: dyanimic percent bar graph --> 
       <section class="step">
         We calculated the percentage of delayed flights per flight carrier per year. So which are the <b>worst</b> airlines?
         <button class='percent-top-5' onclick="setTop5()">Top 5</button>
@@ -72,6 +124,7 @@
           <button class='percent-carrier percent-Virgin-America' onclick="updateSelectedCarrier('Virgin America')">Virgin America</button>
         </div>
       </section>
+      <!-- STEP 14: dynamic min bar graph --> 
       <section class="step">
         We calculated the percentage of delayed flights per flight carrier per year. So which are the <b>worst</b> airlines?
         <button class='min-top-5' onclick="setTop5()">Top 5</button>
@@ -98,39 +151,13 @@
           <button class='min-carrier min-Virgin-America' onclick="updateSelectedCarrier('Virgin America')">Virgin America</button>
         </div>
       </section>
+      <!-- STEP 15: part 2 banner --> 
       <section class="step">
         This is Seara's overview section
       </section>
-      <section class="step">
-        Where are airports around the United States and how many arrivals does each get? This visualization shows the total number of arrivals at each airport since 2016. Hover over different bubbles to see details and zoom and pan to focus in on smaller areas. 
-      </section>
-      <section class="step">
-        We listed several delay types earlier, but whats the breakdown? What's slowing down flights the most around the country?
-      </section>
-      <section class="step">
-        And how are these delays distributed around different airports? Click on a cause to explore the distribution around the country. 
-        <br>
-        <br>
-        <div class="buttonContainer">
-          <button class="button" type="button" id="arr_del15_selector" onclick="choose('arr_del15')">Total Delayed</button>
-          <button class="button1" type="button" id="carrier_ct_selector" onclick="choose('carrier_ct')">Air Carrier</button>
-          <button class="button2" type="button" id="weather_ct_selector" onclick="choose(' weather_ct')">Extreme Weather</button>
-          <button class="button3" type="button" id="nas_ct_selector" onclick="choose('nas_ct')">National Aviation System (NAS)</button>
-          <button class="button4" type="button" id="security_ct_selector" onclick="choose('security_ct')">Security</button>
-          <button class="button5" type="button" id="late_aircraft_ct_selector" onclick="choose('late_aircraft_ct')">Late-arriving aircraft</button>
-        </div>
-        <div id="delayDefinition">
-        </div>
-      </section>
-      <section class="step">
-        We examined each airline's monthly reported number of delayed flights between January 2016 and March 2021. To better compare the proportion of delayed flights across airlines, we normalized the delay counts by the total number of arriving flights per airline.
-        <br>
-        This visualization shows the number of delays per 10,000 arriving flights. To explore changes in delay counts and types over time, select an airline from the dropdown. You can also brush to zoom into a time period or double-click to reset the time scale. You can also hover over the legend to highlight a delay type.
-
-
-        <br>
-        <br>
-        <select id="selectButton"></select>
+       <!-- STEP 16: part 2 banner --> 
+      <section class="step conclusion">
+        Final conclusion  
       </section>
     </div>
 

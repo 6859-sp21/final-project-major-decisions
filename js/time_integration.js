@@ -162,10 +162,12 @@ function generateTimeChart(data) {
 
   // need to set up
   let aggData = sortedData.filter((d) => d.carrier === "T");
-  // let selectedCarrier = "Alaska Airlines Inc.";
-  let selectedCarrier = "Total";
 
-  let airlineCarriers = new Set(data.map((d) => d.carrier_name));
+  let selectedCarrier = "Total";
+  const airlines = new Set(data.map((d) => d.carrier_name));
+  airlines.delete("Total");
+  let airlineCarriers = ["Total"];
+  Array.prototype.push.apply(airlineCarriers, Array.from(airlines));
 
   // add the options to the button
   let airlineSelection = d3.select("#selectButton")
@@ -173,8 +175,16 @@ function generateTimeChart(data) {
     .data(airlineCarriers)
     .enter()
     .append("option")
-    .text((d) => d)
+    .text(function (d) {
+      if (d === "Total") {
+        return "ALL AIRLINES";
+      } else return d;
+    })
     .attr("value", (d) => d);
+
+  airlineSelection.property("selected", function(d) {
+    return d === selectedCarrier
+  })
 
   // set the dimensions and margins of the graph: svg will be 960x650
   let fullWidth = 750,
@@ -682,7 +692,7 @@ function generateTimeChart(data) {
     individualView = false;
     selectedDelay = "";
     d3.selectAll(".delayLegend").style("fill", "white");
-    console.log(d3.select(".yAxisLabel"), d3.select(".yAxisLabel").select("text"));
+
     d3.select(".yAxisLabel").select("text").text("No. of Delays per 10,000 Arriving " + selectedCarrier + " Flights");
 
     let filteredData = sortedData.filter(

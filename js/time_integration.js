@@ -1,6 +1,6 @@
 function createTimeChart() {
-  d3.csv("https://raw.githubusercontent.com/6859-sp21/final-project-major-decisions/main/data/airlines_time_agg.csv", function (d) {
-  // d3.csv("https://raw.githubusercontent.com/6859-sp21/final-project-major-decisions/main/data/airlines_time_total.csv", function (d) {
+  // d3.csv("https://raw.githubusercontent.com/6859-sp21/final-project-major-decisions/main/data/airlines_time_agg.csv", function (d) {
+  d3.csv("https://raw.githubusercontent.com/6859-sp21/final-project-major-decisions/main/data/airlines_time_total.csv", function (d) {
     return {
       year: +d.year,
       month: +d.month-1,
@@ -8,15 +8,28 @@ function createTimeChart() {
       carrier: d.carrier,
       carrier_name: d.carrier_name,
       arr_flights: +d.arr_flights,
+      // carrier_ct: +d.carrier_ct,
+      // weather_ct: +d.weather_ct,
+      // nas_ct: +d.nas_ct,
+      // security_ct: +d.security_ct,
+      // late_aircraft_ct: +d.late_aircraft_ct,
+      // total_ct: +d.carrier_ct + +d.weather_ct + +d.nas_ct + +d.security_ct + +d.late_aircraft_ct
       carrier_ct: (+d.carrier_ct * 10000) / +d.arr_flights,
       weather_ct: (+d.weather_ct * 10000) / +d.arr_flights,
       nas_ct: (+d.nas_ct * 10000) / +d.arr_flights,
       security_ct: (+d.security_ct * 10000) / +d.arr_flights,
       late_aircraft_ct: (+d.late_aircraft_ct * 10000) / +d.arr_flights,
-      total_ct: (+d.carrier_ct + +d.weather_ct + +d.nas_ct + +d.security_ct + +d.late_aircraft_ct) * 10000 / +d.arr_flights 
+      total_ct: (+d.carrier_ct + +d.weather_ct + +d.nas_ct + +d.security_ct + +d.late_aircraft_ct) * 10000 / +d.arr_flights
     };
   }).then(function (data) {
     let airData = data;
+    console.log(airData);
+    // const columnsToSum = ["arr_flights", "carrier_ct", "weather_ct", "nas_ct", "security_ct", "late_aircraft_ct", "total_ct"];
+    // let dataRolled = d3.rollups(airData, 
+    //     v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])),
+    //     d => d.date);
+    // console.log(dataRolled);
+    // console.log(dataRolled[0][0], dataRolled[0][1])
     generateTimeChart(airData);
     // generateAverages(airData);
   });
@@ -54,9 +67,7 @@ function generateAverages(data) {
   // ----- AXES SCALES AND LABELS ----- //
   let x = d3
     .scaleLinear()
-    // .domain([new Date().setMonth(0),new Date().setMonth(11)])
     .domain([0, 11])
-    // .domain(d3.extent(sortedData, (d) => d.month))
     .range([0, width]);
 
 
@@ -64,7 +75,7 @@ function generateAverages(data) {
 
   let xAxis = d3.axisBottom(x)
     .tickValues(tickValues)
-    .tickFormat(function(d,i) {console.log(i, ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][i]); return ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][i]});
+    .tickFormat(function(d,i) {return ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][i]});
 
   let xAxisGroup = svg
     .append("g")
@@ -97,7 +108,8 @@ function generateAverages(data) {
 
 
   // ----- COLOR ENCODING ----- //
-  const colors = ["#E9BDD8","#FFB480","#C3E189","#ACC0E5","#FF0000"];
+  const colors = ["#1f77b4","#ff7f0e","#2ca02c","#9467bd","#d62728","#8c564b","#e377c2","#7f7f7f","#bcbd22","#17becf"];
+  const color = d3.scaleOrdinal().domain(dataYears).range(colors)
 
   // ----- DRAW AREAS ----- //
   // set up clip area so visualization doesn't go past axes
@@ -107,7 +119,7 @@ function generateAverages(data) {
     .attr("id", "clip")
     .append("rect")
     .attr("width", width)
-    .attr("height", height)//-margin.top)
+    .attr("height", height)
     .attr("x", 0)
     .attr("y", 0);
 
@@ -125,8 +137,8 @@ function generateAverages(data) {
       .attr("class", "line " + year)
       .attr("fill", "none")
       .attr("stroke", d => colors[dataYears.indexOf(year)])
+      .attr("stroke-width", 2)
       .attr("d", line(yearData))
-
   }
 
 
@@ -199,9 +211,6 @@ function generateTimeChart(data) {
         `translate(${margin.left},${margin.bottom})`
       );
 
-  // document.getElementById("vis").appendChild(svg.node());
-  // for some reason, using this doesn't actually add it to the DOM?
-  // also, lining up axes and areas keeps going outside bounds without append("g") and translate
 
   // ----- DEFINE STACKED DATA ----- //
   let delayTypes = [
@@ -231,8 +240,6 @@ function generateTimeChart(data) {
     .append("g")
     .call(xAxis)
     .attr("transform", `translate(0,${height})`)
-    // .selectAll("text")
-      // .attr("transform", "translate(-10,5)rotate(-30)");
   
   xAxisGroup.selectAll(".tick").each(function(d) {
     if (this.textContent === d3.timeFormat("%B")(d)) {
@@ -266,7 +273,9 @@ function generateTimeChart(data) {
   let yAxis = d3.axisLeft(y);
   let yAxisGroup = svg
     .append("g")
+    .attr("class", "yAxisGroup")
     .call(yAxis)
+
 
   let yAxisLabel = svg.append("text")
     .attr("x", -height*3/4)
@@ -314,7 +323,7 @@ function generateTimeChart(data) {
 
   let areaContext = d3
     .area()
-    .x((d) => x(d.data.date))
+    .x((d) => xContext(d.data.date))
     .y0((d) => yContext(d[0]))
     .y1((d) => yContext(d[1]));
 
@@ -464,6 +473,8 @@ function generateTimeChart(data) {
 
   drawStackedArea(currentData);
   drawIndividualArea(currentData);
+
+  svg.select(".yAxisGroup").raise(); // make axis fully visible over the area
 
   // ----- DRAW VERTICAL LINE AND TOOLTIPS TO SHOW VALUE ON MOUSEOVER ----- //
   let hoverLine = eventsRect.append("line")
@@ -678,9 +689,8 @@ function generateTimeChart(data) {
   // ----- FILTER BY AIRLINE ----- // 
   function updateChart(selectedCarrier, svg) {
     individualView = false;
-
-    x.domain(d3.extent([new Date(2015,12), d3.max(sortedData, d => d.date)]));
-    xAxisGroup.call(xAxis);
+    selectedDelay = "";
+    d3.selectAll(".delayLegend").style("fill", "white");
 
     let filteredData = sortedData.filter(
       (d) => d.carrier_name === selectedCarrier
@@ -704,10 +714,7 @@ function generateTimeChart(data) {
     svg.selectAll(".contextLayers").remove();
     drawContextArea(filteredStack);
 
-    svg.select(".contextRect")//.transition().duration(1000)
-      .attr("x", 0)
-      .attr("width", width)
-      .raise();
+    svg.select(".contextRect").raise();
 
     // change data for hover line with tooltip
     eventsRect
@@ -769,6 +776,7 @@ function generateTimeChart(data) {
     syncSoloDelays(selectedDelay);
     d3.selectAll(".delayLegend").style("fill", "white");
     d3.select(".delayLegend."+selectedDelay).style("fill", legendColor(selectedDelay));
+    d3.selectAll(".delayLayers").style("opacity", 0);
   }
 
 
@@ -776,10 +784,10 @@ function generateTimeChart(data) {
   function resetView () { 
     x.domain(d3.extent([new Date(2015,12), d3.max(sortedData, d => d.date)]));
     xAxisGroup.call(xAxis);
-    svg.selectAll(".delayLayers").transition().duration(1000).attr("d", area).style("opacity", 1);
+    d3.selectAll(".soloLayers").transition().duration(500).style("opacity",0)
+    d3.selectAll(".delayLayers").transition().duration(500).attr("d", area).style("opacity", 1);
     // svg.selectAll(".soloLayers").transition().duration(1000).attr("d", individualArea).style("opacity", 0);
     
-    svg.selectAll(".soloLayers").transition().duration(250).style("opacity",0)
     svg.selectAll(".soloLayers").remove();
     drawIndividualArea(currentData);
 

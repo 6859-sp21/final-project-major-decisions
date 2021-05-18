@@ -861,7 +861,7 @@ function generateTimeChart(data) {
 
   let hoverTextNote = svg
     .selectAll("hoverTextNote")
-    .data(["*per 10,000 arriving flights"])
+    .data(["*per 10,000 arrivals"])
     .enter()
     .append("text")
     .attr("x", width + margin.left + legendSize)

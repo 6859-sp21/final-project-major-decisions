@@ -69,6 +69,24 @@
         .attr('y', -12)
         .attr('width', width).attr('height', height)
         .attr("xlink:href", "assets/raw_data.png");
+
+        // step 11: gif of delays during 2020
+        vis.append("svg").attr('class', 'time-gif').attr('width', width).attr('height', height)
+        .attr('opacity', 0)
+        .append("svg:image")
+        .attr('x', -9)
+        .attr('y', -12)
+        .attr('width', width).attr('height', height)
+        .attr("xlink:href", "assets/still2-gif2.gif")
+
+        // step 12: png of average monthly delays, categorized by year
+        vis.append("svg").attr('class', 'time-monthly').attr('width', width).attr('height', height)
+        .attr('opacity', 0)
+        .append("svg:image")
+        .attr('x', -9)
+        .attr('y', -12)
+        .attr('width', width).attr('height', height)
+        .attr("xlink:href", "assets/still3-total-years-thicker-lines.png")
     };
   
     /**
@@ -264,20 +282,57 @@
       .attr('display', 'block');
 
       d3.selectAll('.four-step').remove();
+
+      d3.select('.time-gif')
+      .transition()
+      .duration(0)
+      .attr('opacity', 0)
+      .attr('display', 'none');
     }
 
     function showTimeGif(){
       d3.selectAll("#delay_map").remove();
       d3.selectAll("#delay_tooltip").remove();
       d3.selectAll('.five-step').remove();
+      
+      d3.select('.time-monthly')
+      .transition()
+      .duration(0)
+      .attr('opacity', 0)
+      .attr('display', 'none');
+
+      d3.select(".time-gif")
+      .transition()
+      .duration(transitionTime)
+      .attr('opacity', 1)
+      .attr('display', 'block');
     }
 
     function showTimeMonthlyChart(){
       d3.selectAll('.five-step').remove();
+      d3.selectAll('.dynamic-bar').remove();
+
+      d3.select('.time-gif')
+      .transition()
+      .duration(0)
+      .attr('opacity', 0)
+      .attr('display', 'none');
+
+      d3.select(".time-monthly")
+      .transition()
+      .duration(transitionTime)
+      .attr('opacity', 1)
+      .attr('display', 'block');
     }
 
     function showPart3Banner(){
-      d3.selectAll('.dynamic-bar').remove();
+      d3.selectAll('.dynamic-bar').remove();      
+      
+      d3.select('.time-monthly')
+      .transition()
+      .duration(0)
+      .attr('opacity', 0)
+      .attr('display', 'none');
     }
 
     async function showDynamicBarChart() {

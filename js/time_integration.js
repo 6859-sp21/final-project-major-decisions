@@ -381,20 +381,14 @@ function generateTimeChart(data) {
           newX1 = xContext(x.invert(s[1]));
 
       x.domain([x.invert(s[0]), x.invert(s[1])]);
-
-      svg.select(".brush").call(brush.move, null);
-
       xAxisGroup.call(xAxis.scale(x));
     
-      svg.selectAll(".soloLayers").remove();
-      drawIndividualArea(stackedData);
+      svg.select(".brush").call(brush.move, null);
 
       svg.selectAll(".delayLayers").transition().duration(1000).attr("d", area);
-      // svg.selectAll(".soloLayers").transition().duration(1000).attr("d", individualArea);
+      svg.selectAll(".soloLayers").transition().duration(1000).attr("d", individualArea);
+
       
-      if (individualView) {
-        syncSoloDelays(selectedDelay);
-      }
       svg.selectAll(".contextRect").transition().duration(1000)
         .attr("x", newX0)
         .attr("width", newX1 - newX0);
@@ -457,7 +451,6 @@ function generateTimeChart(data) {
     clipped
       .selectAll("layers")
       .data(layerData)
-      // .join("path")
       .enter()
       .append("path")
       .attr("class", (d) => "delayLayers " + d.key)
@@ -469,7 +462,8 @@ function generateTimeChart(data) {
     clipped
       .selectAll("soloLayers")
       .data(layerData)
-      .join("path")
+      .enter()
+      .append("path")
       .attr("class", (d) => "soloLayers " + d.key)
       .attr("fill", (d) => color(d.key))
       .attr("d", individualArea)
@@ -702,16 +696,16 @@ function generateTimeChart(data) {
     filteredData = sortedData.filter(
       (d) => d.carrier_name === selectedCarrier
     );
-    let filteredStack = stackGen(filteredData);
+    stackedData = stackGen(filteredData);
 
     ySolo.domain([0, d3.max(sortedData, d => d.total_ct)]).nice();
     yAxisGroup.call(yAxis);
 
     svg.selectAll(".delayLayers").remove();
-    drawStackedArea(filteredStack);
+    drawStackedArea(stackedData);
 
     svg.selectAll(".soloLayers").remove();
-    drawIndividualArea(filteredStack);
+    drawIndividualArea(stackedData);
     
     // https://stackoverflow.com/questions/47828945/shorten-months-ticks-on-x-axis
     xAxisGroup.selectAll(".tick").each(function(d) {
@@ -721,7 +715,7 @@ function generateTimeChart(data) {
     })
 
     svg.selectAll(".contextLayers").remove();
-    drawContextArea(filteredStack);
+    drawContextArea(stackedData);
 
     svg.select(".contextRect").raise();
 
@@ -789,7 +783,8 @@ function generateTimeChart(data) {
     }
 
     svg.selectAll(".soloLayers").attr("d", individualArea);
-    syncSoloDelays(selectedDelay);
+    // syncSoloDelays(selectedDelay);
+    d3.select(".soloLayers."+selectedDelay).style("opacity", 1);
     d3.selectAll(".delayLegend").style("fill", "white");
     d3.select(".delayLegend."+selectedDelay).style("fill", legendColor(selectedDelay));
     d3.selectAll(".delayLayers").style("opacity", 0);

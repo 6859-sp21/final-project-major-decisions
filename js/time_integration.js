@@ -762,12 +762,6 @@ function generateTimeChart(data) {
   };
 
 
-  function syncSoloDelays (selectedDelay) {
-    d3.selectAll(".soloLayers").transition().duration(250).style("opacity", 0);
-    d3.select(".soloLayers." + selectedDelay).transition().duration(250).style("opacity", 1);
-  }
-
-
   function selectDelayType (event, d) {
     selectedDelay = d;
     individualView = true;
@@ -783,7 +777,6 @@ function generateTimeChart(data) {
     }
 
     svg.selectAll(".soloLayers").attr("d", individualArea);
-    // syncSoloDelays(selectedDelay);
     d3.select(".soloLayers."+selectedDelay).style("opacity", 1);
     d3.selectAll(".delayLegend").style("fill", "white");
     d3.select(".delayLegend."+selectedDelay).style("fill", legendColor(selectedDelay));
@@ -868,7 +861,7 @@ function generateTimeChart(data) {
 
   let legendCaption = svg
     .selectAll("legendCaption")
-    .data(["Delay Types"])
+    .data(["Delay Causes"])
     .enter()
     .append("text")
     .attr("x", width + margin.left + labelBackgroundWidth + 0.3*legendSize)

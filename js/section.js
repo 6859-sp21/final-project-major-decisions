@@ -384,10 +384,6 @@
       // activate current section
       plot.activate(index);
     });
-  
-    // scroll.on('progress', function (index, progress) {
-    //   plot.update(index, progress);
-    // });
   }
   
   // load data and display, the entrance point to the whole flow

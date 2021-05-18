@@ -259,7 +259,13 @@ function generateTimeChart(data) {
     .range([height, 0])
     .nice();
 
-  let yAxis = d3.axisLeft(y);
+  let ySolo = d3
+    .scaleLinear()
+    .domain([0, d3.max(sortedData, d => d.total_ct)])
+    .range([height, 0])
+    .nice();
+
+  let yAxis = d3.axisLeft(ySolo);
   let yAxisGroup = svg
     .append("g")
     .attr("class", "yAxisGroup")
@@ -278,7 +284,7 @@ function generateTimeChart(data) {
     x.domain(d3.extent([new Date(2015,12), d3.max(sortedData, d => d.date)]));
     xAxisGroup.call(xAxis);
 
-    y.domain([0, d3.max(sortedData, d => d.total_ct)]).nice();
+    ySolo.domain([0, d3.max(sortedData, d => d.total_ct)]).nice();
     yAxisGroup.call(yAxis);
   }
 
@@ -442,8 +448,8 @@ function generateTimeChart(data) {
   const individualArea = d3
     .area()
     .x((d) => x(d.data.date))
-    .y0((d) => y(0))
-    .y1((d) => y(d[1]-d[0]));
+    .y0((d) => ySolo(0))
+    .y1((d) => ySolo(d[1]-d[0]));
 
   function drawStackedArea(layerData) {
     clipped
@@ -564,7 +570,7 @@ function generateTimeChart(data) {
     svg.select(".hoverTotalLabel")
       .attr("transform", function(d) {
         if (individualView) {
-          return `translate(${x(datum.date)}, ${y(datumValues.get(selectedDelay))-15})`
+          return `translate(${x(datum.date)}, ${ySolo(datumValues.get(selectedDelay))-15})`
         } else {
           return `translate(${x(datum.date)}, ${y(total_ct)-15})`
         }
@@ -596,7 +602,7 @@ function generateTimeChart(data) {
       .attr("y", function(d){return d.bbox.y})
       .attr("transform", function(d) {
         if (individualView) {
-          return `translate(${x(datum.date)}, ${y(datumValues.get(selectedDelay))-15})`
+          return `translate(${x(datum.date)}, ${ySolo(datumValues.get(selectedDelay))-15})`
         } else {
           return `translate(${x(datum.date)}, ${y(total_ct)-15})`
         }
@@ -614,7 +620,7 @@ function generateTimeChart(data) {
       .attr("class", "hoverTotalLabel")
       .attr("transform", function(d) {
         if (individualView) {
-          return `translate(${x(datum.date)}, ${y(datumValues.get(selectedDelay))-15})`
+          return `translate(${x(datum.date)}, ${ySolo(datumValues.get(selectedDelay))-15})`
         } else {
           return `translate(${x(datum.date)}, ${y(total_ct)-15})`
         }
@@ -637,12 +643,12 @@ function generateTimeChart(data) {
       if (individualView) {
         svg.select(".hoverSoloCircle." + selectedDelay)
           .attr("transform",
-            `translate(${x(datum.date)}, ${y(datumValues.get(selectedDelay))})`)
+            `translate(${x(datum.date)}, ${ySolo(datumValues.get(selectedDelay))})`)
           .style("opacity",1)
       } else {
         svg.select(".hoverCircle." + delayType)
           .attr("transform",
-            `translate(${x(datum.date)}, ${y(datumDelays.get(delayType))})`)
+            `translate(${x(datum.date)}, ${ySolo(datumDelays.get(delayType))})`)
           .style("opacity",1)
 
         svg.select(".hoverText."+delayType)
@@ -696,7 +702,7 @@ function generateTimeChart(data) {
     );
     let filteredStack = stackGen(filteredData);
 
-    y.domain([0, d3.max(sortedData, d => d.total_ct)]).nice();
+    ySolo.domain([0, d3.max(sortedData, d => d.total_ct)]).nice();
     yAxisGroup.call(yAxis);
 
     svg.selectAll(".delayLayers").remove();
@@ -773,10 +779,10 @@ function generateTimeChart(data) {
     let rescaleMap = d3.map(filteredData, d => d[selectedDelay] < 50);
     
     if (rescaleMap.includes(true) && d3.max(filteredData, d => d[selectedDelay]) < 400) {
-      y.domain([0, 400]);
-      yAxisGroup.call(yAxis.scale(y));
+      ySolo.domain([0, 400]);
+      yAxisGroup.call(yAxis.scale(ySolo));
     } else {
-      y.domain([0, d3.max(sortedData, d => d.total_ct)]).nice();
+      ySolo.domain([0, d3.max(sortedData, d => d.total_ct)]).nice();
       yAxisGroup.call(yAxis);
     }
 

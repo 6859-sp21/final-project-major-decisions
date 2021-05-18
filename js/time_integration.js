@@ -385,14 +385,16 @@ function generateTimeChart(data) {
       svg.select(".brush").call(brush.move, null);
 
       xAxisGroup.call(xAxis.scale(x));
+    
+      svg.selectAll(".soloLayers").remove();
+      drawIndividualArea(stackedData);
 
       svg.selectAll(".delayLayers").transition().duration(1000).attr("d", area);
-      svg.selectAll(".soloLayers").transition().duration(1000).attr("d", individualArea);
+      // svg.selectAll(".soloLayers").transition().duration(1000).attr("d", individualArea);
       
       if (individualView) {
         syncSoloDelays(selectedDelay);
       }
-
       svg.selectAll(".contextRect").transition().duration(1000)
         .attr("x", newX0)
         .attr("width", newX1 - newX0);

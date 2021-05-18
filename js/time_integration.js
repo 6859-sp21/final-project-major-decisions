@@ -666,7 +666,7 @@ function generateTimeChart(data) {
 
   eventsRect
     .on("mousemove", function(event, d) {
-      handleMouseMove(event, d, sortedData);
+      handleMouseMove(event, d, filteredData);
     })
     .on("mouseout", handleMouseOut)
 

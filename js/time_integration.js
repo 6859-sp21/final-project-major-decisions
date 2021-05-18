@@ -916,7 +916,7 @@ function generateTimeChart(data) {
     .data(delayTypes)
     .enter()
     .append("text")
-    .attr("x", width + margin.left + labelBackgroundWidth + 0.3*legendSize)
+    .attr("x", width + margin.left + labelBackgroundWidth + 0.2*legendSize)
     .attr("y", function (d, i) {
       return 10 + (5-i) * (legendSize + 5) + legendSize / 2;
     })

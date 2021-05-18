@@ -73,6 +73,7 @@
         // step 11: gif of delays during 2020
         vis.append("svg").attr('class', 'time-gif').attr('width', width).attr('height', height)
         .attr('opacity', 0)
+        .attr('display', 'none')
         .append("svg:image")
         .attr('x', -9)
         .attr('y', -12)
@@ -82,6 +83,7 @@
         // step 12: png of average monthly delays, categorized by year
         vis.append("svg").attr('class', 'time-monthly').attr('width', width).attr('height', height)
         .attr('opacity', 0)
+        .attr('display', 'none')
         .append("svg:image")
         .attr('x', -9)
         .attr('y', -12)

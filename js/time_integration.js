@@ -25,11 +25,12 @@ function createTimeChart() {
 
 function generateAverages(data) {
   let sortedData = data.sort((x, y) => d3.ascending(x.date, y.date));
+  sortedData = sortedData.filter((d) => d.carrier === "T");
   const dataYears = [2016, 2017, 2018, 2019, 2020];
 
   // set the dimensions and margins of the graph
-  let fullWidth = 560,
-      fullHeight = 500;
+  let fullWidth = 750,
+      fullHeight = 450;
 
   let margin  = {top: 20, right: 30, bottom: 30, left: 60},
     width = fullWidth - margin.left - margin.right,

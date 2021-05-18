@@ -264,6 +264,7 @@
       d3.selectAll("#delay_tooltip").remove();
       
       d3.selectAll('.five-step').remove();
+      document.getElementById("selectButton").innerHTML = null;
 
       generateMap('arr_del15');
     }
@@ -294,6 +295,7 @@
       d3.selectAll("#delay_map").remove();
       d3.selectAll("#delay_tooltip").remove();
       d3.selectAll('.five-step').remove();
+      document.getElementById("selectButton").innerHTML = null;
       
       d3.select('.time-monthly')
       .transition()

@@ -162,7 +162,7 @@ function generateTimeChart(data) {
   let sortedData = data.sort((x, y) => d3.ascending(x.date, y.date));
 
   // need to set up
-  let aggData = sortedData.filter((d) => d.carrier === "T");
+  let filteredData = sortedData.filter((d) => d.carrier === "T");
 
   let selectedCarrier = "Total";
   const airlines = new Set(data.map((d) => d.carrier_name));
@@ -222,11 +222,10 @@ function generateTimeChart(data) {
   ];
 
   let stackGen = d3.stack().keys(delayTypes);
-  let stackedData = stackGen(aggData);
+  let stackedData = stackGen(filteredData);
 
   // var to save state: in all-delays view or individual delay type view?
   let individualView = false;
-  let currentData = stackedData;
 
 
   // ----- AXES SCALES AND LABELS ----- //
@@ -402,7 +401,9 @@ function generateTimeChart(data) {
   }
 
   function resetZoom () {
-    resetAxes();
+    x.domain(d3.extent([new Date(2015,12), d3.max(sortedData, d => d.date)]));
+    xAxisGroup.call(xAxis);
+
     svg.selectAll(".delayLayers").transition().duration(1000).attr("d", area);
     // svg.selectAll(".soloLayers").attr("d", individualArea);
     svg.selectAll(".soloLayers").transition().duration(1000).attr("d", individualArea);//.style("opacity", 0);
@@ -467,8 +468,8 @@ function generateTimeChart(data) {
       .style("opacity", 0);
   }
 
-  drawStackedArea(currentData);
-  drawIndividualArea(currentData);
+  drawStackedArea(stackedData);
+  drawIndividualArea(stackedData);
 
   svg.select(".yAxisGroup").raise(); // make axis fully visible over the area
 
@@ -690,11 +691,13 @@ function generateTimeChart(data) {
 
     d3.select(".yAxisLabel").select("text").text("No. of Delays per 10,000 Arriving " + selectedCarrier + " Flights");
 
-    let filteredData = sortedData.filter(
+    filteredData = sortedData.filter(
       (d) => d.carrier_name === selectedCarrier
     );
-    currentData = filteredData;
-    let filteredStack = stackGen(currentData);
+    let filteredStack = stackGen(filteredData);
+
+    y.domain([0, d3.max(sortedData, d => d.total_ct)]).nice();
+    yAxisGroup.call(yAxis);
 
     svg.selectAll(".delayLayers").remove();
     drawStackedArea(filteredStack);
@@ -739,18 +742,14 @@ function generateTimeChart(data) {
   function highlight (event, d) {
     d3.selectAll(".soloLayers").style("opacity", 0);
     d3.selectAll(".delayLayers").style("opacity", 0.3); // lower opacity if not selected
-    d3.select("path.delayLayers." + d)
-      // .attr("fill", function(d) {return highlightColor(d.key)})
-      .style("opacity", 1); // selected should have full opacity
+    d3.select("path.delayLayers." + d).style("opacity", 1); // selected should have full opacity
     d3.select(".delayLegend." + d).style("fill", "#f2f2f2");
   };
 
 
   let noHighlight = function (event, d) {
     if (!individualView) {
-      d3.selectAll("path.delayLayers")
-        // .attr("fill", function(d) {return color(d.key)})
-        .style("opacity", 1);
+      d3.selectAll("path.delayLayers").style("opacity", 1);
       d3.selectAll(".delayLegend").style("fill", "white");
     } else {
       d3.selectAll("path.delayLayers").style("opacity", 0);
@@ -768,13 +767,12 @@ function generateTimeChart(data) {
 
 
   function selectDelayType (event, d) {
-    updateChart(selectedCarrier, svg);
     selectedDelay = d;
     individualView = true;
 
-    let rescaleMap = d3.map(currentData, d => d[selectedDelay] < 50);
+    let rescaleMap = d3.map(filteredData, d => d[selectedDelay] < 50);
     
-    if (rescaleMap.includes(true) && d3.max(currentData, d => d[selectedDelay]) < 400) {
+    if (rescaleMap.includes(true) && d3.max(filteredData, d => d[selectedDelay]) < 400) {
       y.domain([0, 400]);
       yAxisGroup.call(yAxis.scale(y));
     } else {
@@ -798,7 +796,7 @@ function generateTimeChart(data) {
     // svg.selectAll(".soloLayers").transition().duration(1000).attr("d", individualArea).style("opacity", 0);
 
     svg.selectAll(".soloLayers").remove();
-    drawIndividualArea(currentData);
+    drawIndividualArea(stackedData);
 
     svg.selectAll(".contextRect").transition().duration(1000)
       .attr("x", 0)

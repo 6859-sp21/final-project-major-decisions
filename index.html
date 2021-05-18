@@ -8,21 +8,29 @@
   <div class="page-container">
     <div id='sections'>
       <!-- STEP 0: Title --> 
-      <div class="title-banner"> </div>
+      <div class="title-banner">
+        <div class="title-banner-photo">
+          <div class="title-text">Flight delays in the US</div>
+          <div class="title-cover"> </div>
+          <img src="assets/title_banner.jpg" width="2000" height="700" class="banner-title-content">
+        </div>
+      </div>
       <section class="step">
       </section>
       <!-- STEP 1: BTS --> 
       <section class="step">
         <div class="title">
           <h3> Analyzing US airport and airline data </h3>
-          We collected data regarding US airlines and airports on-time statistics and delay causes from United States Department of Transportation's
+          We collected data regarding US airlines and airports delay statistics from United States Department
+           of Transportation's
           <a href="https://www.transtats.bts.gov/OT_Delay/OT_DelayCause1.asp?pn=1">Bureau of Transportation Statistics website.</a>   
         </div>
       </section>
       <!-- STEP 2: Data itself --> 
+      <!-- SVG text says types of delays -->
       <section class="step">
-        We collected data spanned from January 2016 to March 2021. The data includes information on total number and delayed number of flights
-        per airline per airport per months.
+        The data spans from January 2016 to March 2021. The data includes information on total number and delayed number of flights
+        per airline per airport per month. Note that the data only includes <u>US airlines</u> that lands in <u>US airports</u>.
         <br>
         We examined the following delay types:
         <ul>
@@ -35,7 +43,7 @@
       </section>
       <!-- STEP 3: process --> 
       <section class = "step">
-        This is overview of the process
+        we are going to explore the data from three different perspectives. 
       </section>
       <!-- STEP 4: part 1 banner --> 
       <div class = "part-1-banner banner">
@@ -73,8 +81,13 @@
         </div>
       </section>
        <!-- STEP 8: part 2 banner --> 
-      <div class = "part-2-banner banner">
-        This is the 2 banner
+       <div class = "part-2-banner banner">
+        <div class="banner-icon-container">
+          <img src="assets/airline_time.png" width="150" height="150" class="banner-icon">
+        </div>
+        <div class="banner-text">
+          Part II: Time Series
+        </div>
       </div>
       <section class = "step">
       </section>
@@ -97,14 +110,20 @@
       </section>
       <!-- STEP 12: part 3 banner --> 
       <div class = "part-3-banner banner">
-      This is the 3 banner
+        <div class="banner-icon-container">
+          <img src="assets/airline.png" width="150" height="150" class="banner-icon">
+        </div>
+        <div class="banner-text">
+          Part III: Airlines
+        </div>
       </div>
-      <section class = "step">
-        part3
-      </section>
+      <section class="step"></section>
       <!-- STEP 13: dyanimic percent bar graph --> 
       <section class="step">
-        We calculated the percentage of delayed flights per flight carrier per year. So which are the <b>worst</b> airlines?
+        <p>In this section, we will focus on comparing between airlines.</p>
+        <p>Specifically, we are curious in finding out which airlines are the worse in terms of delays</p>
+        <p>So firstly, we calculated the % of flights that are delayed per airlines over the years. 
+          Click around to explore.</p>
         <button class='percent-top-5' onclick="setTop5()">Top 5</button>
         <div class='airline-buttons-container'>
           <button class='percent-carrier percent-Alaska-Airlines-Inc' onclick="updateSelectedCarrier('Alaska Airlines Inc.')">Alaska Airlines Inc.</button>
@@ -131,7 +150,9 @@
       </section>
       <!-- STEP 14: dynamic min bar graph --> 
       <section class="step">
-        We calculated the percentage of delayed flights per flight carrier per year. So which are the <b>worst</b> airlines?
+        <p>We also calculated the expected duration of delay for each airline.</p>
+        <p>Expected duration of delay is calculated by dividing total duration of delay
+           by total number of flights of a particular airline. The units are in minutes.</p>
         <button class='min-top-5' onclick="setTop5()">Top 5</button>
         <div class='airline-buttons-container'>
           <button class='min-carrier min-Alaska-Airlines-Inc' onclick="updateSelectedCarrier('Alaska Airlines Inc.')">Alaska Airlines Inc.</button>
@@ -158,7 +179,8 @@
       </section>
       <!-- STEP 15: part 2 banner --> 
       <section class="step">
-        This is Seara's overview section
+        <p>Aggregating data from 2016, we get a summary of airlines' % percentage flights delayed 
+        and expected time over the years.</p>
       </section>
        <!-- STEP 16: part 2 banner --> 
       <section class="step conclusion">

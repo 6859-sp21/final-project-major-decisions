@@ -486,15 +486,15 @@ function graphTitle(year="") {
     let title ="";
     if (IS_CUSTOMIZABLE) {
         if (IS_PERCENT){
-            title = "Percentage of Flights Delayed of Selected Airlines";
+            title = "Percentage of flights delayed of selected airlines";
         } else {
-            title = "Expected duration of delay(min) of Selected Airlines";
+            title = "Expected duration of delay(min) of aelected airlines";
         }
     } else {
         if (IS_PERCENT){
-            title = "Top 5 Airlines with Highest Percentage of Flights Delayed";
+            title = "Top 5 airlines with highest % of flights delayed";
         } else {
-            title = "Top 5 Airlines with Longest Expected duration of delay(min)"
+            title = "Top 5 airlines with longest expected duration of delay(min)"
         }
     }
 

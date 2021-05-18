@@ -70,6 +70,9 @@
         .attr('width', width).attr('height', height)
         .attr("xlink:href", "assets/raw_data.png");
 
+        // step 3
+        generateProcessStep();
+
         // step 11: gif of delays during 2020
         vis.append("svg").attr('class', 'time-gif').attr('width', width).attr('height', height)
         .attr('opacity', 0)
@@ -140,16 +143,26 @@
     const transitionTime = 600;
     // step 1 Title banner
     function showTitle() {
+      d3.selectAll(".banner-title-content")
+      .transition()
+      .duration(transitionTime)
+      .attr('opacity', 1)
+
       d3.select(".bts-intro")
       .transition()
       .duration(0)
       .attr('opacity', 0)
       .attr('display', 'none');
-
     }
 
     // STEP 2: BTS instro
     function showBTSIntro() {
+      d3.selectAll(".title-cover")
+      .transition()
+      .duration(0)
+      .attr('background-color', 'white')
+
+
       d3.select("#total_map").remove();
       d3.select("#total_tooltip").remove();
 
@@ -184,12 +197,22 @@
       .attr('opacity', 1)
       .attr('display', 'block');
 
-      // TODO: remove process's worK
+      d3.selectAll('.process-text')
+      .transition() // this need to be left in as a hack for fast scrolling
+      .duration(0)
+      .attr('opacity', 0)
+      .attr('display', 'none');
+
     }
 
     // STEP 4: process
     function showProcess(){
-      // TODO: introduce process' work
+      d3.selectAll(".process-text")
+      .transition()
+      .duration(transitionTime)
+      .attr('opacity', 1)
+      .attr('display', 'block');
+
       d3.select('.data-intro')
       .transition() 
       .duration(0)
@@ -202,7 +225,11 @@
 
     // STEP 5: part 1 banner
     function showPart1Banner() {
-      // TODO: remove process' work 
+      d3.selectAll('.process-text')
+      .transition() // this need to be left in as a hack for fast scrolling
+      .duration(0)
+      .attr('opacity', 0)
+      .attr('display', 'none');
 
       d3.selectAll("#total_map").remove();
       d3.selectAll("#total_tooltip").remove();

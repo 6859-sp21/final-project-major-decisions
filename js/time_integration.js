@@ -89,7 +89,7 @@ function generateAverages(data) {
 
   let yAxisLabel = svg.append("text")
     .attr("x", -height*3/4)
-    .attr("y", -50)
+    .attr("y", -30)
     .text("No. of Delays per 10,000 Arriving Flights")
     .attr("transform", "rotate(-90)")
     .attr("text-anchor", "start")
@@ -135,7 +135,7 @@ function generateAverages(data) {
     .append("text")
     .attr("id", "timeTitle")
     .attr("x", width/2)
-    .attr("y", -margin.top)
+    .attr("y", -0.5*margin.top)
     .attr("fill", "black")
     .attr("text-anchor", "middle")
     .text((d) => "Total Delayed Flights")
@@ -269,7 +269,7 @@ function generateTimeChart(data) {
     .attr("class", "yAxisLabel")
     .append("text")
     .attr("x", -height)
-    .attr("y", -50)
+    .attr("y", -40)
     .text(d => "No. of Delays per 10,000 Arriving " + selectedCarrier + " Flights")
     .attr("transform", "rotate(-90)")
     .attr("text-anchor", "start")
@@ -888,7 +888,7 @@ function generateTimeChart(data) {
     .attr("y", function (d, i) {
       return 10 + (5-i)*(legendSize + 5);
     })
-    .attr("width", 4.25*legendSize)
+    .attr("width", 4.45*legendSize)
     .attr("height", legendSize)
     .attr("rx", 5)
     .style("stroke", (d) => highlightColor(d))

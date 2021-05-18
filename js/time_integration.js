@@ -685,7 +685,7 @@ function generateTimeChart(data) {
     .append("text")
     .attr("id", "timeTitle")
     .attr("x", width/2)
-    .attr("y", -margin.top)
+    .attr("y", -0.5*margin.top)
     .attr("fill", "black")
     .attr("text-anchor", "middle")
     .text((d) => selectedCarrier + " Delayed Flights")

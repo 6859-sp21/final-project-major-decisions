@@ -47,7 +47,7 @@ function generateDataIntro() {
     .attr('x', 200)
     .attr('y', 10)
     .attr('width', 150).attr('height', height)
-    .attr("xlink:href", "assets/Weather.png");
+    .attr("xlink:href", "assets/weather.png");
 
     iconVis.append("svg:image")
     .attr('x', 400)

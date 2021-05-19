@@ -6,7 +6,7 @@ Team Members: Seara Chen, Julia Fiksinski, Maggie Wang
 Abstract:
 The onset of the COVID-19 pandemic rapidly brought the air transportation sector to a standstill in the spring of 2020. However, with vaccination rates rising, the number of flights nationwide for post-quarantine travel stands to grow as well. We sought to examine the air transportation sector's recent performance. We acquired data (dated from January 2016 to March 2021) regarding United States airline and airport on-time statistics and delay causes from the United States Department of Transportation's Bureau of Transportation Statistics website. The primary features we examined were geographic airport data, time-based flight delay data, and airline-based delay data. We created a scrollytelling presentation with numerous interactive visualizations and static charts to present these facets in a manner that encourages user exploration.
 
-[alt text](https://github.com/6859-sp21/final-project-major-decisions/raw/main/assets/delay-map.png)
+![alt text](https://github.com/6859-sp21/final-project-major-decisions/raw/main/assets/delay-map.png)
 
 Paper: [Flight Delays in the United States](https://github.com/6859-sp21/final-project-major-decisions/blob/e44f8a4e2c7bd3a14a9964ad13abec05eb56491f/final/FinalPaper.pdf)
 
@@ -34,6 +34,14 @@ With regards to building the structure of the scrolling visualization, Seara sta
 
 
 ## Sources
-https://www.d3-graph-gallery.com/bubblemap
-
-https://observablehq.com/@d3/zoom-to-bounding-box?collection=@d3/d3-zoom
+- Bubble map for location data: https://www.d3-graph-gallery.com/bubblemap
+- Zoom to bounding box: https://observablehq.com/@d3/zoom-to-bounding-box?collection=@d3/d3-zoom
+- D3 time-series line chart: https://bl.ocks.org/robyngit/89327a78e22d138cff19c6de7288c1cf
+- Focus + context (context view underneath area): https://observablehq.com/@d3/focus-context
+- Zoomable area chart with time axis: https://observablehq.com/@d3/zoomable-area-chart
+- Stacked area chart with hover interaction: https://www.d3-graph-gallery.com/graph/stackedarea_template.html
+- Brush to zoom: https://www.d3-graph-gallery.com/graph/area_brushZoom.html
+- Filter view by airline using dropdown: https://www.d3-graph-gallery.com/graph/line_filter.html
+- Brush to zoom: https://www.d3-graph-gallery.com/graph/interactivity_zoom.html
+- Multiple tooltips: https://stackoverflow.com/questions/38366067/unable-to-show-the-tooltip-values-for-stacked-area-chart-in-a-single-tooltip 
+- Line graph: https://www.d3-graph-gallery.com/graph/line_several_group.html 

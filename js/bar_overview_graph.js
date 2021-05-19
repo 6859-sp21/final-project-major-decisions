@@ -203,7 +203,7 @@ function createOverviewBarPercent(data, percentData) {
     .attr("y", 25)
     .attr("x", barIndividualWidth/2)
     .attr("text-anchor", "middle")
-    .text("Percentage of delayed flights throughout out 2016-present")
+    .text("Percentage of delayed flights throughout 2016-present")
     .style("font-size", "25px");
     
     document.getElementById("vis").appendChild(svg.node());
@@ -343,7 +343,7 @@ function createOverviewBarMin(data, minData) {
     .attr("y", 25)
     .attr("x", barIndividualWidth/2)
     .attr("text-anchor", "middle")
-    .text("Average delay duration flights throughout out 2016-present")
+    .text("Average delay duration flights throughout 2016-present")
     .style("font-size", "25px");
     
     document.getElementById("vis").appendChild(svg.node());

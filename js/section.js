@@ -62,14 +62,16 @@
         .attr("xlink:href", "assets/bts.png");
 
         // step 2 raw data image
-        vis.append("svg").attr('class', 'data-intro').attr('width', width).attr('height', height)
-        .attr('opacity', 0)
-        .append("svg:image")
-        .attr('x', -9)
-        .attr('y', -12)
-        .attr('width', width).attr('height', height)
-        .attr("xlink:href", "assets/raw_data.png");
+        // vis.append("svg").attr('class', 'data-intro').attr('width', width).attr('height', height)
+        // .attr('opacity', 0)
+        // .append("svg:image")
+        // .attr('x', -9)
+        // .attr('y', -12)
+        // .attr('width', width).attr('height', height)
+        // .attr("xlink:href", "assets/raw_data.png");
 
+        // step 3
+        generateDataIntro()
         // step 3
         generateProcessStep();
 
@@ -173,7 +175,7 @@
       .attr('display', 'block');
 
 
-      d3.select('.data-intro')
+      d3.select('.data-intro-icon')
       .transition() // this need to be left in as a hack for fast scrolling
       .duration(0)
       .attr('opacity', 0)
@@ -191,7 +193,7 @@
       .attr('display', 'none');
 
      
-      d3.select(".data-intro")
+      d3.select(".data-intro-icon")
       .transition()
       .duration(transitionTime)
       .attr('opacity', 1)
@@ -213,7 +215,7 @@
       .attr('opacity', 1)
       .attr('display', 'block');
 
-      d3.select('.data-intro')
+      d3.select('.data-intro-icon')
       .transition() 
       .duration(0)
       .attr('opacity', 0)

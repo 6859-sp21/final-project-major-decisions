@@ -90,7 +90,18 @@
   margin: auto 55px;
   width: fit-content;
   white-space: nowrap;
+}
 
+.conclusion {
+  height: 600px;
+}
+
+.conclusion-div {
+  position:absolute;
+  left:0;
+  right:0;
+  height:500px;
+  background-color: red;
 }
 
 #wholeBody {

@@ -24,37 +24,50 @@ function generateProcessStep(){
  
     textGroup.append('text').text('III. Airlines')
     .attr('x', 100).attr('y', 300)
- 
 
-    // 'II. Time Series'
-    // 'III. Airlines'
 
     document.getElementById("vis").appendChild(svg.node());
-
-
-    
 
 }
 
 function generateDataIntro() {
+    const height = 400;
     const vis = d3.select("#vis")
+    const iconVis = vis.append("svg").attr('class', 'data-intro-icon').attr('width', 950).attr('height', 600)
+    .attr('opacity', 0).attr('display', 'none')
+    
+    iconVis.append("svg:image")
+    .attr('x', 10)
+    .attr('y', 10)
+    .attr('width', 120).attr('height', height)
+    .attr("xlink:href", "assets/airline.png");
 
-    // step 1 Title image
-    vis.append("svg").attr('class', 'bts-intro').attr('width', width).attr('height', height)
-    .attr('opacity', 0)
-    .append("svg:image")
-    .attr('x', -9)
-    .attr('y', -12)
-    .attr('width', width).attr('height', height)
-    .attr("xlink:href", "assets/bts.png");
+        
+    iconVis.append("svg:image")
+    .attr('x', 200)
+    .attr('y', 10)
+    .attr('width', 150).attr('height', height)
+    .attr("xlink:href", "assets/Weather.png");
 
-    // step 2 raw data image
-    vis.append("svg").attr('class', 'data-intro').attr('width', width).attr('height', height)
-    .attr('opacity', 0)
-    .append("svg:image")
-    .attr('x', -9)
-    .attr('y', -12)
-    .attr('width', width).attr('height', height)
-    .attr("xlink:href", "assets/raw_data.png");
+    iconVis.append("svg:image")
+    .attr('x', 400)
+    .attr('y', 10)
+    .attr('width', 150).attr('height', height)
+    .attr("xlink:href", "assets/radar.png");
+
+    iconVis.append("svg:image")
+    .attr('x', 600)
+    .attr('y', 10)
+    .attr('width', 150).attr('height', height)
+    .attr("xlink:href", "assets/airplane_hour.png");
+
+    iconVis.append("svg:image")
+    .attr('x', 800)
+    .attr('y', 10)
+    .attr('width', 150).attr('height', height)
+    .attr("xlink:href", "assets/security.png");
+ 
+ 
+
 
 }

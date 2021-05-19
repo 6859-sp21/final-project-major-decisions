@@ -16,7 +16,7 @@ function generateProcessStep(){
     .style('font-weight', 'bold')
     .attr('width', 960).attr('height', 600)
 
-    textGroup.append('text').text('I. Airport')
+    textGroup.append('text').text('I. Airports')
     .attr('x', 100).attr('y', 100)
  
     textGroup.append('text').text('II. Time Series')

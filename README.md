@@ -34,3 +34,5 @@ With regards to building the structure of the scrolling visualization, Seara sta
 
 
 ## Sources
+https://github.com/johnwalley/d3-simple-slider
+https://observablehq.com/@d3/bar-chart-race-explained

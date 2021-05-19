@@ -38,12 +38,11 @@ With regards to building the structure of the scrolling visualization, Seara sta
 - Slider on the timeline: https://observablehq.com/@d3/bar-chart-race-explained
 - Bubble map for location data: https://www.d3-graph-gallery.com/bubblemap
 - Zoom to bounding box: https://observablehq.com/@d3/zoom-to-bounding-box?collection=@d3/d3-zoom
-- D3 time-series line chart: https://bl.ocks.org/robyngit/89327a78e22d138cff19c6de7288c1cf
-- Focus + context (context view underneath area): https://observablehq.com/@d3/focus-context
-- Zoomable area chart with time axis: https://observablehq.com/@d3/zoomable-area-chart
+- D3 time-series with context view: https://bl.ocks.org/robyngit/89327a78e22d138cff19c6de7288c1cf
+- Context view underneath area: https://observablehq.com/@d3/focus-context
+- Update x axis on zoom: https://observablehq.com/@d3/zoomable-area-chart
 - Stacked area chart with hover interaction: https://www.d3-graph-gallery.com/graph/stackedarea_template.html
 - Brush to zoom: https://www.d3-graph-gallery.com/graph/area_brushZoom.html
-- Filter view by airline using dropdown: https://www.d3-graph-gallery.com/graph/line_filter.html
 - Brush to zoom: https://www.d3-graph-gallery.com/graph/interactivity_zoom.html
 - Multiple tooltips: https://stackoverflow.com/questions/38366067/unable-to-show-the-tooltip-values-for-stacked-area-chart-in-a-single-tooltip 
 - Line graph: https://www.d3-graph-gallery.com/graph/line_several_group.html 

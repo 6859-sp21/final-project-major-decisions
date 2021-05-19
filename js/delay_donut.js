@@ -19,11 +19,11 @@ function generateDonut(){
         .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
     const colors = new Map(); // a map keeping track if a attribute is selected 
-      colors.set('carrier_ct', '#66c2a5')
-      colors.set('weather_ct', '#fc8d62');    
-      colors.set('nas_ct', '#8da0cb')
-      colors.set('security_ct', '#e78ac3')
-      colors.set('late_aircraft_ct', '#a6d854') 
+    colors.set('carrier_ct', '#66c2a5');
+    colors.set('weather_ct', '#fc8d62');    
+    colors.set('nas_ct', '#a6d854');
+    colors.set('security_ct', '#8da0cb');
+    colors.set('late_aircraft_ct', '#e78ac3');
 
     const attributeMap = new Map(); // a map keeping track of attribute names 
       attributeMap.set('carrier_ct', 'Air Carrier')

@@ -492,7 +492,7 @@ function generateTimeChart(data) {
     selection.each(function(d) {d.bbox = this.getBBox();})
   }
 
-  let labelBackgroundWidth = 90;
+  let labelBackgroundWidth = 80;
 
   for (i = 0; i < delayTypes.length; i++) {
     svg.append('g')
@@ -743,7 +743,7 @@ function generateTimeChart(data) {
   
   function highlight (event, d) {
     d3.selectAll(".soloLayers").style("opacity", 0);
-    d3.selectAll(".delayLayers").style("opacity", 0.3); // lower opacity if not selected
+    d3.selectAll(".delayLayers").style("opacity", 0.35); // lower opacity if not selected
     d3.select("path.delayLayers." + d).style("opacity", 1); // selected should have full opacity
     d3.select(".delayLegend." + d).style("fill", "#f2f2f2");
   };
@@ -810,7 +810,7 @@ function generateTimeChart(data) {
     .append("rect")
     .attr("class", "resetButton")
     .attr("x", width + margin.left + labelBackgroundWidth)
-    .attr("y", 10 + 9*(legendSize+5) - legendSize/2)
+    .attr("y", 10 + 8*(legendSize+5) - legendSize/2)
     .attr("width", 4.25*legendSize)
     .attr("height", legendSize)
     .attr("rx", 5)
@@ -826,7 +826,7 @@ function generateTimeChart(data) {
     .enter()
     .append("text")
     .attr("x", width + margin.left + labelBackgroundWidth + 0.3*legendSize)
-    .attr("y", 10 + 9*(legendSize+5))
+    .attr("y", 10 + 8*(legendSize+5))
     .style("fill", "#a6a6a6")
     .text(d => d)
     .attr("text-anchor", "left")
@@ -837,38 +837,35 @@ function generateTimeChart(data) {
 
   let hoverTextCaption = svg
     .selectAll("hoverTextCaption")
-    .data(["# Delays*"])
+    .data(["# Delays"])
     .enter()
     .append("text")
-    .attr("x", width + margin.left + legendSize)
-    .attr("y", 15)
+    .attr("x", width + 0.7*margin.left)
+    .attr("y", -5)
     .style("fill", "black")
     .text(d => d)
     .attr("text-anchor", "left")
     .style("alignment-baseline", "middle")
-
-  let hoverTextNote = svg
-    .selectAll("hoverTextNote")
-    .data(["*per 10,000 arrivals"])
-    .enter()
-    .append("text")
-    .attr("x", width + margin.left + legendSize)
-    .attr("y", 10 + 7*(legendSize+5))
-    .style("fill", "black")
-    .text(d => d)
-    .attr("text-anchor", "left")
-    .style("alignment-baseline", "middle")
+    .append("tspan")
+      .attr("x", width + 0.7*margin.left)
+      .attr("dy","1.4em")
+      .text("per 10k arrivals")
+      .attr("text-anchor", "left")
+      .attr("text-decoration", "underline")
+      .style("alignment-baseline", "middle")
+      .style("opacity",1)
 
   let legendCaption = svg
     .selectAll("legendCaption")
     .data(["Delay Causes"])
     .enter()
     .append("text")
-    .attr("x", width + margin.left + labelBackgroundWidth + 0.3*legendSize)
+    .attr("x", width + margin.left + labelBackgroundWidth)
     .attr("y", 15)
     .style("fill", "black")
     .text(d => d)
     .attr("text-anchor", "left")
+    .attr("text-decoration", "underline")
     .style("alignment-baseline", "middle")
   
 

@@ -851,6 +851,7 @@ function generateTimeChart(data) {
       .attr("dy","1.4em")
       .text("per 10k arrivals")
       .attr("text-anchor", "left")
+      .attr("text-decoration", "underline")
       .style("alignment-baseline", "middle")
       .style("opacity",1)
 
@@ -864,6 +865,7 @@ function generateTimeChart(data) {
     .style("fill", "black")
     .text(d => d)
     .attr("text-anchor", "left")
+    .attr("text-decoration", "underline")
     .style("alignment-baseline", "middle")
   
 

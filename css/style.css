@@ -26,28 +26,9 @@
   position:absolute;
   left:0;
   right:0;
-  height:700px;
-}
-
-.title-banner-photo {
-  display: relative;
-}
-
-.title-cover {
-  position: absolute;
-  background-image:  linear-gradient(to right,  rgb(90, 82, 82, 0), #ffffff 8%);
-  width: 10000px;
-  height: 700px;
-
-}
-
-.title-text {
-  position: absolute;
-  font-size: 60px;
-  z-index: 10;
-  margin: 300px 500px;
-  white-space: nowrap;
-
+  height:400px;
+  background-image: linear-gradient(to right,  rgb(90, 82, 82, 50), rgba(255,0,0,0));
+  color:white;
 }
 
 .banner {
@@ -57,7 +38,6 @@
   right:0;
   height:500px;
 }
-
 .banner-background-container {
   flex: 0 0 200px;
   display: flex;
@@ -215,15 +195,15 @@
 
 }
 
-div.tooltip {	
-    position: absolute;			
-    text-align: center;								
-    padding: 2px;				
-    font: 12px sans-serif;		
-    background: lightsteelblue;	
-    border: 0px;		
-    border-radius: 8px;			
-    pointer-events: none;			
+div.tooltip { 
+    position: absolute;     
+    text-align: center;               
+    padding: 2px;       
+    font: 12px sans-serif;    
+    background: lightsteelblue; 
+    border: 0px;    
+    border-radius: 8px;     
+    pointer-events: none;     
 }
 
 .circle:hover{
@@ -253,7 +233,7 @@ div.tooltip {
 
 
 .button1 {
-    background-color: #66c2a5; /* Green */
+    background-color: #66c2a5; /* Teal */
     border: none;
     color: white;
     transition-duration: 0.4s;
@@ -274,7 +254,7 @@ div.tooltip {
   }
 
 .button2 {
-    background-color: #fc8d62; /* Green */
+    background-color: #fc8d62; /* Orange */
     border: none;
     color: white;
     transition-duration: 0.4s;
@@ -295,48 +275,6 @@ div.tooltip {
   }
 
 .button3 {
-    background-color: #8da0cb; /* Green */
-    border: none;
-    color: white;
-    transition-duration: 0.4s;
-    padding: 5px 10px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 14px;
-    display: block;
-    border: 2px solid #8da0cb;
-    margin-bottom:5px;
-  }
-
-.button3:hover {
-    background-color: white;
-    color: #8da0cb;
-    border: 2px solid #8da0cb;
-  }
-
-.button4 {
-    background-color: #e78ac3; /* Green */
-    border: none;
-    color: white;
-    transition-duration: 0.4s;
-    padding: 5px 10px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 14px;
-    display: block;
-    border: 2px solid #e78ac3;
-    margin-bottom:5px;
-  }
-
-.button4:hover {
-    background-color: white;
-    color: #e78ac3;
-    border: 2px solid #e78ac3;
-  }
-
-.button5 {
     background-color: #a6d854; /* Green */
     border: none;
     color: white;
@@ -351,8 +289,50 @@ div.tooltip {
     margin-bottom:5px;
   }
 
-.button5:hover {
+.button3:hover {
     background-color: white;
     color: #a6d854;
     border: 2px solid #a6d854;
+  }
+
+.button4 {
+    background-color: #8da0cb; /* Blue */
+    border: none;
+    color: white;
+    transition-duration: 0.4s;
+    padding: 5px 10px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    display: block;
+    border: 2px solid #8da0cb;
+    margin-bottom:5px;
+  }
+
+.button4:hover {
+    background-color: white;
+    color: #8da0cb;
+    border: 2px solid #8da0cb;
+  }
+
+.button5 {
+    background-color: #e78ac3; /* Pink */
+    border: none;
+    color: white;
+    transition-duration: 0.4s;
+    padding: 5px 10px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    display: block;
+    border: 2px solid #e78ac3;
+    margin-bottom:5px;
+  }
+
+.button5:hover {
+    background-color: white;
+    color: #e78ac3;
+    border: 2px solid #e78ac3;
   }

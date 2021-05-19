@@ -8,9 +8,9 @@ Summary image:
 Abstract:
 The onset of the COVID-19 pandemic rapidly brought the air transportation sector to a standstill in the spring of 2020. However, with vaccination rates rising, the number of flights nationwide for post-quarantine travel stands to grow as well. We sought to examine the air transportation sector's recent performance. We acquired data (dated from January 2016 to March 2021) regarding United States airline and airport on-time statistics and delay causes from the United States Department of Transportation's Bureau of Transportation Statistics website. The primary features we examined were geographic airport data, time-based flight delay data, and airline-based delay data. We created a scrollytelling presentation with numerous interactive visualizations and static charts to present these facets in a manner that encourages user exploration.
 
-Paper: (link)
+Paper: [Flight Delays in the United States](https://github.com/6859-sp21/final-project-major-decisions/blob/e44f8a4e2c7bd3a14a9964ad13abec05eb56491f/final/FinalPaper.pdf)
 
-Video: (link)
+Video: (link here)
 
 
 ## Project Process

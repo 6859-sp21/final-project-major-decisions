@@ -35,23 +35,6 @@
   display: relative;
 }
 
-.title-cover {
-  position: absolute;
-  background-image:  linear-gradient(to right,  rgb(90, 82, 82, 0), #ffffff 8%);
-  width: 10000px;
-  height: 700px;
-
-}
-
-.title-text {
-  position: absolute;
-  font-size: 60px;
-  z-index: 10;
-  margin: 300px 500px;
-  white-space: nowrap;
-
-}
-
 .banner {
   display: flex;
   position:absolute;
@@ -59,11 +42,13 @@
   right:0;
   height:500px;
 }
+
 .banner-background-container {
   flex: 0 0 200px;
   display: flex;
   flex-direction: column;
 }
+
 .banner-background {
   flex: 0 0 250px;
   width: 200px;
@@ -93,16 +78,56 @@
   white-space: nowrap;
 }
 
-.conclusion {
-  height: 600px;
+.title-cover {
+  position: absolute;
+  background-image:  linear-gradient(to right,  rgb(90, 82, 82, 0), #ffffff 8%);
+  width: 10000px;
+  height: 700px;
+}
+
+.conclusion-cover {
+  position: absolute;
+  background-image:  linear-gradient(to right,  rgb(90, 82, 82, 0), #ffffff 5%);
+  width: 10000px;
+  height: 700px;
 }
 
 .conclusion-div {
   position:absolute;
   left:0;
   right:0;
-  height:500px;
-  background-color: red;
+  height:700px;
+}
+
+.conclusion {
+  height: 100px;
+}
+
+.title-banner {
+  position:absolute;
+  left:0;
+  right:0;
+  background-image: linear-gradient(to right,  rgb(90, 82, 82, 50), rgba(255,0,0,0));
+  height:700px;
+}
+
+.title-text {
+  position: absolute;
+  font-size: 60px;
+  z-index: 10;
+  margin: 300px 500px;
+  white-space: nowrap;
+
+}
+
+.conclusion-content-text {
+  position: absolute;
+  width: 800px;
+  font-size: 20px;
+  margin-left: 300px;
+  margin-top: 150px;
+  z-index: 10;
+
 }
 
 #wholeBody {

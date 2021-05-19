@@ -136,6 +136,23 @@ function generateMap(selectedAttribute){
             .attr("fill", "#E5E7E9")
             .attr("fill-opacity", 0)
   
+        function handleMouseOver(event, d) {
+          Tooltip.style("opacity", 1);
+          d3.select(event.currentTarget).attr("stroke-width", 4);  
+        }
+
+        function handleMouseMove(event, d) {
+          Tooltip
+          .html(d.airport_name + "<br>" + attributeMap.get(selectedAttribute) + Math.round(d[selectedAttribute]))
+            .style("left", (d3.pointer(event, g.node())[0]+10) + "px")
+            .style("top", (d3.pointer(event, g.node())[1]) + "px") 
+        }
+
+        function handleMouseLeave(event, d) {
+          Tooltip.style("opacity", 0)
+            d3.select(event.currentTarget).attr("stroke-width", 2);
+        }
+
         // Add circles:
         var circles= svg
           .selectAll("myCircles")
@@ -164,20 +181,9 @@ function generateMap(selectedAttribute){
             .attr("stroke", colors.get(selectedAttribute))
             .attr("stroke-width", 2)
             .attr("fill-opacity", .3)
-          .on("mouseover", (event, d) => {
-            Tooltip.style("opacity", 1)
-            d3.select(event.currentTarget).attr("stroke-width", 4);  
-          })
-          .on("mousemove", (event, d) => {
-            Tooltip
-            .html(d.airport_name + "<br>" + attributeMap.get(selectedAttribute) + Math.round(d[selectedAttribute]))
-              .style("left", (d3.pointer(event, g.node())[0]+10) + "px")
-              .style("top", (d3.pointer(event, g.node())[1]) + "px")
-          })
-          .on("mouseleave", (event, d) => {
-            Tooltip.style("opacity", 0)
-            d3.select(event.currentTarget).attr("stroke-width", 2); 
-          })
+          .on("mouseover", handleMouseOver)
+          .on("mousemove", handleMouseMove)
+          .on("mouseleave", handleMouseLeave)
 
         svg
           .selectAll("legend")
@@ -223,13 +229,10 @@ function generateMap(selectedAttribute){
             d3.zoomIdentity,
             d3.zoomTransform(svg.node()).invert([width / 2, height / 2])
           );
-          svg.selectAll('circle').attr('stroke-width', 2)
-          circles.on("mouseover", function(event, d) {
-            d3.select(event.currentTarget).attr("stroke-width", 4);
-          })                  
-          circles.on("mouseleave", function(event, d) {
-            d3.select(event.currentTarget).attr("stroke-width", 2);
-          });
+          svg.selectAll('circle').attr('stroke-width', 2);
+          circles.on("mouseover", handleMouseOver);
+          circles.on("mousemove", handleMouseMove);
+          circles.on("mouseleave", handleMouseLeave);
           centers.attr('fill-opacity', 0)
         }
       
@@ -237,9 +240,17 @@ function generateMap(selectedAttribute){
           const [[x0, y0], [x1, y1]] = path.bounds(d);
           centers.attr('fill-opacity', 1.0)
           circles.on("mouseover", function(event, d) {
+            handleMouseOver(event, d);
             d3.select(event.currentTarget).attr("stroke-width", 1);
           })                  
+          circles.on("mousemove", function(event, d) {
+            Tooltip
+            .html(d.airport_name + "<br>" + attributeMap.get(selectedAttribute) + Math.round(d[selectedAttribute]))
+              .style("left", (d3.pointer(event, g.node())[0]) + "px")
+              .style("top", (d3.pointer(event, g.node())[1]) + "px");
+          })
           circles.on("mouseleave", function(event, d) {
+            handleMouseLeave(event, d);
             d3.select(event.currentTarget).attr("stroke-width", 0.5);
           });
           svg.selectAll('circle').attr('stroke-width', 0.5)

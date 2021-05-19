@@ -15,6 +15,8 @@ territoryPos.set('SJU', 240)
 territoryPos.set('STT', 250) 
 territoryPos.set('STX', 260) 
 
+let IS_FIRST_MAP_RENDERING = true;
+
 const colors = new Map(); // a map keeping track if a attribute is selected 
 colors.set('arr_del15', '#ebc334');
 colors.set('carrier_ct', '#66c2a5')
@@ -27,7 +29,9 @@ colors.set('late_aircraft_ct', '#a6d854')
 function choose(choice){
     d3.select("#delay_map").remove();
     d3.select("#delay_tooltip").remove();
-    generateMap(choice)
+    IS_FIRST_MAP_RENDERING = false;
+    generateMap(choice);
+    console.log("finished choose function");
 }
 
 function generateMap(selectedAttribute){  
@@ -67,8 +71,11 @@ function generateMap(selectedAttribute){
           .attr("height", height)
           .on("click", reset)
           .attr("id", "delay_map")
-          .attr("opacity", "0")
           .attr('class', 'four-step');
+        
+        if (IS_FIRST_MAP_RENDERING) {
+          svg.attr('opacity',0)
+        }
 
         const g = svg.append("g");
 

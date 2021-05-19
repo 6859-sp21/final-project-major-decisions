@@ -268,6 +268,7 @@
       // remove after
       d3.selectAll("#delay_map").remove();
       d3.selectAll("#delay_tooltip").remove();
+      IS_FIRST_MAP_RENDERING = true;
       generateMap('arr_del15')
     }
     
@@ -295,7 +296,9 @@
       d3.selectAll('.five-step').remove();
       document.getElementById("selectButton").innerHTML = null;
 
+      IS_FIRST_MAP_RENDERING = true;
       generateMap('arr_del15');
+
     }
 
     // step 10: show time chart

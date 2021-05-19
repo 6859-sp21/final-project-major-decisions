@@ -35,4 +35,5 @@ With regards to building the structure of the scrolling visualization, Seara sta
 
 ## Sources
 https://www.d3-graph-gallery.com/bubblemap
+
 https://observablehq.com/@d3/zoom-to-bounding-box?collection=@d3/d3-zoom

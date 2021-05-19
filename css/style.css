@@ -28,7 +28,28 @@
   right:0;
   height:400px;
   background-image: linear-gradient(to right,  rgb(90, 82, 82, 50), rgba(255,0,0,0));
-  color:white;
+  height:700px;
+}
+
+.title-banner-photo {
+  display: relative;
+}
+
+.title-cover {
+  position: absolute;
+  background-image:  linear-gradient(to right,  rgb(90, 82, 82, 0), #ffffff 8%);
+  width: 10000px;
+  height: 700px;
+
+}
+
+.title-text {
+  position: absolute;
+  font-size: 60px;
+  z-index: 10;
+  margin: 300px 500px;
+  white-space: nowrap;
+
 }
 
 .banner {
